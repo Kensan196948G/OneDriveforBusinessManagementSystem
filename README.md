@@ -1,0 +1,2 @@
+# OneDriveforBusinessManagementSystem
+OneDriveforBusiness運用ツール（ITSM準拠）
