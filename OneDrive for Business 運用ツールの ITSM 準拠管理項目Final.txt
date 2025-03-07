@@ -1,0 +1,129 @@
+OneDrive for Business 運用ツールの ITSM 準拠管理項目
+
+
+
+ 1. スクリプトの概要
+
+miraiAllUserInfoComplete.ps1 は OneDrive for Business の利用状況を収集する PowerShell スクリプトであり、Microsoft Graph API を活用して以下の情報を取得しています。
+
+ 取得データ
+
+ ユーザー情報（表示名、メールアドレス、AD サムアカウント名、アカウント状態、最終同期日、ユーザー種別）
+ OneDrive ストレージ情報（総容量、使用容量、残容量）
+ 権限情報（グローバル管理者判定）
+ OneDrive のストレージ使用状況取得
+ アカウントの有効/無効状態取得
+ ユーザーの同期状態（最終同期日）
+ ユーザーの権限情報取得（グローバル管理者判定）
+ OneDrive のストレージクォータ取得
+
+
+
+ 2. ITSM に準拠した OneDrive 運用ツール管理項目
+
+ ✅ 管理者権限が不要な範囲でできること（一般ユーザー & グローバル管理者共通）
+
+ 1. インシデント管理（サービス監視 & トラブル対応）
+
+ OneDrive の同期エラー情報の取得 (GetMgUserDrive + GetMgUserDriveItem)
+ OneDrive のストレージ使用状況の監視 (GetMgUserDrive)
+ OneDrive の最近のファイルアクティビティの記録 (GetMgUserDriveRecent)
+ OneDrive のアクセス履歴（監査ログ）の取得 (GetMgAuditLogSignIn)
+ OneDrive のパフォーマンス監視（同期状態・ネットワーク速度の監視）
+ 異常なファイル変更のリアルタイム通知（大量変更・不正な削除の検知）
+
+ 2. 変更管理（アクセス & 共有設定の監視・制御）
+
+ ユーザー自身の OneDrive 内の権限変更履歴の確認 (GetMgUserDrivePermission)
+ OneDrive の共有設定確認 (GetMgUserDriveSharedWithMe)
+ 外部共有・匿名リンクの監視と制御（外部共有の可視化・匿名リンクの削除）
+ OneDrive 共有設定の自動チェック機能（外部公開リスクの監査）
+
+ 3. セキュリティ管理（データ保護 & 機密情報の管理）
+
+ 外部共有の監視 (GetMgUserDriveSharedWithMe)
+ 匿名リンクの検出 (GetMgUserDriveItem)
+ DLP（データ漏洩防止）ポリシーの適用状況の監査（自身のデータのみ取得可能）
+ OneDrive の異常なファイル変更の検知（ランサムウェア対策を含むが、Microsoft Defender for Endpoint は未使用） (GetMgUserDriveActivity)
+ ユーザーごとの OneDrive のファイル変更履歴の取得 (GetMgUserDriveItem)
+ 個人の DLP（データ漏洩防止）ポリシーの監査（機密データの管理）
+
+
+
+ 3. 機能の実装方法
+
+ PowerShell スクリプト構成
+
+ ルートフォルダを定義し、その中に運用項目ごとのフォルダを作成（フォルダ名は英語）
+ ルートフォルダには、代表する実行 PowerShell スクリプトファイル（Main.ps1）が存在し、これを実行することで各機能を PowerShell プロンプト上で選択・実行できる
+
+ フォルダ構成例
+
+plaintext
+OneDrive_Management
+│── Main.ps1  （管理ツールのメインスクリプト）
+│
+├── Basic_Data_Collection （基本取得データ）
+│   ├── GetUserInfo.ps1 （ユーザー情報取得：表示名、メールアドレス、AD サムアカウント名、アカウント状態、最終同期日、ユーザー種別）
+│   ├── GetOneDriveQuota.ps1 （OneDrive のストレージクォータ取得）
+│   ├── GetUserPermissions.ps1 （権限情報（グローバル管理者判定））
+│   ├── GetAccountStatus.ps1 （アカウントの有効/無効状態取得）
+│   ├── GetLastSyncDate.ps1 （最終同期日取得）
+│   ├── GetStorageUsage.ps1 （OneDriveストレージ使用状況取得）
+│
+├── Incident_Management （インシデント管理）
+│   ├── SyncErrorCheck.ps1 （同期エラー確認）
+│   ├── StorageUsageCheck.ps1 （ストレージ使用状況確認）
+│   ├── ActivityLog.ps1 （最近のアクティビティ記録）
+│   ├── PerformanceMonitor.ps1 （パフォーマンス監視）
+│   ├── FileChangeAlert.ps1 （異常なファイル変更のリアルタイム通知）
+│
+├── Change_Management （変更管理）
+│   ├── PermissionCheck.ps1 （権限変更の記録）
+│   ├── SharingCheck.ps1 （共有設定の確認）
+│   ├── AnonymousLinkControl.ps1 （匿名リンクの監視と制御）
+│   ├── AutoSharingPolicyCheck.ps1 （共有ポリシーの自動チェック）
+│
+├── Security_Management （セキュリティ管理）
+│   ├── ExternalShareCheck.ps1 （外部共有の監視）
+│   ├── DLPPolicyCheck.ps1 （DLP ポリシーの監査）
+│   ├── FileChangeMonitor.ps1 （異常なファイル変更の検出）
+│   ├── SensitiveDataAudit.ps1 （機密データ監査）
+│   ├── SecurityLogAnalyzer.ps1 （セキュリティログ分析）
+
+
+ 実行方法
+
+ Main.ps1 を PowerShell で実行し、表示されるメニューから 「インシデント管理」「変更管理」「セキュリティ管理」 の各項目を選択可能。
+ 各カテゴリに応じたスクリプトが実行され、PowerShell プロンプト上に結果が表示される。
+
+powershell
+ Main.ps1 のサンプルコード
+WriteHost "OneDrive 管理ツール" ForegroundColor Cyan
+WriteHost "1. インシデント管理"
+WriteHost "2. 変更管理"
+WriteHost "3. セキュリティ管理"
+$choice = ReadHost "実行する管理項目を選択してください"
+
+switch ($choice) {
+    "1" { & "./Incident_Management/SyncErrorCheck.ps1" }
+    "2" { & "./Change_Management/PermissionCheck.ps1" }
+    "3" { & "./Security_Management/ExternalShareCheck.ps1" }
+    default { WriteHost "無効な選択肢です。" }
+}
+
+
+
+
+ 4. 結論と次のステップ
+
+PowerShell スクリプトを フォルダ構造化 し、管理項目ごとに整理することで ITSM に準拠した OneDrive 運用ツール を構築可能。
+
+ 次のステップ
+
+1. 各カテゴリごとの PowerShell スクリプトを具体化
+2. Main.ps1\\ の改良（選択肢を増やし、より詳細な操作を可能にする）\\
+3. スクリプトのログ出力を強化し、運用時の記録を残す
+
+💡 スクリプトの改良・追加機能の実装を進め、OneDrive 運用管理を効率化していくことが重要です。
+
