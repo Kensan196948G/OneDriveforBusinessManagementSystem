@@ -51,6 +51,7 @@ th { background:#f2f2f2; font-weight:bold; }
 tr.danger { background:#ffebee; }
 tr.warning { background:#fff8e1; }
 tr.normal { background:#f1f8e9; }
+tr.admin { background:#e3f2fd; } /* 管理者用の強調色 */
 tr.disabled { color:#999; font-style:italic; }
 .status-icon { margin-right:5px; }
 @media print {
@@ -62,6 +63,7 @@ th { background:#f2f2f2 !important; -webkit-print-color-adjust:exact; print-colo
 tr.danger { background:#ffebee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 tr.warning { background:#fff8e1 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+tr.admin { background:#e3f2fd !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 </style>
 </head>
@@ -101,6 +103,12 @@ tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; pri
 
 <div id="pagination"></div>
 
+<!-- 凡例 -->
+<div style="margin-bottom:10px;">
+  <span style="display:inline-block;width:18px;height:18px;background:#e3f2fd;border:1px solid #90caf9;vertical-align:middle;margin-right:5px;"></span>
+  <span style="vertical-align:middle;">管理者（Administrator）</span>
+</div>
+
 <table id="quotaTable">
 <thead>
 <tr>
@@ -134,7 +142,9 @@ tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; pri
 "@
 
 foreach ($row in $data) {
-    $html += "<tr>"
+    $rowClass = ""
+    if ($row.'ユーザー種別' -eq "Administrator") { $rowClass = " class='admin'" }
+    $html += "<tr$rowClass>"
     $html += "<td>$($row.'ユーザー名')</td>"
     $html += "<td>$($row.'メールアドレス')</td>"
     $html += "<td>$($row.'ログインユーザー名')</td>"

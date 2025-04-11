@@ -16,7 +16,7 @@
 脇平 興一,k-wakihira@mirai-const.co.jp,MK0374,Member,有効,対応,1024,0,1024,0,正常
 大西 良和,y-ohnishi@mirai-const.co.jp,MK0294,Member,有効,対応,1024,0,1024,0,正常
 中島 吉近,yo-nakajima@mirai-const.co.jp,MK0317,Member,有効,対応,1024,0,1024,0,正常
-admin,admin@miraiconst.onmicrosoft.com,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
+admin,admin@miraiconst.onmicrosoft.com,同期なし,Administrator,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 小笠　浩史,k-ogasa@mirai-const.co.jp,MK0243,Member,有効,対応,1024,0.01,1023.99,0,正常
 イェー イン ナイン,y-naing@mirai-const.co.jp,MK0923,Member,有効,対応,1024,0,1024,0,正常
 福岡 保則,y-fukuoka@mirai-const.co.jp,MK0886,Member,有効,対応,1024,0,1024,0,正常
@@ -64,7 +64,7 @@ HENNGE動作確認,,同期なし,Member,有効,未対応,取得不可,取得不�
 多田 翔伍,sh-tada@mirai-const.co.jp,MK0946,Member,有効,対応,1024,0,1024,0,正常
 服部 俊朗,s-hattori@mirai-const.co.jp,MK1031,Member,有効,対応,1024,0,1024,0,正常
 矢野 勝己,k-yano@mirai-const.co.jp,MK0141,Member,有効,対応,1024,0.65,1023.35,0.06,正常
-鬼塚　宏明,h-onitsuka@mirai-const.co.jp,MK0752,Member,有効,対応,1024,39.67,984.2,3.87,正常
+鬼塚　宏明,h-onitsuka@mirai-const.co.jp,MK0752,Member,有効,対応,1024,39.7,984.16,3.88,正常
 渡　欣一,k-watari@mirai-const.co.jp,MK0267,Member,有効,対応,1024,0,1024,0,正常
 野呂 航平,ko-noro@mirai-const.co.jp,MK0918,Member,有効,対応,1024,0,1024,0,正常
 佐々木 啓敦,hi-sasaki@mirai-const.co.jp,MK0914,Member,有効,対応,1024,0.02,1023.98,0,正常
@@ -79,7 +79,7 @@ HENNGE動作確認,,同期なし,Member,有効,未対応,取得不可,取得不�
 鬼丸 覚,s-onimaru@mirai-const.co.jp,MK0114,Member,有効,対応,1024,0,1024,0,正常
 市川　豊,y-ichikawa@mirai-const.co.jp,MK0247,Member,有効,対応,1024,0,1024,0,正常
 河野 ゆかり,y-kawano@mirai-const.co.jp,MK9078,Member,有効,対応,1024,0,1024,0,正常
-藤岡　仁,h-fujioka@mirai-const.co.jp,MK0800,Member,有効,対応,1024,26.78,997.2,2.61,正常
+藤岡　仁,h-fujioka@mirai-const.co.jp,MK0800,Member,有効,対応,1024,26.78,997.2,2.62,正常
 江原 知希,t-ehara@mirai-const.co.jp,MK1026,Member,有効,対応,1024,0,1024,0,正常
 石本 涼,r-ishimoto@mirai-const.co.jp,MK0619,Member,有効,対応,1024,0,1024,0,正常
 大井 光治,m-ohi@mirai-const.co.jp,MK0123,Member,有効,対応,1024,1.04,1022.96,0.1,正常
@@ -94,7 +94,7 @@ HENNGE動作確認,,同期なし,Member,有効,未対応,取得不可,取得不�
 進藤　愁也,s-shintoh@mirai-const.co.jp,MK0827,Member,有効,対応,1024,0.09,1023.91,0.01,正常
 植田 倫徹,to-ueda@mirai-const.co.jp,MK0256,Member,有効,対応,1024,0.01,1023.99,0,正常
 岡本 広,hi-okamoto@mirai-const.co.jp,MK0297,Member,有効,対応,1024,22.18,1001.81,2.17,正常
-程 雯琪,b-tei@mirai-const.co.jp,MK0967,Member,有効,対応,1024,0.33,1022.99,0.03,正常
+程 雯琪,b-tei@mirai-const.co.jp,MK0967,Member,有効,対応,1024,0.34,1023.01,0.03,正常
 黒田 祐次,y-kuroda@mirai-const.co.jp,MK0934,Member,有効,対応,1024,0.01,1023.99,0,正常
 登坂 成葉,n-tosaka@mirai-const.co.jp,MK0957,Member,有効,対応,1024,0,1024,0,正常
 山﨑　龍馬,r-yamasaki@mirai-const.co.jp,MK0698,Member,有効,対応,1024,0,1024,0,正常
@@ -131,7 +131,7 @@ CIM用14,cim-master14@mirai-const.co.jp,cim-master14,Member,有効,未対応,取
 近藤 篤史,at-kondou@mirai-const.co.jp,Mk0911,Member,有効,対応,1024,16.07,1006.95,1.57,正常
 山田　昭光,a-yamada@mirai-const.co.jp,MK0861,Member,有効,対応,1024,0,1024,0,正常
 久木田　篤士,a-kukita@mirai-const.co.jp,MK0259,Member,有効,対応,1024,0,1024,0,正常
-庭野　将紀,m-niwano@mirai-const.co.jp,MK0763,Member,有効,対応,1024,111.17,907.67,10.86,正常
+庭野　将紀,m-niwano@mirai-const.co.jp,MK0763,Member,有効,対応,1024,111.55,907.23,10.89,正常
 清水 由理,y-shimizu@mirai-const.co.jp,MK1013,Member,有効,対応,1024,0,1024,0,正常
 川名 啓介,k-kawana@mirai-const.co.jp,MK0973,Member,有効,対応,1024,0.01,1023.99,0,正常
 大本 泰久,y-ohmoto@mirai-const.co.jp,MK0161,Member,有効,対応,1024,0,1020.42,0,正常
@@ -143,21 +143,21 @@ CIM用14,cim-master14@mirai-const.co.jp,cim-master14,Member,有効,未対応,取
 大熊 孝至,t-ohkuma@mirai-const.co.jp,MK0144,Member,有効,対応,1024,0,1024,0,正常
 長江 進,s-nagae@mirai-const.co.jp,MK0928,Member,有効,対応,1024,0,1024,0,正常
 吉田　忠,t-yoshida@mirai-const.co.jp,MK0724,Member,有効,対応,1024,0.02,1023.98,0,正常
-梅津 博幸,h-umezu@mirai-const.co.jp,MK0179,Member,有効,対応,1024,2.97,1019.91,0.29,正常
+梅津 博幸,h-umezu@mirai-const.co.jp,MK0179,Member,有効,対応,1024,2.97,1019.92,0.29,正常
 齋藤　慎太郎,s-saitoh@mirai-const.co.jp,MK0758,Member,有効,対応,1024,0.01,1023.99,0,正常
 駒田 一太,i-komada@mirai-const.co.jp,MK0892,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 高田 七奈,n-takada@mirai-const.co.jp,MK9081,Member,有効,対応,1024,0,1024,0,正常
 和田 行裕,y-wada@mirai-const.co.jp,MK0293,Member,有効,対応,1024,0.22,1023.78,0.02,正常
 濱田 高明,t-hamada@mirai-const.co.jp,MK0238,Member,有効,対応,1024,0,1024,0,正常
 照屋 忠彦,t-teruya@mirai-const.co.jp,MK0240,Member,有効,対応,1024,13.05,1010.95,1.27,正常
-内田 正宏,m-uchida@mirai-const.co.jp,MK0197,Member,有効,対応,1024,5.71,1018.06,0.56,正常
+内田 正宏,m-uchida@mirai-const.co.jp,MK0197,Member,有効,対応,1024,5.75,1018.02,0.56,正常
 鈴木　崚太,ry-suzuki@mirai-const.co.jp,MK0818,Member,有効,対応,1024,0.01,1023.99,0,正常
 岩切　雄二,y-iwakiri@mirai-const.co.jp,MK0245,Member,有効,対応,1024,0,1024,0,正常
 永江 愛美,n-manami@mirai-const.co.jp,MK0951,Member,有効,対応,1024,0,1024,0,正常
 tsubokawa-y92y2,tsubokawa-y92y2@mlit.go.jp,同期なし,Guest,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 坂口 英紀,h-sakaguchi@mirai-const.co.jp,MK9063,Member,有効,対応,1024,0,1024,0,正常
 牛久保　麻椰,m-ushikubo@mirai-const.co.jp,MK0822,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
-鈴木 弘之,h-suzuki@mirai-const.co.jp,MK0904,Member,有効,対応,1024,33.86,990.13,3.31,正常
+鈴木 弘之,h-suzuki@mirai-const.co.jp,MK0904,Member,有効,対応,1024,33.87,990.12,3.31,正常
 楽楽精算 （九州支店）,kyushu-rakuraku@mirai-const.co.jp,kyushu-rakuraku,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 中山 寛之,h-nakayama@mirai-const.co.jp,MK0958,Member,有効,対応,1024,0.8,1023.2,0.08,正常
 大久保 澪弥,r-ohkubo@mirai-const.co.jp,MK0971,Member,有効,対応,1024,0,1024,0,正常
@@ -217,7 +217,7 @@ netis,netis@mirai-const.co.jp,同期なし,Member,有効,未対応,取得不可,
 西田 善一,y-nishida@mirai-const.co.jp,MK0159,Member,有効,対応,1024,0,1024,0,正常
 石原 旧Officeアカウント,sh-ishihara-old@miraiconst.mail.onmicrosoft.com,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 宮崎 克晶,k-miyazaki@mirai-const.co.jp,MK0284,Member,有効,対応,1024,0,1024,0,正常
-ザーニ トェイ,z-htwe@mirai-const.co.jp,MK0851,Member,有効,対応,1024,0.01,1023.99,0,正常
+ザーニ トェイ,z-htwe@mirai-const.co.jp,MK0851,Member,有効,対応,1024,0.02,1023.98,0,正常
 今澤　義朗,y-imasawa@mirai-const.co.jp,MK0716,Member,有効,対応,1024,0.02,1023.98,0,正常
 大薗 祐輝,y-ohzono@mirai-const.co.jp,MK1007,Member,有効,対応,1024,0,1024,0,正常
 植野 芳彦,y-ueno@mirai-const.co.jp,MK0891,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
@@ -290,17 +290,17 @@ HP管理,hp-kanri@mirai-const.co.jp,同期なし,Member,有効,未対応,取得�
 端 啓貴,hi-hashi@mirai-const.co.jp,MK0919,Member,有効,対応,1024,0.03,1023.97,0,正常
 佐藤　淳,mak-satoh@mirai-const.co.jp,MK0263,Member,有効,対応,1024,0,1024,0,正常
 みらい　渡邊,e-watanabe@miraiconst.onmicrosoft.com,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
-砂子 範行,n-sunako@mirai-const.co.jp,MK0952,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
+砂子 範行,n-sunako@mirai-const.co.jp,MK0952,Administrator,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 佐藤 奨,s-satoh@mirai-const.co.jp,MK0557,Member,有効,対応,1024,0.03,1023.97,0,正常
 睦　堅斗,k-mutsu@mirai-const.co.jp,MK0696,Member,有効,対応,1024,0,1024,0,正常
 yamasaki-s89fa,yamasaki-s89fa@mlit.go.jp,同期なし,Guest,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 伊東 美樹,m-itoh@mirai-const.co.jp,MK0442,Member,有効,対応,1024,0,1024,0,正常
-福田 総一郎,s-fukuda@mirai-const.co.jp,MK0933,Member,有効,対応,1024,0.05,1023.95,0.01,正常
+福田 総一郎,s-fukuda@mirai-const.co.jp,MK0933,Member,有効,対応,1024,0.05,1023.94,0.01,正常
 メール取得用みらい,mail-info@mirai-const.co.jp,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 トゥイン ゾウ,t-zaw@mirai-const.co.jp,MK0924,Member,有効,対応,1024,0,1024,0,正常
 富岡 康丞,k-tomioka@mirai-const.co.jp,MK0902,Member,有効,対応,1024,0,1024,0,正常
 久下 大士,h-kuge@mirai-const.co.jp,MK0986,Member,有効,対応,1024,0,1024,0,正常
-青塚 純平,j-aotsuka@mirai-const.co.jp,MK0647,Member,有効,対応,1024,89.05,934.76,8.7,正常
+青塚 純平,j-aotsuka@mirai-const.co.jp,MK0647,Member,有効,対応,1024,89.28,934.53,8.72,正常
 明主 篤,a-myoshu@mirai-const.co.jp,MK0200,Member,有効,対応,1024,0,1024,0,正常
 上運天 治,o-kamiunten@mirai-const.co.jp,MK0214,Member,有効,対応,1024,0,1024,0,正常
 電子入札（茨城営業支店）,bid-info07m@mirai-const.co.jp,bid-info07m,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
@@ -332,14 +332,14 @@ HP問合せ（m-info）,m-info@mirai-const.co.jp,同期なし,Member,有効,未�
 力武　哲郎,t-rikitake@mirai-const.co.jp,MK0129,Member,有効,対応,1024,0,1024,0,正常
 電子入札（北陸営業支店）,bid-info08m@mirai-const.co.jp,bid-info08m,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 梶原　美砂,m-kajiwara@mirai-const.co.jp,MK0802,Member,有効,対応,1024,0,1024,0,正常
-吉盛　勇介,y-yoshimori@mirai-const.co.jp,MK0811,Member,有効,対応,1024,0.02,1023.98,0,正常
+吉盛　勇介,y-yoshimori@mirai-const.co.jp,MK0811,Member,有効,対応,1024,0.02,1023.97,0,正常
 塩野谷　咲希,s-shionoya@mirai-const.co.jp,MK0753,Member,有効,対応,1024,0,1024,0,正常
 CIM用16,cim-master16@mirai-const.co.jp,cim-master16,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 阿部 哲也,te-abe@mirai-const.co.jp,MK0273,Member,有効,対応,1024,0.09,1023.91,0.01,正常
 山口　大輝,hi-yamaguchi@mirai-const.co.jp,MK0761,Member,有効,対応,1024,0,1024,0,正常
 CIM用06,cim-master06@mirai-const.co.jp,cim-master06,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 八木 日香里,h-yagi@mirai-const.co.jp,MK0955,Member,有効,対応,1024,0.01,1023.99,0,正常
-足立 雅樹,ma-adachi@mirai-const.co.jp,MK0325,Member,有効,対応,1024,0.64,1022.78,0.06,正常
+足立 雅樹,ma-adachi@mirai-const.co.jp,MK0325,Member,有効,対応,1024,0.64,1023.36,0.06,正常
 石橋 宏樹,hi-ishibashi@mirai-const.co.jp,MK0132,Member,有効,対応,1024,0.01,1023.99,0,正常
 小堀 諒士,r-kobori@mirai-const.co.jp,MK0613,Member,有効,対応,1024,0,1024,0,正常
 深澤 貴光,ta-fukazawa@mirai-const.co.jp,MK0195,Member,有効,対応,1024,0,1024,0,正常
@@ -355,10 +355,10 @@ S.Nagano,S.Nagano@otsuka-shokai.co.jp,同期なし,Guest,有効,未対応,取得
 立川 有紀美,y-tachikawa@mirai-const.co.jp,MK0888,Member,有効,対応,1024,0,1024,0,正常
 電子入札（本社）,bid-info01m@mirai-const.co.jp,bid-info01m,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 笠野 克典,k-kasano@mirai-const.co.jp,MK0620,Member,有効,対応,1024,0,1024,0,正常
-新倉 怜於,r-niikura@mirai-const.co.jp,MK7019,Member,有効,対応,1024,0.42,1023.58,0.04,正常
+新倉 怜於,r-niikura@mirai-const.co.jp,MK7019,Administrator,有効,対応,1024,0.42,1023.58,0.04,正常
 財務管理,zaimu@mirai-const.co.jp,zaimu,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 河北 勝己,k-kawakita@mirai-const.co.jp,MK0994,Member,有効,対応,1024,0.09,1023.9,0.01,正常
-岡田 健司,k-okada@mirai-const.co.jp,MK0655,Member,有効,対応,1024,173.24,838.58,16.92,正常
+岡田 健司,k-okada@mirai-const.co.jp,MK0655,Administrator,有効,対応,1024,172.88,841.52,16.88,正常
 CIM用15,cim-master15@mirai-const.co.jp,cim-master15,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 黒田　和彦,k-kuroda@mirai-const.co.jp,MK0736,Member,有効,対応,1024,0.04,1023.96,0,正常
 安本　翔,k-yasumoto@mirai-const.co.jp,MK0699,Member,有効,対応,1024,0,1024,0,正常
@@ -396,7 +396,7 @@ SketchUpPro用（サブスク管理）,sketchup@mirai-const.co.jp,同期なし,M
 大野　達也,t-ohno@mirai-const.co.jp,MK0711,Member,有効,対応,1024,0,1024,0,正常
 北岡 太造,t-kitaoka@mirai-const.co.jp,MK0081,Member,有効,対応,1024,0,1024,0,正常
 加藤 里美,sa-katoh@mirai-const.co.jp,MK0370,Member,有効,対応,1024,26.18,997.7,2.56,正常
-滝野澤　朱里,j-takinosawa@mirai-const.co.jp,MK0824,Member,有効,対応,1024,0,1024,0,正常
+滝野澤　朱里,j-takinosawa@mirai-const.co.jp,MK0824,Member,有効,対応,1024,0.03,1023.97,0,正常
 藤原 伸治,sh-fujiwara@mirai-const.co.jp,MK0298,Member,有効,対応,1024,0,1024,0,正常
 鈴木 正彦,m-suzuki@mirai-const.co.jp,MK0593,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 有田　尚史,n-arita@mirai-const.co.jp,MK0717,Member,有効,対応,1024,0,1024,0,正常
@@ -434,7 +434,7 @@ Amazonビジネス,amazon-biz@mirai-const.co.jp,amazon-biz,Member,有効,未対�
 本社会議室２階①（Zoom）,honsya2-1@mirai-const.co.jp,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 田口 航平,k-taguchi@mirai-const.co.jp,MK1028,Member,有効,対応,1024,0,1024,0,正常
 吉冨　三矢,m-yoshitomi@mirai-const.co.jp,MK0262,Member,有効,対応,1024,0.02,1023.98,0,正常
-三成 哲也,t-minari@mirai-const.co.jp,MK0962,Member,有効,対応,1024,16.58,1003.6,1.62,正常
+三成 哲也,t-minari@mirai-const.co.jp,MK0962,Member,有効,対応,1024,16.65,1003.51,1.63,正常
 栗原 竣介,sh-kurihara@mirai-const.co.jp,MK0912,Member,有効,対応,1024,0.14,1023.86,0.01,正常
 岡井　祐一,y-okai@mirai-const.co.jp,MK0261,Member,有効,対応,1024,0,1024,0,正常
 ito,ito@mainmark.co.jp,同期なし,Guest,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
@@ -458,7 +458,7 @@ WEB管理（web-admin）,webadmin@mirai-const.co.jp,同期なし,Member,有効,�
 楽楽精算 （能登営業所）,noto-rakuraku@mirai-const.co.jp,noto-rakuraku,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 楽楽精算 （青森営業所）,aomori-rakuraku@mirai-const.co.jp,aomori-rakuraku,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 一政 奏音,k-ichimasa@mirai-const.co.jp,MK1025,Member,有効,対応,1024,0,1024,0,正常
-佐竹 寛峻,h-satake@mirai-const.co.jp,MK0842,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
+佐竹 寛峻,h-satake@mirai-const.co.jp,MK0842,Member,有効,対応,1024,0,1024,0,正常
 神原　正明,m-kambara@mirai-const.co.jp,MK0091,Member,有効,対応,1024,0,1024,0,正常
 井出 波奈,h-ide@mirai-const.co.jp,MK1004,Member,有効,対応,1024,0,1024,0,正常
 Autocad管理用,cad-master@mirai-const.co.jp,同期なし,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
@@ -514,7 +514,7 @@ SNS共用アカウント,mirai-sns@mirai-const.co.jp,同期なし,Member,有効,
 大西 勇也,yu-ohnishi@mirai-const.co.jp,MK0995,Member,有効,対応,1024,0.63,1023.37,0.06,正常
 稲毛 健,t-inage@mirai-const.co.jp,MK0727,Member,有効,対応,1024,0,1024,0,正常
 松本 篤,a-matsumoto@mirai-const.co.jp,MK0149,Member,有効,対応,1024,0.02,1023.98,0,正常
-齋藤 豪,g-saitoh@mirai-const.co.jp,MK0299,Member,有効,対応,1024,30.47,993.52,2.98,正常
+齋藤 豪,g-saitoh@mirai-const.co.jp,MK0299,Member,有効,対応,1024,30.58,993.41,2.99,正常
 管理（大阪）,kanri-oosaka@mirai-const.co.jp,kanri-oosaka,Member,有効,未対応,取得不可,取得不可,取得不可,取得不可,不明
 荒木 厚史,a-araki@mirai-const.co.jp,MK0201,Member,有効,対応,1024,0,1024,0,正常
 佐藤 利光,t-satoh@mirai-const.co.jp,MK0925,Member,有効,対応,1024,0.02,1023.98,0,正常

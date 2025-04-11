@@ -1,0 +1,1807 @@
+[2025-04-11 21:03:23] [INFO] ストレージクォータ取得を開始します
+[2025-04-11 21:03:23] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250411\Basic_Data_Collection.20250411
+[2025-04-11 21:03:23] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250411\Log
+[2025-04-11 21:03:23] [WARNING] Graph接続済みですが、ユーザー情報は取得できません。
+[2025-04-11 21:03:23] [WARNING] Graph接続済みですが、ユーザー情報は取得できません。
+[2025-04-11 21:03:23] [INFO] すべてのユーザーのOneDriveクォータ情報を取得しています...
+[2025-04-11 21:03:26] [WARNING] ユーザー okinawa-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:25
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : f45903f5-0097-44f7-b977-2146455f5116
+client-request-id             : 1281597b-bea4-4d8d-937c-961591f7770e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:25 GMT
+
+
+[2025-04-11 21:03:33] [WARNING] ユーザー admin@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:32
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 5ce64c70-8920-4693-a5c6-87b34b418a02
+client-request-id             : baef7f1b-d9e0-4719-88d9-127801b222a2
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:32 GMT
+
+
+[2025-04-11 21:03:34] [INFO] ユーザー admin@miraiconst.onmicrosoft.com のroleTemplateId: 62e90394-69f5-4237-9190-012177145e10
+[2025-04-11 21:03:34] [INFO] ユーザー admin@miraiconst.onmicrosoft.com は管理者ロール: 62e90394-69f5-4237-9190-012177145e10
+[2025-04-11 21:03:38] [WARNING] ユーザー admin1@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:37
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 1cdf196a-0028-4198-96d9-9b3fdf874e8a
+client-request-id             : d9b4a46b-6862-41ce-a446-363f952ff773
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:37 GMT
+
+
+[2025-04-11 21:03:40] [WARNING] ユーザー cim-master10@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:39
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3afb9f3a-aa88-47b6-b7b5-5d29133e8441
+client-request-id             : d12d0d69-cf54-4e2a-b1cd-8e55a4e8adcd
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:39 GMT
+
+
+[2025-04-11 21:03:44] [WARNING] ユーザー jinji-saiyou@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:44
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b09e9467-98ac-4653-b967-5d7b9bc84222
+client-request-id             : cd4129f3-8404-4e92-9664-1894ab2f02fc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:43 GMT
+
+
+[2025-04-11 21:03:48] [WARNING] ユーザー soumu-payment@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:47
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : aab3a9ef-340c-44fe-af62-88334aeda3d0
+client-request-id             : 03eaea29-65b8-4406-b5c8-b1420d81a210
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:47 GMT
+
+
+[2025-04-11 21:03:50] [WARNING] ユーザー mf-jigyoukikaku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:49
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 9af9af3b-92b5-4667-a80f-fe22293769a8
+client-request-id             : 9c91312a-dab1-4890-b25b-bea257da163b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:49 GMT
+
+
+[2025-04-11 21:03:53] [WARNING] ユーザー henngetest@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:03:51
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 0e04acea-501b-4e74-947a-62391daa4300
+client-request-id             : d2ff0225-ca3f-417a-86e9-dfdfc3434944
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:03:51 GMT
+
+
+[2025-04-11 21:04:06] [WARNING] ユーザー ariake-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:05
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 66fe6d58-a2b0-4b17-aba7-20cda7da6308
+client-request-id             : d6e1de07-7f2e-42fc-bf47-7cf713f1ce54
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:05 GMT
+
+
+[2025-04-11 21:04:08] [WARNING] ユーザー system-info@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:06
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : d97aa3ed-4994-4191-a4de-ef3a283b7988
+client-request-id             : ab60a3a6-72b1-429a-b4bf-87a97fdd58bc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:05 GMT
+
+
+[2025-04-11 21:04:13] [WARNING] ユーザー hideyuki.nomura_halekulaniokinawa.com#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:13
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 20cb0df5-22e2-41e6-9a6c-4fda8651d074
+client-request-id             : 461bda1e-4e26-40e9-8ff8-c69cef3fb4a0
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:12 GMT
+
+
+[2025-04-11 21:04:14] [WARNING] ユーザー cim-master05@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:13
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : c49fd495-6c83-407c-8717-79d8b407fd25
+client-request-id             : a2c30898-b709-4518-ac96-9540dc5ba312
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:12 GMT
+
+
+[2025-04-11 21:04:15] [WARNING] ユーザー mk-engagement@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:14
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ae39bfa5-1737-4bb5-836e-7205532cc8d5
+client-request-id             : f5ba9f4f-3c54-489d-a2d3-69db600a3c4e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:14 GMT
+
+
+[2025-04-11 21:04:16] [WARNING] ユーザー bid-info10m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:16
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 013e2c85-1f87-468f-9497-3fc9adc240a2
+client-request-id             : 6968decf-cceb-494c-8903-d21885311602
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:15 GMT
+
+
+[2025-04-11 21:04:18] [WARNING] ユーザー bid-info09m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:17
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 11bb6a93-6a46-4801-9469-8c14ff548a7a
+client-request-id             : 00ddcf3f-db7f-4e6f-b9fa-4fad1ac1473c
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:16 GMT
+
+
+[2025-04-11 21:04:21] [WARNING] ユーザー hokuriku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:21
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 97e3a83e-2de1-4206-b7bd-08fd551e8b41
+client-request-id             : 29a730ec-b808-4384-b244-58d19f793f50
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000A380"}}
+Date                          : Fri, 11 Apr 2025 12:04:20 GMT
+
+
+[2025-04-11 21:04:24] [WARNING] ユーザー m-ariake@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:23
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 50709f4c-067d-4980-9e4e-52533885e9a5
+client-request-id             : f9143bf6-4b2d-473c-a1c9-44d62f83805b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:23 GMT
+
+
+[2025-04-11 21:04:26] [WARNING] ユーザー cim-master14@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:26
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : cba94a3d-5152-4e8b-8b84-4439e5fe8a67
+client-request-id             : d80cf46d-8cb2-4cd5-93f8-ffd90e468dc9
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:26 GMT
+
+
+[2025-04-11 21:04:34] [WARNING] ユーザー chubu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:33
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 179fc726-eca0-441e-8d2c-9c31983bb695
+client-request-id             : b9d7087c-ccc8-4e68-a437-ba8eac6b214b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:33 GMT
+
+
+[2025-04-11 21:04:37] [WARNING] ユーザー i-komada@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:36
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 44aa7e60-66bd-4944-9568-11f1b50a2c4a
+client-request-id             : 72473a6c-d46e-4ca1-9211-7e8f22bc98ac
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:36 GMT
+
+
+[2025-04-11 21:04:40] [WARNING] ユーザー tsubokawa-y92y2_mlit.go.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:39
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ca07876d-08cd-4ab3-bd5c-df1bb74d48b2
+client-request-id             : e444330e-c7c0-4ded-8920-a6a33d658aa5
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:39 GMT
+
+
+[2025-04-11 21:04:41] [WARNING] ユーザー m-ushikubo@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:40
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3f4794f4-eba0-49a0-92e3-2378982788c8
+client-request-id             : fb42bf47-4f69-41ab-bca8-568ab95b7b18
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:40 GMT
+
+
+[2025-04-11 21:04:41] [WARNING] ユーザー kyushu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:41
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 4c125f1b-3158-4c30-bff8-54d9837c7d83
+client-request-id             : 68d09ab5-2c5b-42f1-9056-52b33c1e73c6
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:41 GMT
+
+
+[2025-04-11 21:04:44] [WARNING] ユーザー cim-master01@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:43
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3063b272-79e9-41d7-ba04-dea9eeef35ee
+client-request-id             : ce263b8d-c2b4-458e-bf63-455b9f4c435b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:43 GMT
+
+
+[2025-04-11 21:04:45] [WARNING] ユーザー cim-master@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:44
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 1160699c-6b66-4793-b5a9-caa9ae73038b
+client-request-id             : 4d9c6dcd-c40c-4092-b86a-ea238a009af9
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:44 GMT
+
+
+[2025-04-11 21:04:45] [WARNING] ユーザー cim-master07@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:45
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : faafc5ce-6630-40a2-a0af-a1be48bbe711
+client-request-id             : 7237ed20-b75a-41c6-9939-dba9a576ad70
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:45 GMT
+
+
+[2025-04-11 21:04:50] [WARNING] ユーザー tohoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:50
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : c5df0c1a-a220-401d-a904-a66abb40ac70
+client-request-id             : daac8590-2ce1-4841-a395-452767547d2e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:50 GMT
+
+
+[2025-04-11 21:04:51] [WARNING] ユーザー cim-master02@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:50
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 083a86f4-37f6-44c1-98d4-6ba59579fa0b
+client-request-id             : 4653b0c3-a630-43a6-8128-ef4110026aa8
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:50 GMT
+
+
+[2025-04-11 21:04:52] [WARNING] ユーザー cim-master09@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:51
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 9f6ab43d-81ec-4735-bc90-9f19beade781
+client-request-id             : 99ca628f-df44-4f2d-a124-399fbe29ff72
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:51 GMT
+
+
+[2025-04-11 21:04:53] [WARNING] ユーザー s-yoshie@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: Method invocation failed because [System.Object[]] does not contain a method named 'op_Division'.
+[2025-04-11 21:04:55] [WARNING] ユーザー ibaraki-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:54
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 31003eac-30c8-40ad-8c38-a9e1e4d391b3
+client-request-id             : 385dc153-ff21-43d4-97bd-84072b585eb6
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:54 GMT
+
+
+[2025-04-11 21:04:55] [WARNING] ユーザー mksystem-alert@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:55
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ead67435-f854-4628-95f8-220511c53154
+client-request-id             : 844459ac-4945-4766-b67e-6ef602a6ec34
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:54 GMT
+
+
+[2025-04-11 21:04:56] [WARNING] ユーザー honsya2-2@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:55
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3169e961-b792-47a4-a252-240f54540a2f
+client-request-id             : 5982ff3a-7026-4a23-8b99-a1953b8c72d8
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:55 GMT
+
+
+[2025-04-11 21:04:59] [WARNING] ユーザー m-maruta@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:04:58
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 1ed6ed1c-9081-40aa-baff-ae4b4dcb013b
+client-request-id             : 5eb8b1cf-4842-467a-9cef-89fde9352ab6
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:04:58 GMT
+
+
+[2025-04-11 21:05:00] [WARNING] ユーザー netis@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:00
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : af9010e3-86fd-403f-9b89-bcef3b9630c9
+client-request-id             : 55dc3558-82da-41c4-b0f3-0569dcefa16d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:00 GMT
+
+
+[2025-04-11 21:05:02] [WARNING] ユーザー sh-ishihara-old@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:01
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 58ae9ec4-8ea1-4585-9035-980bed586e8f
+client-request-id             : 95e6c396-2909-4768-807d-076939aca273
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:01 GMT
+
+
+[2025-04-11 21:05:03] [WARNING] ユーザー y-ueno@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:03
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : a0d05bee-4370-4d11-b08d-665fdf795d6c
+client-request-id             : 192811c4-cfe2-48e5-a0cb-7ffaa2256ebf
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:03 GMT
+
+
+[2025-04-11 21:05:04] [WARNING] ユーザー osaka-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:04
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 7a00f460-153b-44d4-b234-e720e319f051
+client-request-id             : c8deea14-0569-464d-a980-679b1d3982c3
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:03 GMT
+
+
+[2025-04-11 21:05:05] [WARNING] ユーザー apple-id@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:04
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 0e5f5571-8bb9-453f-bdee-15508fdd7372
+client-request-id             : e642a777-3305-4227-aacc-42a0748e85bc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:04 GMT
+
+
+[2025-04-11 21:05:05] [WARNING] ユーザー okinawa@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:04
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : c2791ba7-b68f-45bd-9fec-c995592eff49
+client-request-id             : a4bfed1c-273b-4b32-9a22-960d100962f1
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:04 GMT
+
+
+[2025-04-11 21:05:12] [WARNING] ユーザー ki-fujita_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:11
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b3dcc10a-a61b-4e34-a201-a219acb7ad9e
+client-request-id             : 35d49ad0-7fe4-41c6-8e66-be0308568998
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:11 GMT
+
+
+[2025-04-11 21:05:14] [WARNING] ユーザー shikoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:13
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 75312006-8be0-4980-9b26-fd25f5aa3134
+client-request-id             : ee6addfc-fb33-4045-9c4e-cfc79272a4eb
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:12 GMT
+
+
+[2025-04-11 21:05:16] [WARNING] ユーザー kanri-tokyo@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:15
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 14f84870-8b4a-40e4-afbf-a962058b0efc
+client-request-id             : f76f6fc2-5fcc-4f8c-96cf-6f5a57ce599a
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:15 GMT
+
+
+[2025-04-11 21:05:20] [WARNING] ユーザー bid-info05m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:20
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : d107b0ce-8c79-4b04-b70f-59f142ca6ba9
+client-request-id             : d3b40b4d-c418-431a-8ce1-22310f2221c2
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:19 GMT
+
+
+[2025-04-11 21:05:22] [WARNING] ユーザー cim-master12@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:21
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e8716a38-cbcc-4845-8428-97eff74b431d
+client-request-id             : 5eb0eb09-1043-4d6c-96fb-b22484fa7d0e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:21 GMT
+
+
+[2025-04-11 21:05:22] [WARNING] ユーザー m-chugoku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:22
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : d9916e7b-4161-4e21-8a53-a3ba27ab6a79
+client-request-id             : 72a271c2-50c5-4488-9d85-65d60a4d00e0
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604C"}}
+Date                          : Fri, 11 Apr 2025 12:05:21 GMT
+
+
+[2025-04-11 21:05:24] [WARNING] ユーザー mirai-zoom@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:23
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 10acabf0-17c9-47de-9548-e9c9eb567f57
+client-request-id             : 490c7925-27b5-4e23-93e7-215c6c563f2e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:22 GMT
+
+
+[2025-04-11 21:05:25] [WARNING] ユーザー cim-master11@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:25
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ce3112cd-bfc2-4951-8e12-e4626ea5bbb3
+client-request-id             : 2131b2c6-dfd0-4244-82fd-dc413fed8482
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:24 GMT
+
+
+[2025-04-11 21:05:30] [WARNING] ユーザー compliance-hotline@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:29
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e6660c7b-0e4e-4747-8f54-1916da1dedb8
+client-request-id             : 6636e0bd-5923-446c-9a99-40d1e50cc997
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:28 GMT
+
+
+[2025-04-11 21:05:30] [WARNING] ユーザー takuro.kumada_aaconst.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:29
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : d3438878-d98a-4a83-8eab-a8994fca6261
+client-request-id             : 068fd8ff-571d-482e-af8d-65d9369a8aa5
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:29 GMT
+
+
+[2025-04-11 21:05:33] [WARNING] ユーザー chiba-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:32
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b0b0c507-3e4d-41fc-9a93-2d6ee4999eb6
+client-request-id             : 44f4a4ee-2e80-472b-9334-1e228ac9c1d3
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:31 GMT
+
+
+[2025-04-11 21:05:33] [WARNING] ユーザー h_kawamura_cdit.or.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:32
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 4b265c89-8b92-4504-b557-17234e7a566d
+client-request-id             : 028fa959-2dc6-4711-94a4-6606ec26c0fd
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:31 GMT
+
+
+[2025-04-11 21:05:34] [WARNING] ユーザー y-kamei@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: Method invocation failed because [System.Object[]] does not contain a method named 'op_Division'.
+[2025-04-11 21:05:34] [WARNING] ユーザー bid-info03m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:33
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 72195abe-a159-4165-8344-8a88a9aa5a8f
+client-request-id             : e0f85ecb-95ec-4af6-95d9-e8cef82d4e61
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:32 GMT
+
+
+[2025-04-11 21:05:36] [WARNING] ユーザー hokkaido-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:35
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : db842eba-5129-4a4b-9a21-2204e771ccc6
+client-request-id             : 8b34f15e-ce30-47d8-9835-002aba06849d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:35 GMT
+
+
+[2025-04-11 21:05:36] [WARNING] ユーザー hp-kanri@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:36
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 6c8926f5-0d74-4aa3-bf0b-6ed749a01d79
+client-request-id             : 8bb763d4-c3fc-4955-be7d-862f246bd3e2
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:35 GMT
+
+
+[2025-04-11 21:05:40] [WARNING] ユーザー e-watanabe@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:40
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : bb4909bd-3441-48de-8fb1-9f438955c04f
+client-request-id             : 4149565a-df66-433d-918f-ff6e43046dd7
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:39 GMT
+
+
+[2025-04-11 21:05:41] [WARNING] ユーザー n-sunako@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: Method invocation failed because [System.Object[]] does not contain a method named 'op_Division'.
+[2025-04-11 21:05:41] [INFO] ユーザー n-sunako@mirai-const.co.jp のroleTemplateId: 69091246-20e8-4a56-aa4d-066075b2a7a8
+[2025-04-11 21:05:41] [INFO] ユーザー n-sunako@mirai-const.co.jp は管理者ロール: 69091246-20e8-4a56-aa4d-066075b2a7a8
+[2025-04-11 21:05:42] [WARNING] ユーザー yamasaki-s89fa_mlit.go.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:42
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 4e50076a-1a5d-46d8-9541-dc3837a97f9d
+client-request-id             : 9b147deb-7d8a-4891-b62d-59eb9eaded76
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:41 GMT
+
+
+[2025-04-11 21:05:45] [WARNING] ユーザー mail-info@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:44
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 74b27149-0a94-4c2b-b9e5-dfdd06d2628a
+client-request-id             : b6915536-0ee7-472a-809f-3ba43d585c28
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:43 GMT
+
+
+[2025-04-11 21:05:47] [WARNING] ユーザー bid-info07m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:47
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 0e32418e-8392-42fc-9960-be0a6a55c35f
+client-request-id             : c4c69ebc-9ac0-4d00-86ef-5549b187928c
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:46 GMT
+
+
+[2025-04-11 21:05:52] [WARNING] ユーザー cim-master08@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:51
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8ee4da08-25ff-4d7f-87e6-d3dcd9316e77
+client-request-id             : af1f4bfe-0648-4185-a487-faae65bbf4ab
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:50 GMT
+
+
+[2025-04-11 21:05:54] [WARNING] ユーザー y-tsuzuki@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:53
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b551e2e3-8002-4bdb-b7f7-85b4f55666db
+client-request-id             : 51bdaa67-7d33-4abf-8180-21107e153ee3
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:52 GMT
+
+
+[2025-04-11 21:05:54] [WARNING] ユーザー m-info@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:53
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 43ce618e-8774-4ca5-bc01-3d43c262988e
+client-request-id             : e4a26064-393a-4444-922a-eb02e4fadb8b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:53 GMT
+
+
+[2025-04-11 21:05:57] [WARNING] ユーザー hokkaido@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:57
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 1ee556b7-69e4-4bc9-874b-914c8a1f1556
+client-request-id             : 4d50b18c-db80-42c7-9af0-1c0ef7fd2448
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:56 GMT
+
+
+[2025-04-11 21:05:58] [WARNING] ユーザー yokohama-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:57
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 745b0b4e-671c-4484-b8a1-c85d2e22dee2
+client-request-id             : f6cf0dfb-fb68-4770-876e-7aad8bb2a057
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:56 GMT
+
+
+[2025-04-11 21:06:00] [WARNING] ユーザー keieikikaku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:05:59
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 0cd1cf72-27fd-4f6b-abcf-0f98366712d9
+client-request-id             : 323706de-aedc-4f25-a162-ac279657f10e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:05:59 GMT
+
+
+[2025-04-11 21:06:02] [WARNING] ユーザー bid-info11m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:02
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 7e975bcb-44f0-4851-82b1-60be02f0548f
+client-request-id             : 75bfb562-fcb6-4eeb-8dc0-17fd2d71ee0c
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:01 GMT
+
+
+[2025-04-11 21:06:03] [WARNING] ユーザー bid-info08m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:02
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b935130a-fd53-414e-b1f7-1b921bad5c22
+client-request-id             : dd4018f5-b60d-40f7-9e58-2ee412c89dbc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:01 GMT
+
+
+[2025-04-11 21:06:06] [WARNING] ユーザー cim-master16@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:05
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 78f19043-fbc9-4ea1-a63d-fb3b5a7a563b
+client-request-id             : 4da74a99-3f79-444e-8b03-a4687ad3c459
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:04 GMT
+
+
+[2025-04-11 21:06:07] [WARNING] ユーザー cim-master06@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:06
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 539bd7ca-ebcd-4c35-be76-14c027935972
+client-request-id             : a51f9a67-9294-49eb-8593-b8a8ea7f5d81
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:05 GMT
+
+
+[2025-04-11 21:06:10] [WARNING] ユーザー S.Nagano_otsuka-shokai.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:10
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e3c66617-0a61-4969-804f-74ad326d9110
+client-request-id             : bef6408c-0b7f-4684-b07e-4685eba76ac0
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:09 GMT
+
+
+[2025-04-11 21:06:11] [WARNING] ユーザー k-sugimoto@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:10
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 707eb15a-055b-4b0a-a59c-b9391122f9d2
+client-request-id             : 9723d51f-043f-426a-b4f0-3644b6b0b4da
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:09 GMT
+
+
+[2025-04-11 21:06:13] [WARNING] ユーザー kita-kyushu@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:12
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 510d10ac-d039-40d4-a476-cc75cc34bb15
+client-request-id             : 676525a2-28fd-4416-81bc-c6c517dfa0e6
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:11 GMT
+
+
+[2025-04-11 21:06:15] [WARNING] ユーザー bid-info@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:14
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : cb926e67-7689-40fa-bda9-cbd2eef4abac
+client-request-id             : fe18e81d-2106-4c1a-8c47-bc4e7909003d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:13 GMT
+
+
+[2025-04-11 21:06:16] [WARNING] ユーザー bid-info01m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:15
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 66b45bb6-f68f-4628-81a6-efb11fc735d1
+client-request-id             : 2ed71b12-54ac-4990-b684-56ba9115985c
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:14 GMT
+
+
+[2025-04-11 21:06:18] [INFO] ユーザー r-niikura@mirai-const.co.jp のroleTemplateId: 62e90394-69f5-4237-9190-012177145e10
+[2025-04-11 21:06:18] [INFO] ユーザー r-niikura@mirai-const.co.jp は管理者ロール: 62e90394-69f5-4237-9190-012177145e10
+[2025-04-11 21:06:18] [WARNING] ユーザー zaimu@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:17
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e0f146d9-f6e2-470d-945a-0f6f0f85cd56
+client-request-id             : 467997e4-c798-4b91-a24c-ee4ef6134b63
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:16 GMT
+
+
+[2025-04-11 21:06:20] [INFO] ユーザー k-okada@mirai-const.co.jp のroleTemplateId: 69091246-20e8-4a56-aa4d-066075b2a7a8
+[2025-04-11 21:06:20] [INFO] ユーザー k-okada@mirai-const.co.jp は管理者ロール: 69091246-20e8-4a56-aa4d-066075b2a7a8
+[2025-04-11 21:06:20] [WARNING] ユーザー cim-master15@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:19
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : cc71e674-9428-4ae1-b3e2-595dce4d25f8
+client-request-id             : 68cc9b64-fdc2-45e6-9bdc-5f4f5e8dbd0a
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:18 GMT
+
+
+[2025-04-11 21:06:22] [WARNING] ユーザー ats-watanabe_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:21
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8a7d3de0-61ea-40b3-a6e7-755307091784
+client-request-id             : de7c5a62-4b0e-4617-9ea4-bfd2206af876
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0001456B"}}
+Date                          : Fri, 11 Apr 2025 12:06:20 GMT
+
+
+[2025-04-11 21:06:24] [WARNING] ユーザー t-kumai@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:23
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3e9f2858-46ca-488a-b855-a3164e87e73b
+client-request-id             : f2939127-1a21-4a1b-9b1b-fc830e260fbc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:22 GMT
+
+
+[2025-04-11 21:06:26] [WARNING] ユーザー bid-info12m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:25
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 6f2433fd-9a05-4295-ad0d-871eb87492d5
+client-request-id             : cfb8ada2-f1f3-420e-b6bb-a08dca6d48a4
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:24 GMT
+
+
+[2025-04-11 21:06:26] [WARNING] ユーザー cim-master03@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:26
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8f29081b-8e8c-4082-ba7c-53383d8843c3
+client-request-id             : 25ac43d5-38e0-451b-93b5-9228b41596f8
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:25 GMT
+
+
+[2025-04-11 21:06:31] [WARNING] ユーザー tech@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:30
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 6658b5b6-181f-4f63-837b-f711fedc14c0
+client-request-id             : fc62b462-1468-4fdc-8d82-23aabdce56bf
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:29 GMT
+
+
+[2025-04-11 21:06:32] [WARNING] ユーザー sketchup@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:31
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 0fd52f62-96a8-4083-b8fb-938c986bbe44
+client-request-id             : 9bc45f3c-d606-435c-8ff3-b5a5f4214f2d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:30 GMT
+
+
+[2025-04-11 21:06:33] [WARNING] ユーザー y-tajima@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:32
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 66efa6ed-0cc4-4d68-ad12-641a552d63c1
+client-request-id             : c8622762-efdf-4ba3-bb87-84bfd3c2e97b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:31 GMT
+
+
+[2025-04-11 21:06:33] [WARNING] ユーザー kaikei-support@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:32
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 7c148ed8-a52a-470b-89be-c2810a4bd72a
+client-request-id             : 773f3121-57c9-4789-a0a6-84cea5f30688
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:31 GMT
+
+
+[2025-04-11 21:06:35] [WARNING] ユーザー m-suzuki@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:35
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 89048719-5c0b-4c5a-91df-fc63a775dc91
+client-request-id             : 494f4d47-c5a1-41c8-a0e4-0edd864ba6de
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:34 GMT
+
+
+[2025-04-11 21:06:37] [WARNING] ユーザー Sync_AZSV0001_b63ec191406d@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:36
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : f56c168e-3b13-4900-a993-f5406c325632
+client-request-id             : e3cb378b-7a08-4488-ad0e-ff79b0eac4b0
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:35 GMT
+
+
+[2025-04-11 21:06:37] [INFO] ユーザー Sync_AZSV0001_b63ec191406d@miraiconst.onmicrosoft.com のroleTemplateId: d29b2b05-8046-44ba-8758-1e26182fcf32
+[2025-04-11 21:06:37] [WARNING] ユーザー kanri-kyushu@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:37
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 04fb278e-a850-4c68-8479-2179732394c6
+client-request-id             : c658a1a8-a844-4e85-b087-b33abd3c651b
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:36 GMT
+
+
+[2025-04-11 21:06:40] [WARNING] ユーザー bid-info04m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:39
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8f77b108-be5d-4c12-bfe1-a763dd9f6820
+client-request-id             : 67bdcee2-3808-4742-9ca0-4221aef29d96
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:38 GMT
+
+
+[2025-04-11 21:06:41] [WARNING] ユーザー cim-master04@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:40
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 6fe7ff4a-57e0-477d-8971-daeeff570c8f
+client-request-id             : 821ccc52-318c-4faf-bf7a-c20dba6eec72
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:39 GMT
+
+
+[2025-04-11 21:06:41] [WARNING] ユーザー share@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:40
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8f7160b6-a0e7-4dde-b7f4-00b10b69a18f
+client-request-id             : 1253931c-e7c7-481f-8afc-3372afe70e6f
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:39 GMT
+
+
+[2025-04-11 21:06:41] [WARNING] ユーザー kitakyushu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:40
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 23956408-1124-4eac-8ba6-7900cd60acc1
+client-request-id             : 0684fafd-629a-4665-8ba5-21560df00af8
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:39 GMT
+
+
+[2025-04-11 21:06:41] [WARNING] ユーザー amazon-biz@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:41
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 41139605-0d1a-4e85-953c-0b4749802c2b
+client-request-id             : aed59fbf-acb7-4587-8443-ea01b61dad0d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:40 GMT
+
+
+[2025-04-11 21:06:43] [WARNING] ユーザー k-hirabayashi@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:43
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : f5cda4b8-1bcc-4ec7-a465-7326796f4838
+client-request-id             : e38016e0-8b65-429e-b1af-43e3f66bf27d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:42 GMT
+
+
+[2025-04-11 21:06:44] [WARNING] ユーザー shizuoka-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:43
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 457b3b32-3f43-4c81-83a0-e9d3434289ac
+client-request-id             : b5f03141-d44d-482b-bb08-06623b5924a5
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:42 GMT
+
+
+[2025-04-11 21:06:44] [WARNING] ユーザー tokyokouji-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:43
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b593970b-4418-427c-9286-efed21c00eed
+client-request-id             : 27033b71-e9f0-4076-901f-7cca0d07e1b0
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:42 GMT
+
+
+[2025-04-11 21:06:46] [WARNING] ユーザー honsya2-1@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:46
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 71605532-2246-42f1-a438-be15c7c90dcc
+client-request-id             : de55a2ff-9dba-4701-9fc9-ee6fd32a64bd
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:45 GMT
+
+
+[2025-04-11 21:06:48] [WARNING] ユーザー ito_mainmark.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:48
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e1c8301f-2302-486c-bea4-830f8f12e267
+client-request-id             : 6d14c2c0-78ca-41d9-b330-ef19e1f1c6ef
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:47 GMT
+
+
+[2025-04-11 21:06:50] [WARNING] ユーザー yk-takahashi_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:49
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : fe910bd1-b95f-4a5e-bb20-bea4cb467f2f
+client-request-id             : d9fad323-f65a-41e1-ad91-ca5a327b085d
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:49 GMT
+
+
+[2025-04-11 21:06:50] [WARNING] ユーザー chugoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:49
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : d11f3151-c9e0-49ce-96b2-074aa30dd10a
+client-request-id             : 8a1d52e8-ae66-478a-855e-dfa9b55d432e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:49 GMT
+
+
+[2025-04-11 21:06:52] [WARNING] ユーザー webadmin@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:51
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 760c1e04-3a33-4771-a363-ae652b8f5522
+client-request-id             : 697f5533-8376-4d32-9e51-018e287e3156
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:51 GMT
+
+
+[2025-04-11 21:06:53] [WARNING] ユーザー tokyokoji@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:53
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ccd7ec32-a547-4f16-915f-5340e4047714
+client-request-id             : 82ede584-2fc4-4498-939f-30eb35ea7d05
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:53 GMT
+
+
+[2025-04-11 21:06:55] [WARNING] ユーザー tokyo-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:54
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 6272828e-8676-4cd8-8b75-b435cfe13c6f
+client-request-id             : 703de144-5b93-4e3f-b8d3-85d283ec8362
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:54 GMT
+
+
+[2025-04-11 21:06:56] [WARNING] ユーザー mirai-edr@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:55
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ce67f40d-0f6d-4b02-8593-8cced8973d2e
+client-request-id             : 8c8ab36c-8746-4cbc-8c2f-2862b3f67f6f
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:55 GMT
+
+
+[2025-04-11 21:06:57] [WARNING] ユーザー bid-info06m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:56
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 813ac168-9fd0-4ec9-a6ea-8ec16ebf87fb
+client-request-id             : 8c77c578-273e-4587-842c-2a20068a7afc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:56 GMT
+
+
+[2025-04-11 21:06:59] [WARNING] ユーザー noto-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:58
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : adda5765-d67f-4279-80d7-53aafd5f9ddc
+client-request-id             : fcbc6638-cd1a-4bc3-a124-3b0f2dc321a5
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:58 GMT
+
+
+[2025-04-11 21:07:01] [WARNING] ユーザー aomori-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:06:59
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 8aa5a867-a059-42b2-be25-ecba9e72e0e5
+client-request-id             : b18eac5a-f65d-4514-ac48-f751a822e943
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:06:59 GMT
+
+
+[2025-04-11 21:07:02] [WARNING] ユーザー cad-master@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:02
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : e7d126f9-7b94-46f5-a182-bd0965cf1e96
+client-request-id             : a5d7f328-e515-4eff-a007-393bf62c2fb5
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:02 GMT
+
+
+[2025-04-11 21:07:07] [WARNING] ユーザー direct@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:06
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 5b532bcf-a95a-4876-8ed1-1a59b2d7aac7
+client-request-id             : 6801bfa7-9023-4203-9e44-a0fb5ea540ce
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:06 GMT
+
+
+[2025-04-11 21:07:09] [WARNING] ユーザー forti-admin@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:08
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : db19800c-3d5f-4f7f-8b0a-f65dc5925ba0
+client-request-id             : cf7e7922-954a-4781-807b-85eb461d1454
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:08 GMT
+
+
+[2025-04-11 21:07:10] [WARNING] ユーザー chubu@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:10
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 3d7cefdd-2a85-441a-a2bb-af2947a87657
+client-request-id             : e8fb5794-0c0b-43f8-b2ea-45ed4a4f058a
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:10 GMT
+
+
+[2025-04-11 21:07:13] [WARNING] ユーザー ys-yamamoto_apptec.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:12
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 31927155-39c9-4dc2-b287-5085c2ffe264
+client-request-id             : 3976dde4-1c0b-42f1-ad45-3c89d425a656
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:12 GMT
+
+
+[2025-04-11 21:07:14] [WARNING] ユーザー r-futenma@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:14
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 2d1d7435-f7eb-439f-8712-5968c72e754f
+client-request-id             : 0277d5e4-bd43-45ea-91ea-e3293ff701d7
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:14 GMT
+
+
+[2025-04-11 21:07:16] [WARNING] ユーザー cim-master13@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:15
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : ccfffa29-da7f-4b6a-ac7a-5c9b4b98707f
+client-request-id             : 331e94f3-b716-4010-af39-f5b94e0c3a49
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:15 GMT
+
+
+[2025-04-11 21:07:17] [WARNING] ユーザー na-kadokawa_apptec.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:16
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 512a3e02-9345-4e4a-9a62-0bc32c793a84
+client-request-id             : 8932a39a-1c56-4acd-81ab-1d55be3b72fd
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:16 GMT
+
+
+[2025-04-11 21:07:20] [WARNING] ユーザー mirai-sns@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:20
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 9127f0f8-08cb-4108-a468-6a244edd7879
+client-request-id             : 623a0ca5-e202-47e9-8b9c-337237884657
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:20 GMT
+
+
+[2025-04-11 21:07:23] [WARNING] ユーザー et-satoh@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:22
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 86a106ee-2738-4622-9ac0-cda97274b681
+client-request-id             : 6f55371e-8a9b-4853-8ba6-73d1d1a5fcee
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF00008C6A"}}
+Date                          : Fri, 11 Apr 2025 12:07:22 GMT
+
+
+[2025-04-11 21:07:26] [WARNING] ユーザー k-obara@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:25
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : bab0d096-4723-4050-87fd-a1c606ca65d1
+client-request-id             : 37624960-8736-4104-a852-af1c560b62b9
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604B"}}
+Date                          : Fri, 11 Apr 2025 12:07:25 GMT
+
+
+[2025-04-11 21:07:30] [WARNING] ユーザー kanri-oosaka@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:29
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : 93f51825-d0f8-4a85-bf77-29452d3faf55
+client-request-id             : 45ba4f21-43d6-4f08-b505-b1b7b97485dc
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604B"}}
+Date                          : Fri, 11 Apr 2025 12:07:29 GMT
+
+
+[2025-04-11 21:07:32] [WARNING] ユーザー haruka.ishigaki_aaconst.onmicrosoft.com#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:31
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : bf608366-b234-4d1d-ae4c-2c8ac0643e62
+client-request-id             : 69e8d4c8-a0d6-446a-b416-c54e1ceb5423
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604B"}}
+Date                          : Fri, 11 Apr 2025 12:07:31 GMT
+
+
+[2025-04-11 21:07:34] [WARNING] ユーザー bid-info02m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: User's mysite not found.
+
+Status: 404 (NotFound)
+ErrorCode: ResourceNotFound
+Date: 2025-04-11T12:07:33
+
+Headers:
+Vary                          : Accept-Encoding
+Strict-Transport-Security     : max-age=31536000
+request-id                    : b15a0989-875a-4e1e-9f5f-a55794389082
+client-request-id             : 57004f33-f699-4e4e-8336-ffa7b95c6b9e
+x-ms-ags-diagnostic           : {"ServerInfo":{"DataCenter":"Japan East","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"TY1PEPF0000604B"}}
+Date                          : Fri, 11 Apr 2025 12:07:33 GMT
+
+
+[2025-04-11 21:07:34] [SUCCESS] OneDriveクォータ情報の取得が完了しました。取得件数: 524
+[2025-04-11 21:07:34] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250411\Basic_Data_Collection.20250411\OneDriveQuota.20250411210734.csv
+[2025-04-11 21:07:34] [INFO] Excelでファイルを開いて列幅の調整とフィルターの適用を行います...
+[2025-04-11 21:07:36] [SUCCESS] Excelでの処理が完了しました。

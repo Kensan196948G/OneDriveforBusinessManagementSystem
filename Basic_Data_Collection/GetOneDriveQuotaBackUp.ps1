@@ -1,5 +1,5 @@
 # OneDrive for Business 運用ツール - ITSM準拠
-# GetOneDriveQuota.ps1 - ストレージクォータ取得スクリプト (統一テンプレート版)
+# GetOneDriveQuotaBackUp.ps1 - ストレージクォータ取得スクリプト（ユニーク値プルダウン・出力同期対応）
 
 param (
     [string]$OutputDir = "$(Get-Location)\Output",
@@ -11,8 +11,9 @@ param (
 if (-not (Test-Path $OutputDir)) { New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null }
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Force | Out-Null }
 
-# 実行日時
+# 実行日時・タイムスタンプ（HTML/CSVで完全同期）
 $executionDateFormatted = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
 
 # 実行者情報（仮の値、必要に応じて取得処理を追加）
 $executorName = "管理者"
@@ -75,11 +76,22 @@ foreach ($u in $users) {
         "残り容量(GB)" = $remainingGB
         "使用率(%)" = $usagePercent
         "状態" = $status
-}
+    }
 }
 
-# 出力ファイル名
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+# 列名リスト
+$columns = @(
+    "ユーザー名", "メールアドレス", "ログインユーザー名", "ユーザー種別", "アカウント状態",
+    "OneDrive対応", "総容量(GB)", "使用容量(GB)", "残り容量(GB)", "使用率(%)", "状態"
+)
+
+# 各列のユニーク値リストを作成
+$uniqueValues = @{}
+foreach ($col in $columns) {
+    $uniqueValues[$col] = $userList | Select-Object -ExpandProperty $col | Sort-Object | Get-Unique
+}
+
+# 出力ファイル名（同期）
 $htmlPath = Join-Path $OutputDir "OneDriveQuota.$timestamp.html"
 $csvPath = Join-Path $OutputDir "OneDriveQuota.$timestamp.csv"
 
@@ -120,6 +132,7 @@ th { background:#f2f2f2; font-weight:bold; }
 tr.danger { background:#ffebee; }
 tr.warning { background:#fff8e1; }
 tr.normal { background:#f1f8e9; }
+tr.admin { background:#e3f2fd; }
 tr.disabled { color:#999; font-style:italic; }
 .status-icon { margin-right:5px; }
 @media print {
@@ -131,6 +144,7 @@ th { background:#f2f2f2 !important; -webkit-print-color-adjust:exact; print-colo
 tr.danger { background:#ffebee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 tr.warning { background:#fff8e1 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+tr.admin { background:#e3f2fd !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 </style>
 </head>
@@ -170,52 +184,45 @@ tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; pri
 
 <div id="pagination"></div>
 
+<!-- 管理者凡例 -->
+<div style="margin-bottom:10px;">
+  <span style="display:inline-block;width:18px;height:18px;background:#e3f2fd;border:1px solid #90caf9;vertical-align:middle;margin-right:5px;"></span>
+  <span style="vertical-align:middle;">管理者（Administrator）</span>
+</div>
+
 <table id="quotaTable">
 <thead>
 <tr>
-<th>ユーザー名</th>
-<th>メールアドレス</th>
-<th>ログインユーザー名</th>
-<th>ユーザー種別</th>
-<th>アカウント状態</th>
-<th>OneDrive対応</th>
-<th>総容量(GB)</th>
-<th>使用容量(GB)</th>
-<th>残り容量(GB)</th>
-<th>使用率(%)</th>
-<th>状態</th>
-</tr>
-<tr class="filter-row">
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-</tr>
-</thead>
-<tbody>
-<!-- ここにPowerShellで行を追加 -->
 "@
 
+# ヘッダー
+foreach ($col in $columns) {
+    $html += "<th>$col</th>"
+}
+$html += "</tr>`n<tr class='filter-row'>"
+# 各列のユニーク値でプルダウン生成
+foreach ($col in $columns) {
+    $html += "<th><select class='column-filter'><option value=''>すべて</option>"
+    foreach ($val in $uniqueValues[$col]) {
+        if ($val -ne $null -and $val -ne "") {
+            $html += "<option value='$val'>$val</option>"
+        }
+    }
+    $html += "</select></th>"
+}
+$html += "</tr>
+</thead>
+<tbody>
+"
+
+# データ行
 foreach ($user in $userList) {
-    $html += "<tr>"
-    $html += "<td>$($user.'ユーザー名')</td>"
-    $html += "<td>$($user.'メールアドレス')</td>"
-    $html += "<td>$($user.'ログインユーザー名')</td>"
-    $html += "<td>$($user.'ユーザー種別')</td>"
-    $html += "<td>$($user.'アカウント状態')</td>"
-    $html += "<td>$($user.'OneDrive対応')</td>"
-    $html += "<td>$($user.'総容量(GB)')</td>"
-    $html += "<td>$($user.'使用容量(GB)')</td>"
-    $html += "<td>$($user.'残り容量(GB)')</td>"
-    $html += "<td>$($user.'使用率(%)')</td>"
-    $html += "<td>$($user.'状態')</td>"
+    $rowClass = ""
+    if ($user.'ユーザー種別' -eq "Administrator") { $rowClass = " class='admin'" }
+    $html += "<tr$rowClass>"
+    foreach ($col in $columns) {
+        $html += "<td>$($user.$col)</td>"
+    }
     $html += "</tr>"
 }
 
@@ -227,7 +234,18 @@ $html += @"
 </html>
 "@
 
-$html | Out-File -FilePath $htmlPath -Encoding UTF8
+# HTML出力
+try {
+    $html | Out-File -FilePath $htmlPath -Encoding UTF8
+    Write-Host "HTMLファイルを作成しました: $htmlPath" -ForegroundColor Green
+} catch {
+    Write-Error "HTMLファイルの出力に失敗しました: $_"
+}
 
-# CSVも必ず出力
-$userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8BOM
+# CSVも必ず同じタイムスタンプで出力
+try {
+    $userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8BOM
+    Write-Host "CSVファイルを作成しました: $csvPath" -ForegroundColor Green
+} catch {
+    Write-Error "CSVファイルの出力に失敗しました: $_"
+}
