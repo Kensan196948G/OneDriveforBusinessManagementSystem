@@ -91,15 +91,19 @@ $($ErrorRecord.ScriptStackTrace)
 function Install-RequiredModules {
     if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
         Write-ExecutionLog "Microsoft.Graph モジュールが未インストールのためインストールします..." "INFO"
+        Write-Host "[INFO] Microsoft.Graph モジュールのインストールを開始します..." -ForegroundColor Cyan
         try {
             Install-Module Microsoft.Graph -Scope CurrentUser -Force
             Write-ExecutionLog "Microsoft.Graph モジュールのインストールが完了しました" "SUCCESS"
+            Write-Host "[SUCCESS] Microsoft.Graph モジュールのインストールが完了しました" -ForegroundColor Green
         } catch {
             Write-ErrorLog $_ "Microsoft.Graph モジュールのインストールに失敗しました"
+            Write-Host "[ERROR] Microsoft.Graph モジュールのインストールに失敗しました" -ForegroundColor Red
             return $false
         }
     } else {
         Write-ExecutionLog "Microsoft.Graph モジュールは既にインストールされています" "INFO"
+        Write-Host "[INFO] Microsoft.Graph モジュールは既にインストール済みです" -ForegroundColor Cyan
     }
     
     return $true
@@ -108,42 +112,67 @@ function Install-RequiredModules {
 # Microsoft Graphに接続
 function Connect-ToMicrosoftGraph {
     try {
-        Write-ExecutionLog "Microsoft Graphに接続しています..." "INFO"
-        
-        # グローバル管理者向けの事前設定情報
-        <#
-        ===== グローバル管理者向け事前設定手順 =====
-        
-        以下の手順は、グローバル管理者が初回のみ実行する必要があります。
-        
-        1. Azure Active Directoryポータル(https://aad.portal.azure.com/)にグローバル管理者でログイン
-        
-        2. [エンタープライズアプリケーション] → [新しいアプリケーション] → [独自のアプリケーションを作成]
-           - 名前: "OneDrive運用ツール"
-           - タイプ: "この組織ディレクトリのみに存在するアプリケーション"
-        
-        3. [APIのアクセス許可] → [アクセス許可の追加] → [Microsoft Graph] → [委任されたアクセス許可]
-           - User.Read.All
-           - Directory.Read.All
-           - Sites.Read.All
-           - Files.Read.All
-        
-        4. [管理者の同意を付与] ボタンをクリック
-        #>
-        
-        Connect-MgGraph -Scopes "User.Read.All","Directory.Read.All","Sites.Read.All","Files.Read.All"
-        
-        # ログインユーザーのUPN（メールアドレス）を自動取得
-        $context = Get-MgContext
-        $UserUPN = $context.Account
-        
-        # ログイン済ユーザー情報を取得
-        $currentUser = Get-MgUser -UserId $UserUPN -Property DisplayName,Mail,UserType
-        
-        Write-ExecutionLog "Microsoft Graphに接続しました。ログインユーザー: $($currentUser.DisplayName) ($UserUPN)" "SUCCESS"
-        return $true
+        Write-ExecutionLog "config.jsonから認証情報を読み込みます..." "INFO"
+        $configPath = Join-Path -Path $PSScriptRoot -ChildPath "config.json"
+        if (-not (Test-Path $configPath)) {
+            Write-ExecutionLog "config.jsonが見つかりません: $configPath" "ERROR"
+            return $false
+        }
+        $config = Get-Content -Raw -Path $configPath | ConvertFrom-Json
+
+        $tenantId = $config.TenantId
+        $clientId = $config.ClientId
+        $clientSecret = $config.ClientSecret
+        $scopes = "https://graph.microsoft.com/.default"
+        $tokenUrl = "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token"
+
+        Write-ExecutionLog "Microsoft Graph用アクセストークンを取得します..." "INFO"
+
+        $body = @{
+            client_id     = $clientId
+            scope         = $scopes
+            client_secret = $clientSecret
+            grant_type    = "client_credentials"
+        }
+
+        try {
+            $response = Invoke-RestMethod -Method Post -Uri $tokenUrl -Body $body -ContentType "application/x-www-form-urlencoded"
+            $global:AccessToken = $response.access_token
+
+            if (-not $global:AccessToken) {
+                Write-ExecutionLog "アクセストークンの取得に失敗しました。レスポンス: $($response | ConvertTo-Json -Compress)" "ERROR"
+                return $false
+            }
+
+            # TEMPフォルダにトークンを保存
+            $tempDir = Join-Path -Path $PSScriptRoot -ChildPath "TEMP"
+            if (-not (Test-Path -Path $tempDir)) {
+                New-Item -Path $tempDir -ItemType Directory | Out-Null
+            }
+            $tokenFile = Join-Path -Path $tempDir -ChildPath "graph_token.txt"
+            Set-Content -Path $tokenFile -Value $global:AccessToken -Encoding UTF8
+
+            # PowerShell Graph SDKの認証状態をセット
+            $secureToken = ConvertTo-SecureString $global:AccessToken -AsPlainText -Force
+            Connect-MgGraph -AccessToken $secureToken | Out-Null
+
+            Write-ExecutionLog "Microsoft Graphにクライアントシークレット認証で接続しました" "SUCCESS"
+            return $true
+        } catch {
+            Write-ExecutionLog "トークン取得時のエラー詳細: $($_.Exception.Message)" "ERROR"
+            if ($_.ErrorDetails) {
+                Write-ExecutionLog "エラーディテール: $($_.ErrorDetails.Message)" "ERROR"
+            }
+            if ($_.Exception.Response -ne $null) {
+                $stream = $_.Exception.Response.GetResponseStream()
+                $reader = New-Object System.IO.StreamReader($stream)
+                $responseBody = $reader.ReadToEnd()
+                Write-ExecutionLog "HTTPレスポンス: $responseBody" "ERROR"
+            }
+            return $false
+        }
     } catch {
-        Write-ErrorLog $_ "Microsoft Graphへの接続に失敗しました"
+        Write-ErrorLog $_ "Microsoft Graphへのクライアントシークレット認証に失敗しました"
         return $false
     }
 }
@@ -349,7 +378,13 @@ try {
             "0" {
                 $scriptPath = Show-BasicDataMenu
                 if ($scriptPath) {
-                    Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Basic_Data_Collection" -LogFolder $logFolderPath
+                    # OneDriveクォータ取得前に毎回トークン再取得
+                    $connected = Connect-ToMicrosoftGraph
+                    if (-not $connected) {
+                        Write-ExecutionLog "Microsoft Graphへの再接続に失敗したため、スクリプトをスキップします。" "ERROR"
+                    } else {
+                        Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Basic_Data_Collection" -LogFolder $logFolderPath
+                    }
                 }
             }
             "1" {

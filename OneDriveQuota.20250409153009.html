@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OneDriveクォータレポート - データなし</title>
+    <script src="$jsFile"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .info-section {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #d32f2f;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">💾</div>
+            <h1>OneDriveクォータレポート</h1>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">実行日時:</span> $(Get-Date -Format "yyyy/MM/dd HH:mm:ss")</p>
+            <p><span class="info-label">出力フォルダ:</span> $OutputDir</p>
+        </div>
+        
+        <table id="quotaTable">
+            <thead>
+                <tr>
+                    <th>ユーザー名</th>
+                    <th>メールアドレス</th>
+                    <th>ログインユーザー名</th>
+                    <th>ユーザー種別</th>
+                    <th>アカウント状態</th>
+                    <th>OneDrive対応</th>
+                    <th>総容量(GB)</th>
+                    <th>使用容量(GB)</th>
+                    <th>残り容量(GB)</th>
+                    <th>使用率(%)</th>
+                    <th>状態</th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="column-filter" data-column="0"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="1"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="2"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="3"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="4"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="5"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="6"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="7"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="8"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="9"><option value="">すべて</option></select></th>
+                    <th><select class="column-filter" data-column="10"><option value="">すべて</option></select></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="11" class="no-data">
+                        OneDriveクォータ情報を取得中...<br>
+                        「OneDrive対応」列で各ユーザーの状態を確認できます
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

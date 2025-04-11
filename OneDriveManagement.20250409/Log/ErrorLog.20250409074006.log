@@ -1,0 +1,14 @@
+[2025-04-09 08:33:25] [ERROR] スクリプト実行中にエラーが発生しました: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+例外タイプ: System.Management.Automation.ParseException
+例外メッセージ: At C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1:322 char:14
++ $jsContent = @"
++              ~~
+The string is missing the terminator: "@.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1:322 char:14
++ $jsContent = @"
++              ~~
+スタックトレース:
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 337
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 380
+at <ScriptBlock>, <No file>: line 1
+

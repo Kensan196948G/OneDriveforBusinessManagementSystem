@@ -1,0 +1,14 @@
+[2025-04-09 09:46:18] [INFO] OneDrive for Business 運用ツール - ITSM準拠 を開始しました
+[2025-04-09 09:46:18] [INFO] 出力フォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409
+[2025-04-09 09:46:18] [INFO] ログフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Log
+[2025-04-09 09:46:18] [INFO] レポートフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Report
+[2025-04-09 09:46:19] [INFO] Microsoft.Graph モジュールは既にインストールされています
+[2025-04-09 09:46:20] [INFO] config.jsonから認証情報を読み込みます...
+[2025-04-09 09:46:20] [INFO] Microsoft Graph用アクセストークンを取得します...
+[2025-04-09 09:46:20] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-09 09:46:43] [INFO] config.jsonから認証情報を読み込みます...
+[2025-04-09 09:46:43] [INFO] Microsoft Graph用アクセストークンを取得します...
+[2025-04-09 09:46:43] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-09 09:46:43] [INFO] スクリプト実行開始: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1 (Basic_Data_Collection)
+[2025-04-09 09:49:17] [SUCCESS] スクリプト実行完了: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+[2025-04-09 12:33:24] [INFO] プログラムを終了します。

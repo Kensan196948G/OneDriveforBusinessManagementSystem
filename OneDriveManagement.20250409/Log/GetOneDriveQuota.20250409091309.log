@@ -1,0 +1,1454 @@
+[2025-04-09 09:13:09] [INFO] ストレージクォータ取得を開始します
+[2025-04-09 09:13:09] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Basic_Data_Collection.20250409
+[2025-04-09 09:13:09] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Log
+[2025-04-09 09:13:09] [INFO] トークンファイルからアクセストークンを読み込みました
+[2025-04-09 09:13:09] [WARNING] Graph接続済みですが、ユーザー情報は取得できません。
+[2025-04-09 09:13:09] [WARNING] Graph接続済みですが、ユーザー情報は取得できません。
+[2025-04-09 09:13:09] [INFO] Microsoft Graph REST APIで全ユーザー情報を取得します...
+[2025-04-09 09:13:09] [INFO] トークンにBearerプレフィックスを追加しました
+[2025-04-09 09:13:16] [WARNING] ユーザー admin@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:15",
+      "request-id": "0c87f15d-d63f-4bfe-85dc-074641156a86",
+      "client-request-id": "0c87f15d-d63f-4bfe-85dc-074641156a86"
+    }
+  }
+}
+[2025-04-09 09:13:16] [WARNING] ユーザー admin1@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:16",
+      "request-id": "9866e24a-0de5-4870-a608-9dd5418cfb8e",
+      "client-request-id": "9866e24a-0de5-4870-a608-9dd5418cfb8e"
+    }
+  }
+}
+[2025-04-09 09:13:16] [WARNING] ユーザー amazon-biz@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:16",
+      "request-id": "038f6874-4c6c-4258-84d0-29c31976413b",
+      "client-request-id": "038f6874-4c6c-4258-84d0-29c31976413b"
+    }
+  }
+}
+[2025-04-09 09:13:16] [WARNING] ユーザー aomori-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:16",
+      "request-id": "0b3d28bf-ef22-4a25-970c-05d80798f95f",
+      "client-request-id": "0b3d28bf-ef22-4a25-970c-05d80798f95f"
+    }
+  }
+}
+[2025-04-09 09:13:16] [WARNING] ユーザー apple-id@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:16",
+      "request-id": "45454e26-7e93-4c4f-bf63-3b724755e8f0",
+      "client-request-id": "45454e26-7e93-4c4f-bf63-3b724755e8f0"
+    }
+  }
+}
+[2025-04-09 09:13:16] [WARNING] ユーザー ariake-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:16",
+      "request-id": "7963bd02-56a7-485a-8a84-cae8de14b8b8",
+      "client-request-id": "7963bd02-56a7-485a-8a84-cae8de14b8b8"
+    }
+  }
+}
+[2025-04-09 09:13:17] [WARNING] ユーザー ats-watanabe_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:17",
+      "request-id": "bf58380c-a8e9-427f-a895-5dd28cecca59",
+      "client-request-id": "bf58380c-a8e9-427f-a895-5dd28cecca59"
+    }
+  }
+}
+[2025-04-09 09:13:17] [WARNING] ユーザー bid-info@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:17",
+      "request-id": "e6859beb-c9e5-4457-85cc-33d10abfe0d1",
+      "client-request-id": "e6859beb-c9e5-4457-85cc-33d10abfe0d1"
+    }
+  }
+}
+[2025-04-09 09:13:17] [WARNING] ユーザー bid-info01m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:17",
+      "request-id": "b4d70891-21c6-4413-b5cd-4d567356020f",
+      "client-request-id": "b4d70891-21c6-4413-b5cd-4d567356020f"
+    }
+  }
+}
+[2025-04-09 09:13:17] [WARNING] ユーザー bid-info02m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:17",
+      "request-id": "13fcfeb7-1326-4ffb-aa81-360a7145ef90",
+      "client-request-id": "13fcfeb7-1326-4ffb-aa81-360a7145ef90"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info03m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:17",
+      "request-id": "9f9f6b40-97bb-4e7b-995c-8e101788825f",
+      "client-request-id": "9f9f6b40-97bb-4e7b-995c-8e101788825f"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info04m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "42222770-6637-42e4-b0e3-24733dba4ca6",
+      "client-request-id": "42222770-6637-42e4-b0e3-24733dba4ca6"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info05m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "0f969a0f-bf49-445c-9207-6aef1e7f075d",
+      "client-request-id": "0f969a0f-bf49-445c-9207-6aef1e7f075d"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info06m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "b925986c-f391-4a70-a9f9-e47cfb1a051b",
+      "client-request-id": "b925986c-f391-4a70-a9f9-e47cfb1a051b"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info07m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "add08f66-ae2c-45d6-a12d-1dd70c367c6a",
+      "client-request-id": "add08f66-ae2c-45d6-a12d-1dd70c367c6a"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info08m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "042b0467-dc95-4232-8d2d-fbba6b290f8d",
+      "client-request-id": "042b0467-dc95-4232-8d2d-fbba6b290f8d"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info09m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "5f4641e4-6ca8-44b9-9bd5-d2a0432f29ac",
+      "client-request-id": "5f4641e4-6ca8-44b9-9bd5-d2a0432f29ac"
+    }
+  }
+}
+[2025-04-09 09:13:18] [WARNING] ユーザー bid-info10m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:18",
+      "request-id": "0bd52fe0-7be6-4f52-8e80-818edb452e8c",
+      "client-request-id": "0bd52fe0-7be6-4f52-8e80-818edb452e8c"
+    }
+  }
+}
+[2025-04-09 09:13:19] [WARNING] ユーザー bid-info11m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:19",
+      "request-id": "2389af03-061d-454f-a0cb-157323fa29de",
+      "client-request-id": "2389af03-061d-454f-a0cb-157323fa29de"
+    }
+  }
+}
+[2025-04-09 09:13:19] [WARNING] ユーザー bid-info12m@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:19",
+      "request-id": "2da42dec-bc9e-4f42-b97f-b58fb7f6a861",
+      "client-request-id": "2da42dec-bc9e-4f42-b97f-b58fb7f6a861"
+    }
+  }
+}
+[2025-04-09 09:13:20] [WARNING] ユーザー cad-master@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "67825be3-5c55-4e9f-97f5-baefc1f20a2d",
+      "client-request-id": "67825be3-5c55-4e9f-97f5-baefc1f20a2d"
+    }
+  }
+}
+[2025-04-09 09:13:20] [WARNING] ユーザー chiba-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "165802fb-bb42-4a14-8864-b8f3ad8c528a",
+      "client-request-id": "165802fb-bb42-4a14-8864-b8f3ad8c528a"
+    }
+  }
+}
+[2025-04-09 09:13:20] [WARNING] ユーザー chubu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "24a6f3a3-f7fa-4004-bfbb-8ce3b41ebec8",
+      "client-request-id": "24a6f3a3-f7fa-4004-bfbb-8ce3b41ebec8"
+    }
+  }
+}
+[2025-04-09 09:13:20] [WARNING] ユーザー chubu@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "4106c694-2d62-4eae-9180-a9b6ddbceb06",
+      "client-request-id": "4106c694-2d62-4eae-9180-a9b6ddbceb06"
+    }
+  }
+}
+[2025-04-09 09:13:20] [WARNING] ユーザー chugoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "b0e6b382-5bb9-4874-a632-d45b1132e722",
+      "client-request-id": "b0e6b382-5bb9-4874-a632-d45b1132e722"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:20",
+      "request-id": "ae589e1c-dc90-450d-a1be-a44a793c1d00",
+      "client-request-id": "ae589e1c-dc90-450d-a1be-a44a793c1d00"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master01@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "c8a6fe6c-4454-4e38-9464-088f6d1cd531",
+      "client-request-id": "c8a6fe6c-4454-4e38-9464-088f6d1cd531"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master02@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "0c4f55de-411e-4743-85fd-dc611a55a18f",
+      "client-request-id": "0c4f55de-411e-4743-85fd-dc611a55a18f"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master03@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "ae113cd3-dbd1-4c40-81d7-0253187bc8e3",
+      "client-request-id": "ae113cd3-dbd1-4c40-81d7-0253187bc8e3"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master04@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "797e43e6-08a1-4e78-992b-9e4caeff4e80",
+      "client-request-id": "797e43e6-08a1-4e78-992b-9e4caeff4e80"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master05@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "697ac9b1-a2cb-4d57-ad91-9eea7114f572",
+      "client-request-id": "697ac9b1-a2cb-4d57-ad91-9eea7114f572"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master06@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "234b1fdb-5880-43e6-85cf-0a75939d40a1",
+      "client-request-id": "234b1fdb-5880-43e6-85cf-0a75939d40a1"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master07@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "3f170979-b014-4939-821d-3fc1fb309fe0",
+      "client-request-id": "3f170979-b014-4939-821d-3fc1fb309fe0"
+    }
+  }
+}
+[2025-04-09 09:13:21] [WARNING] ユーザー cim-master08@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:21",
+      "request-id": "5ad54365-0b6d-40b8-8832-b895f9258df0",
+      "client-request-id": "5ad54365-0b6d-40b8-8832-b895f9258df0"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master09@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "84027659-40b0-4af8-b5fa-5ec02b0dd5f8",
+      "client-request-id": "84027659-40b0-4af8-b5fa-5ec02b0dd5f8"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master10@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "6e2339a1-1f40-4e6b-8b32-84ca20fc4c0f",
+      "client-request-id": "6e2339a1-1f40-4e6b-8b32-84ca20fc4c0f"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master11@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "52309e4e-5589-4ec2-9a12-0914af1799a4",
+      "client-request-id": "52309e4e-5589-4ec2-9a12-0914af1799a4"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master12@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "65c0f780-f5c8-4bdc-93e1-4855c9f753e7",
+      "client-request-id": "65c0f780-f5c8-4bdc-93e1-4855c9f753e7"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master13@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "37a9873f-ebd6-4671-b873-6cb03fb0c263",
+      "client-request-id": "37a9873f-ebd6-4671-b873-6cb03fb0c263"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master14@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "f11ff045-7bbb-456a-9d60-f04e11276c67",
+      "client-request-id": "f11ff045-7bbb-456a-9d60-f04e11276c67"
+    }
+  }
+}
+[2025-04-09 09:13:22] [WARNING] ユーザー cim-master15@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:22",
+      "request-id": "a71ed75a-ed16-453d-9bf5-9d197ae48f47",
+      "client-request-id": "a71ed75a-ed16-453d-9bf5-9d197ae48f47"
+    }
+  }
+}
+[2025-04-09 09:13:23] [WARNING] ユーザー cim-master16@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:23",
+      "request-id": "a23f1a97-6380-4c5f-95bb-289348a94e02",
+      "client-request-id": "a23f1a97-6380-4c5f-95bb-289348a94e02"
+    }
+  }
+}
+[2025-04-09 09:13:23] [WARNING] ユーザー compliance-hotline@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:23",
+      "request-id": "dc12ea20-266f-46b1-b1ba-c88619c187df",
+      "client-request-id": "dc12ea20-266f-46b1-b1ba-c88619c187df"
+    }
+  }
+}
+[2025-04-09 09:13:23] [WARNING] ユーザー direct@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:23",
+      "request-id": "811b9ee5-1d8f-4e7f-827c-76adbf7fec8a",
+      "client-request-id": "811b9ee5-1d8f-4e7f-827c-76adbf7fec8a"
+    }
+  }
+}
+[2025-04-09 09:13:23] [WARNING] ユーザー e-watanabe@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:23",
+      "request-id": "ec594ce0-f00d-420c-ba7f-a4b24ca6498c",
+      "client-request-id": "ec594ce0-f00d-420c-ba7f-a4b24ca6498c"
+    }
+  }
+}
+[2025-04-09 09:13:23] [WARNING] ユーザー et-satoh@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:23",
+      "request-id": "3bb258b2-0946-45f7-aa3f-133c53f28af3",
+      "client-request-id": "3bb258b2-0946-45f7-aa3f-133c53f28af3"
+    }
+  }
+}
+[2025-04-09 09:13:25] [WARNING] ユーザー forti-admin@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:25",
+      "request-id": "0747397a-6e28-481e-adc4-7e2df23aa1ef",
+      "client-request-id": "0747397a-6e28-481e-adc4-7e2df23aa1ef"
+    }
+  }
+}
+[2025-04-09 09:13:31] [WARNING] ユーザー h-satake@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:31",
+      "request-id": "09947097-6b57-421d-9c4d-5981fc241c2d",
+      "client-request-id": "09947097-6b57-421d-9c4d-5981fc241c2d"
+    }
+  }
+}
+[2025-04-09 09:13:35] [WARNING] ユーザー h_kawamura_cdit.or.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:34",
+      "request-id": "c16b97b0-aa40-4528-a7c3-04c051b0abcf",
+      "client-request-id": "c16b97b0-aa40-4528-a7c3-04c051b0abcf"
+    }
+  }
+}
+[2025-04-09 09:13:35] [WARNING] ユーザー haruka.ishigaki_aaconst.onmicrosoft.com#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:35",
+      "request-id": "a37d4e64-5455-42e6-9800-6f0bad6fc8a0",
+      "client-request-id": "a37d4e64-5455-42e6-9800-6f0bad6fc8a0"
+    }
+  }
+}
+[2025-04-09 09:13:35] [WARNING] ユーザー henngetest@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:35",
+      "request-id": "20a74476-ffad-43b7-966b-1922ac24e32d",
+      "client-request-id": "20a74476-ffad-43b7-966b-1922ac24e32d"
+    }
+  }
+}
+[2025-04-09 09:13:38] [WARNING] ユーザー hideyuki.nomura_halekulaniokinawa.com#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:38",
+      "request-id": "7cf15369-4bcd-468e-899b-b7296f5019d5",
+      "client-request-id": "7cf15369-4bcd-468e-899b-b7296f5019d5"
+    }
+  }
+}
+[2025-04-09 09:13:38] [WARNING] ユーザー hokkaido-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:38",
+      "request-id": "6540bcd7-9282-422d-9af6-2662e35cb470",
+      "client-request-id": "6540bcd7-9282-422d-9af6-2662e35cb470"
+    }
+  }
+}
+[2025-04-09 09:13:38] [WARNING] ユーザー hokkaido@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:38",
+      "request-id": "6f51b063-aabb-48c7-964c-1cefd7ed2c1c",
+      "client-request-id": "6f51b063-aabb-48c7-964c-1cefd7ed2c1c"
+    }
+  }
+}
+[2025-04-09 09:13:38] [WARNING] ユーザー hokuriku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:38",
+      "request-id": "6bb1234c-c53f-4e5f-b14e-ca7b7f0b71e0",
+      "client-request-id": "6bb1234c-c53f-4e5f-b14e-ca7b7f0b71e0"
+    }
+  }
+}
+[2025-04-09 09:13:39] [WARNING] ユーザー honsya2-1@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:39",
+      "request-id": "e146d420-cd61-4d9c-bf37-9dc5db85e00b",
+      "client-request-id": "e146d420-cd61-4d9c-bf37-9dc5db85e00b"
+    }
+  }
+}
+[2025-04-09 09:13:39] [WARNING] ユーザー honsya2-2@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:39",
+      "request-id": "0c53ae55-a023-4b2f-9a3b-05da99d5beb1",
+      "client-request-id": "0c53ae55-a023-4b2f-9a3b-05da99d5beb1"
+    }
+  }
+}
+[2025-04-09 09:13:39] [WARNING] ユーザー hp-kanri@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:39",
+      "request-id": "a2fbf726-1fcd-44b7-af23-9749ddf5ee7e",
+      "client-request-id": "a2fbf726-1fcd-44b7-af23-9749ddf5ee7e"
+    }
+  }
+}
+[2025-04-09 09:13:39] [WARNING] ユーザー i-komada@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:39",
+      "request-id": "df61ab0c-ab91-4405-8089-3c46ab21b849",
+      "client-request-id": "df61ab0c-ab91-4405-8089-3c46ab21b849"
+    }
+  }
+}
+[2025-04-09 09:13:40] [WARNING] ユーザー ibaraki-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:40",
+      "request-id": "8ecaaa85-d3f2-4402-a487-896810188f42",
+      "client-request-id": "8ecaaa85-d3f2-4402-a487-896810188f42"
+    }
+  }
+}
+[2025-04-09 09:13:40] [WARNING] ユーザー ito_mainmark.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:40",
+      "request-id": "8a071e6f-1bd0-4066-b76e-aa893fa1bc57",
+      "client-request-id": "8a071e6f-1bd0-4066-b76e-aa893fa1bc57"
+    }
+  }
+}
+[2025-04-09 09:13:41] [WARNING] ユーザー jinji-saiyou@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:41",
+      "request-id": "37aba0ac-5bc1-4482-8149-f76d08ffe42f",
+      "client-request-id": "37aba0ac-5bc1-4482-8149-f76d08ffe42f"
+    }
+  }
+}
+[2025-04-09 09:13:42] [WARNING] ユーザー k-hirabayashi@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:42",
+      "request-id": "5bb7cf3a-65e4-43b5-90fc-38a1cd42a923",
+      "client-request-id": "5bb7cf3a-65e4-43b5-90fc-38a1cd42a923"
+    }
+  }
+}
+[2025-04-09 09:13:49] [WARNING] ユーザー k-obara@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:49",
+      "request-id": "67c70d04-3b1a-42e6-9ecd-1370b27dead5",
+      "client-request-id": "67c70d04-3b1a-42e6-9ecd-1370b27dead5"
+    }
+  }
+}
+[2025-04-09 09:13:51] [WARNING] ユーザー k-sugimoto@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:51",
+      "request-id": "cd80cc05-002c-4490-8bc7-17020f7cdc19",
+      "client-request-id": "cd80cc05-002c-4490-8bc7-17020f7cdc19"
+    }
+  }
+}
+[2025-04-09 09:13:56] [WARNING] ユーザー kaikei-support@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:56",
+      "request-id": "84a01bf1-b379-4724-a816-92dbeba5b126",
+      "client-request-id": "84a01bf1-b379-4724-a816-92dbeba5b126"
+    }
+  }
+}
+[2025-04-09 09:13:56] [WARNING] ユーザー kanri-kyushu@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:56",
+      "request-id": "bef4481b-f432-4e65-ad0f-e021fbaac478",
+      "client-request-id": "bef4481b-f432-4e65-ad0f-e021fbaac478"
+    }
+  }
+}
+[2025-04-09 09:13:56] [WARNING] ユーザー kanri-oosaka@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:56",
+      "request-id": "803af727-8422-4594-81e0-c0eaa1be27db",
+      "client-request-id": "803af727-8422-4594-81e0-c0eaa1be27db"
+    }
+  }
+}
+[2025-04-09 09:13:57] [WARNING] ユーザー kanri-tokyo@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:57",
+      "request-id": "9ad9975c-5ee5-4ce0-9fcb-abfef3e5eb2b",
+      "client-request-id": "9ad9975c-5ee5-4ce0-9fcb-abfef3e5eb2b"
+    }
+  }
+}
+[2025-04-09 09:13:57] [WARNING] ユーザー keieikikaku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:57",
+      "request-id": "3c52e653-626b-42d5-9891-68a180adba9f",
+      "client-request-id": "3c52e653-626b-42d5-9891-68a180adba9f"
+    }
+  }
+}
+[2025-04-09 09:13:57] [WARNING] ユーザー ki-fujita_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:57",
+      "request-id": "26e6f46e-8d30-457e-9764-86d482831039",
+      "client-request-id": "26e6f46e-8d30-457e-9764-86d482831039"
+    }
+  }
+}
+[2025-04-09 09:13:57] [WARNING] ユーザー kita-kyushu@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:57",
+      "request-id": "35f489be-457e-4963-bffe-0a238ba3f292",
+      "client-request-id": "35f489be-457e-4963-bffe-0a238ba3f292"
+    }
+  }
+}
+[2025-04-09 09:13:57] [WARNING] ユーザー kitakyushu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:57",
+      "request-id": "0b3ce8ad-12ca-4113-9f04-76ac7ea1685a",
+      "client-request-id": "0b3ce8ad-12ca-4113-9f04-76ac7ea1685a"
+    }
+  }
+}
+[2025-04-09 09:13:58] [WARNING] ユーザー kyushu-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:58",
+      "request-id": "973226ea-9ef3-4832-956d-6c318942582b",
+      "client-request-id": "973226ea-9ef3-4832-956d-6c318942582b"
+    }
+  }
+}
+[2025-04-09 09:13:58] [WARNING] ユーザー m-ariake@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:58",
+      "request-id": "b9b6a462-0e0c-4ee4-b649-ed4b26868917",
+      "client-request-id": "b9b6a462-0e0c-4ee4-b649-ed4b26868917"
+    }
+  }
+}
+[2025-04-09 09:13:58] [WARNING] ユーザー m-chugoku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:13:58",
+      "request-id": "67c0026d-3b9a-4840-8964-2749e294be48",
+      "client-request-id": "67c0026d-3b9a-4840-8964-2749e294be48"
+    }
+  }
+}
+[2025-04-09 09:14:01] [WARNING] ユーザー m-info@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:01",
+      "request-id": "14a7fd31-ad59-46fe-bf8a-02a7c456a73d",
+      "client-request-id": "14a7fd31-ad59-46fe-bf8a-02a7c456a73d"
+    }
+  }
+}
+[2025-04-09 09:14:02] [WARNING] ユーザー m-maruta@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:02",
+      "request-id": "3a175bfe-e7e4-437b-ba5c-6e6d368d36f5",
+      "client-request-id": "3a175bfe-e7e4-437b-ba5c-6e6d368d36f5"
+    }
+  }
+}
+[2025-04-09 09:14:06] [WARNING] ユーザー m-suzuki@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:06",
+      "request-id": "78ac4b12-6ec4-43c6-8d8b-0cda3c24496f",
+      "client-request-id": "78ac4b12-6ec4-43c6-8d8b-0cda3c24496f"
+    }
+  }
+}
+[2025-04-09 09:14:07] [WARNING] ユーザー m-ushikubo@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:07",
+      "request-id": "6f363833-5f07-45fb-bf07-3f345ab350da",
+      "client-request-id": "6f363833-5f07-45fb-bf07-3f345ab350da"
+    }
+  }
+}
+[2025-04-09 09:14:09] [WARNING] ユーザー mail-info@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:09",
+      "request-id": "3555bdb2-cc21-42b4-baaa-0312972c78df",
+      "client-request-id": "3555bdb2-cc21-42b4-baaa-0312972c78df"
+    }
+  }
+}
+[2025-04-09 09:14:10] [WARNING] ユーザー mf-jigyoukikaku@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:10",
+      "request-id": "2808c401-e9e8-4cdf-8b21-5fab8ee1f880",
+      "client-request-id": "2808c401-e9e8-4cdf-8b21-5fab8ee1f880"
+    }
+  }
+}
+[2025-04-09 09:14:10] [WARNING] ユーザー mirai-edr@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:10",
+      "request-id": "ad99e01d-baca-4ee9-b9e2-635f45bc3336",
+      "client-request-id": "ad99e01d-baca-4ee9-b9e2-635f45bc3336"
+    }
+  }
+}
+[2025-04-09 09:14:10] [WARNING] ユーザー mirai-sns@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:10",
+      "request-id": "d154605f-19dd-4df1-a49d-e58e5513c380",
+      "client-request-id": "d154605f-19dd-4df1-a49d-e58e5513c380"
+    }
+  }
+}
+[2025-04-09 09:14:10] [WARNING] ユーザー mirai-zoom@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:10",
+      "request-id": "a7b5504a-a795-485f-85ca-fc851446a0d3",
+      "client-request-id": "a7b5504a-a795-485f-85ca-fc851446a0d3"
+    }
+  }
+}
+[2025-04-09 09:14:10] [WARNING] ユーザー mk-engagement@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:10",
+      "request-id": "bb16bbb0-b219-488a-ab23-163aa9dba22a",
+      "client-request-id": "bb16bbb0-b219-488a-ab23-163aa9dba22a"
+    }
+  }
+}
+[2025-04-09 09:14:11] [WARNING] ユーザー mksystem-alert@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:11",
+      "request-id": "0bcdf93d-1f65-48cc-84fc-93da13e60e2b",
+      "client-request-id": "0bcdf93d-1f65-48cc-84fc-93da13e60e2b"
+    }
+  }
+}
+[2025-04-09 09:14:15] [WARNING] ユーザー na-kadokawa_apptec.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:15",
+      "request-id": "a96e03b8-a7e4-4571-ae5d-1b1b1618ea1f",
+      "client-request-id": "a96e03b8-a7e4-4571-ae5d-1b1b1618ea1f"
+    }
+  }
+}
+[2025-04-09 09:14:15] [WARNING] ユーザー netis@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:15",
+      "request-id": "adb4eade-9953-47d0-94c7-8633218085de",
+      "client-request-id": "adb4eade-9953-47d0-94c7-8633218085de"
+    }
+  }
+}
+[2025-04-09 09:14:16] [WARNING] ユーザー noto-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:16",
+      "request-id": "7dd3effb-68fc-43ac-9d0f-02c7b271e05a",
+      "client-request-id": "7dd3effb-68fc-43ac-9d0f-02c7b271e05a"
+    }
+  }
+}
+[2025-04-09 09:14:17] [WARNING] ユーザー okinawa-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:17",
+      "request-id": "0c0ec621-ab9b-4c33-985d-c0dd14a9dc2d",
+      "client-request-id": "0c0ec621-ab9b-4c33-985d-c0dd14a9dc2d"
+    }
+  }
+}
+[2025-04-09 09:14:17] [WARNING] ユーザー okinawa@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:17",
+      "request-id": "4cbc6495-e6dc-43a2-a344-90dd1545a452",
+      "client-request-id": "4cbc6495-e6dc-43a2-a344-90dd1545a452"
+    }
+  }
+}
+[2025-04-09 09:14:17] [WARNING] ユーザー osaka-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:17",
+      "request-id": "126cf055-14ef-49b3-bf42-f04399dfc360",
+      "client-request-id": "126cf055-14ef-49b3-bf42-f04399dfc360"
+    }
+  }
+}
+[2025-04-09 09:14:18] [WARNING] ユーザー r-futenma@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:18",
+      "request-id": "b1a1d714-b8e0-4851-aa7d-c41a99dbaa42",
+      "client-request-id": "b1a1d714-b8e0-4851-aa7d-c41a99dbaa42"
+    }
+  }
+}
+[2025-04-09 09:14:31] [WARNING] ユーザー S.Nagano_otsuka-shokai.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:31",
+      "request-id": "20ddcac1-8641-419d-920f-636ed33654fc",
+      "client-request-id": "20ddcac1-8641-419d-920f-636ed33654fc"
+    }
+  }
+}
+[2025-04-09 09:14:32] [WARNING] ユーザー sh-ishihara-old@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:32",
+      "request-id": "4495fcf5-d8f1-4093-ad5b-2aceaeb9e45f",
+      "client-request-id": "4495fcf5-d8f1-4093-ad5b-2aceaeb9e45f"
+    }
+  }
+}
+[2025-04-09 09:14:32] [WARNING] ユーザー share@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:32",
+      "request-id": "797fd1fe-9d3f-45df-8772-8f6c8fdbffcd",
+      "client-request-id": "797fd1fe-9d3f-45df-8772-8f6c8fdbffcd"
+    }
+  }
+}
+[2025-04-09 09:14:33] [WARNING] ユーザー shikoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:33",
+      "request-id": "454f9e17-66fc-4ce4-a2c7-718ca67877da",
+      "client-request-id": "454f9e17-66fc-4ce4-a2c7-718ca67877da"
+    }
+  }
+}
+[2025-04-09 09:14:33] [WARNING] ユーザー shizuoka-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:33",
+      "request-id": "0386ed12-cc15-43d4-af7b-8f87f61cde43",
+      "client-request-id": "0386ed12-cc15-43d4-af7b-8f87f61cde43"
+    }
+  }
+}
+[2025-04-09 09:14:33] [WARNING] ユーザー sketchup@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:33",
+      "request-id": "b62f51f0-1e34-4f6b-99b0-b34985586da5",
+      "client-request-id": "b62f51f0-1e34-4f6b-99b0-b34985586da5"
+    }
+  }
+}
+[2025-04-09 09:14:33] [WARNING] ユーザー soumu-payment@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:33",
+      "request-id": "606a9841-b2d5-4fed-a59a-3f2623f6a20d",
+      "client-request-id": "606a9841-b2d5-4fed-a59a-3f2623f6a20d"
+    }
+  }
+}
+[2025-04-09 09:14:34] [WARNING] ユーザー Sync_AZSV0001_b63ec191406d@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:33",
+      "request-id": "21330887-9b7e-414f-aba0-400f7412fc62",
+      "client-request-id": "21330887-9b7e-414f-aba0-400f7412fc62"
+    }
+  }
+}
+[2025-04-09 09:14:34] [WARNING] ユーザー system-info@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:34",
+      "request-id": "85be4d10-6475-4afd-ab26-42c10b30b4d2",
+      "client-request-id": "85be4d10-6475-4afd-ab26-42c10b30b4d2"
+    }
+  }
+}
+[2025-04-09 09:14:39] [WARNING] ユーザー t-kumai@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:39",
+      "request-id": "387b6f9b-f869-4ddf-b8f3-8b07e940f91a",
+      "client-request-id": "387b6f9b-f869-4ddf-b8f3-8b07e940f91a"
+    }
+  }
+}
+[2025-04-09 09:14:49] [WARNING] ユーザー takuro.kumada_aaconst.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:49",
+      "request-id": "64ba93a6-a829-4364-9637-fde1d3d462b3",
+      "client-request-id": "64ba93a6-a829-4364-9637-fde1d3d462b3"
+    }
+  }
+}
+[2025-04-09 09:14:50] [WARNING] ユーザー tech@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:50",
+      "request-id": "26273ca2-a9aa-4d4a-b6b4-34476336a538",
+      "client-request-id": "26273ca2-a9aa-4d4a-b6b4-34476336a538"
+    }
+  }
+}
+[2025-04-09 09:14:50] [WARNING] ユーザー tohoku-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:50",
+      "request-id": "b6ecc119-5bc3-4587-bbf9-f5c13aa7a998",
+      "client-request-id": "b6ecc119-5bc3-4587-bbf9-f5c13aa7a998"
+    }
+  }
+}
+[2025-04-09 09:14:51] [WARNING] ユーザー tokyo-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:51",
+      "request-id": "7d7f5696-4f0a-401c-adab-bf2a8e70f106",
+      "client-request-id": "7d7f5696-4f0a-401c-adab-bf2a8e70f106"
+    }
+  }
+}
+[2025-04-09 09:14:51] [WARNING] ユーザー tokyokoji@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:51",
+      "request-id": "26a6f22c-07bf-41ff-9ea8-c84f128f9e3a",
+      "client-request-id": "26a6f22c-07bf-41ff-9ea8-c84f128f9e3a"
+    }
+  }
+}
+[2025-04-09 09:14:51] [WARNING] ユーザー tokyokouji-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:51",
+      "request-id": "fe380b0d-283d-4756-9f1d-a6c945d69328",
+      "client-request-id": "fe380b0d-283d-4756-9f1d-a6c945d69328"
+    }
+  }
+}
+[2025-04-09 09:14:51] [WARNING] ユーザー tsubokawa-y92y2_mlit.go.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:51",
+      "request-id": "219c4fdd-df45-4975-9f70-da98767552d2",
+      "client-request-id": "219c4fdd-df45-4975-9f70-da98767552d2"
+    }
+  }
+}
+[2025-04-09 09:14:52] [WARNING] ユーザー webadmin@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:14:51",
+      "request-id": "21700370-04dc-46f5-a45c-bd66e3d325d9",
+      "client-request-id": "21700370-04dc-46f5-a45c-bd66e3d325d9"
+    }
+  }
+}
+[2025-04-09 09:15:01] [WARNING] ユーザー y-tajima@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:01",
+      "request-id": "0ceb7b11-d89a-4f8b-9e7b-44685c3855e7",
+      "client-request-id": "0ceb7b11-d89a-4f8b-9e7b-44685c3855e7"
+    }
+  }
+}
+[2025-04-09 09:15:02] [WARNING] ユーザー y-tsuzuki@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:02",
+      "request-id": "99504f8d-ce9c-4d90-985d-1994fd80af08",
+      "client-request-id": "99504f8d-ce9c-4d90-985d-1994fd80af08"
+    }
+  }
+}
+[2025-04-09 09:15:03] [WARNING] ユーザー y-ueno@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:03",
+      "request-id": "ee0a0d23-7428-415d-ae3e-d08df52ce232",
+      "client-request-id": "ee0a0d23-7428-415d-ae3e-d08df52ce232"
+    }
+  }
+}
+[2025-04-09 09:15:03] [WARNING] ユーザー yamasaki-s89fa_mlit.go.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:03",
+      "request-id": "70acc006-f176-41d7-8807-4140f2a1429e",
+      "client-request-id": "70acc006-f176-41d7-8807-4140f2a1429e"
+    }
+  }
+}
+[2025-04-09 09:15:03] [WARNING] ユーザー yk-takahashi_mitsuifudosan.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:03",
+      "request-id": "249b1039-2be9-468a-8129-2d7223b477af",
+      "client-request-id": "249b1039-2be9-468a-8129-2d7223b477af"
+    }
+  }
+}
+[2025-04-09 09:15:04] [WARNING] ユーザー yokohama-rakuraku@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:04",
+      "request-id": "d508df4a-6c6e-4941-b7b4-b566b87a26f1",
+      "client-request-id": "d508df4a-6c6e-4941-b7b4-b566b87a26f1"
+    }
+  }
+}
+[2025-04-09 09:15:04] [WARNING] ユーザー ys-yamamoto_apptec.co.jp#EXT#@miraiconst.onmicrosoft.com のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:04",
+      "request-id": "6219df65-73af-44ce-8319-47a2ccda042e",
+      "client-request-id": "6219df65-73af-44ce-8319-47a2ccda042e"
+    }
+  }
+}
+[2025-04-09 09:15:06] [WARNING] ユーザー zaimu@mirai-const.co.jp のOneDriveクォータ情報を取得できませんでした: 
+{
+  "error": {
+    "code": "ResourceNotFound",
+    "message": "User\u0027s mysite not found.",
+    "innerError": {
+      "date": "2025-04-09T00:15:06",
+      "request-id": "af54ad6f-9796-4365-ad78-7fcfbb0c4a93",
+      "client-request-id": "af54ad6f-9796-4365-ad78-7fcfbb0c4a93"
+    }
+  }
+}
+[2025-04-09 09:15:06] [SUCCESS] OneDriveクォータ情報の取得が完了しました。取得件数: 524
+[2025-04-09 09:15:06] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Basic_Data_Collection.20250409\OneDriveQuota.20250409091506.csv
+[2025-04-09 09:15:06] [INFO] Excelでファイルを開いて列幅の調整とフィルターの適用を行います...
+[2025-04-09 09:15:15] [SUCCESS] Excelでの処理が完了しました。
+[2025-04-09 09:15:17] [SUCCESS] JavaScriptファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Basic_Data_Collection.20250409\OneDriveQuota.20250409091506.js
+[2025-04-09 09:15:18] [SUCCESS] HTMLファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250409\Basic_Data_Collection.20250409\OneDriveQuota.20250409091506.html

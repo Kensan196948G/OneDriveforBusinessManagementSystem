@@ -702,6 +702,37 @@ $htmlContent = @"
             margin: 20px;
             background-color: #f5f5f5;
         }
+        /* 横スクロール防止＆自動調整 */
+        .container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            max-width: 100%;
+            table-layout: auto; /* 内容に応じて自動調整 */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        th, td {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        th {
+            white-space: nowrap;
+        }
+        /* URLやメール列は強制折り返し＋最大幅制限 */
+        td:nth-child(2), td:nth-child(11), td:nth-child(12),
+        th:nth-child(2), th:nth-child(11), th:nth-child(12) {
+            max-width: 250px;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        /* ユーザー名列の幅を狭く固定 */
+        th:nth-child(1), td:nth-child(1) {
+            width: 120px;
+            max-width: 150px;
+            word-break: break-all;
+        }
         .container {
             background-color: white;
             padding: 20px;
@@ -963,8 +994,8 @@ $htmlContent = @"
             <table id="userInfoTable">
                 <thead>
                     <tr>
-                        <th>ユーザー名</th>
-                        <th>メールアドレス</th>
+                        <th>表示名</th>
+                        <th>メール</th>
                         <th>ログインユーザー名</th>
                         <th>ユーザー種別</th>
                         <th>アカウント状態</th>
@@ -1010,8 +1041,8 @@ $htmlContent += @"
             <table id="oneDriveQuotaTable">
                 <thead>
                     <tr>
-                        <th>ユーザー名</th>
-                        <th>メールアドレス</th>
+                        <th>表示名</th>
+                        <th>メール</th>
                         <th>ログインユーザー名</th>
                         <th>ユーザー種別</th>
                         <th>アカウント状態</th>
@@ -1063,8 +1094,8 @@ $htmlContent += @"
             <table id="syncErrorsTable">
                 <thead>
                     <tr>
-                        <th>ユーザー名</th>
-                        <th>メールアドレス</th>
+                        <th>表示名</th>
+                        <th>メール</th>
                         <th>アカウント状態</th>
                         <th>エラー種別</th>
                         <th>ファイル名</th>
@@ -1115,8 +1146,8 @@ $htmlContent += @"
             <table id="sharingSettingsTable">
                 <thead>
                     <tr>
-                        <th>ユーザー名</th>
-                        <th>メールアドレス</th>
+                        <th>表示名</th>
+                        <th>メール</th>
                         <th>アカウント状態</th>
                         <th>共有方向</th>
                         <th>アイテム名</th>
@@ -1169,8 +1200,8 @@ $htmlContent += @"
             <table id="externalSharingTable">
                 <thead>
                     <tr>
-                        <th>ユーザー名</th>
-                        <th>メールアドレス</th>
+                        <th>表示名</th>
+                        <th>メール</th>
                         <th>アカウント状態</th>
                         <th>アイテム名</th>
                         <th>アイテムタイプ</th>
