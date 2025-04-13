@@ -186,7 +186,7 @@ try {
             # 無視
         }
 
-        $userTypeValue = if ($isAdminUser) { "Administrator" } elseif ($user.UserType -eq "Guest") { "Guest" } else { "Member" }
+        $userTypeValue = if ($isAdminUser) { "管理者" } elseif ($user.UserType -eq "Guest") { "ゲスト" } else { "一般" }
 
         $userList += [PSCustomObject]@{
             "ユーザー名"       = $user.DisplayName
@@ -237,6 +237,17 @@ try {
     }
     Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
     
+    # HTMLファイル出力処理を追加
+    try {
+        $htmlPath = [System.IO.Path]::ChangeExtension($csvPath, "html")
+        $generateHtmlScript = Join-Path -Path $PSScriptRoot -ChildPath "GenerateHtmlFromCsv.ps1"
+        Write-Log "HTMLファイルを作成します: $htmlPath" "INFO"
+        powershell -ExecutionPolicy Bypass -File $generateHtmlScript -CsvPath $csvPath -OutputHtmlPath $htmlPath
+        Write-Log "HTMLファイルの作成が完了しました: $htmlPath" "SUCCESS"
+    } catch {
+        Write-Log "HTMLファイルの作成中にエラーが発生しました: $_" "WARNING"
+    }
+
     # CSVファイルをExcelで開き、列幅の調整とフィルターの適用を行う
     try {
         Write-Log "Excelでファイルを開いて列幅の調整とフィルターの適用を行います..." "INFO"
@@ -268,104 +279,12 @@ try {
     Write-ErrorLog $_ "CSVファイルの作成中にエラーが発生しました"
 }
 
-# JavaScript ファイルの生成
-$jsContent = @"
-// OneDriveQuota データ操作用 JavaScript
-
-// グローバル変数
-let currentPage = 1;
-let rowsPerPage = 10;
-let filteredRows = [];
-
-// テーブルを検索する関数
-function searchTable() {
-    var input = document.getElementById('searchInput').value.toLowerCase();
-    var table = document.getElementById('quotaTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    filteredRows = [];
-    for (var i = 0; i < rows.length; i++) {
-        var found = false;
-        var cells = rows[i].getElementsByTagName('td');
-        var rowData = {};
-        for (var j = 0; j < cells.length; j++) {
-            var cellText = cells[j].textContent || cells[j].innerText;
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[j].textContent;
-            rowData[headerText] = cellText;
-            if (cellText.toLowerCase().indexOf(input) > -1) {
-                found = true;
-            }
-        }
-        if (found) {
-            filteredRows.push({row: rows[i], data: rowData});
-        }
-    }
-    showSearchSuggestions(input);
-    currentPage = 1;
-    updatePagination();
+# HTML生成スクリプトを実行
+Write-Log "HTMLファイルを生成しています..." "INFO"
+try {
+    $generateHtmlScript = Join-Path -Path $PSScriptRoot -ChildPath "GenerateHtmlFromCsv.ps1"
+    & $generateHtmlScript -CsvPath $csvPath -OutputHtmlPath $htmlPath
+    Write-Log "HTMLファイルの生成が完了しました: $htmlPath" "SUCCESS"
+} catch {
+    Write-Log "HTMLファイルの生成中にエラーが発生しました: $_" "ERROR"
 }
-
-// 検索候補を表示
-function showSearchSuggestions(input) {
-    var suggestionsDiv = document.getElementById('searchSuggestions');
-    suggestionsDiv.innerHTML = '';
-    if (input.length < 1) {
-        suggestionsDiv.style.display = 'none';
-        return;
-    }
-    var matches = new Set();
-    filteredRows.forEach(item => {
-        Object.values(item.data).forEach(value => {
-            if (value.toLowerCase().indexOf(input.toLowerCase()) > -1) {
-                matches.add(value);
-            }
-        });
-    });
-    var count = 0;
-    matches.forEach(match => {
-        if (count < 5) {
-            var div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = match;
-            div.onclick = function() {
-                document.getElementById('searchInput').value = match;
-                searchTable();
-                suggestionsDiv.style.display = 'none';
-            };
-            suggestionsDiv.appendChild(div);
-            count++;
-        }
-    });
-    if (count > 0) {
-        suggestionsDiv.style.display = 'block';
-    } else {
-        var noResults = document.createElement('div');
-        noResults.className = 'suggestion-item no-results';
-        noResults.textContent = '検索結果がありません';
-        suggestionsDiv.appendChild(noResults);
-        suggestionsDiv.style.display = 'block';
-    }
-}
-
-// 列フィルターを作成
-function createColumnFilters() {
-    var table = document.getElementById('quotaTable');
-    var headers = table.getElementsByTagName('thead')[0].getElementsByTagName('th');
-    var filterRow = document.createElement('tr');
-    filterRow.className = 'filter-row';
-    for (var i = 0; i < headers.length; i++) {
-        var cell = document.createElement('th');
-        var select = document.createElement('select');
-        select.className = 'column-filter';
-        select.setAttribute('data-column', i);
-        var defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'すべて';
-        select.appendChild(defaultOption);
-        var uniqueValues = new Set();
-        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-        for (var j = 0; j < rows.length; j++) {
-            var cellValue = rows[j].getElementsBy
-        }
-    }
-}
-"@

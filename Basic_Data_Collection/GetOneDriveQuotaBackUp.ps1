@@ -234,6 +234,10 @@ $html += @"
 </html>
 "@
 
+# デバッグ: ユーザー件数とHTML長さ
+Write-Host "デバッグ: 取得ユーザー数 = $($userList.Count)" -ForegroundColor Yellow
+Write-Host "デバッグ: HTML文字数 = $($html.Length)" -ForegroundColor Yellow
+
 # HTML出力
 try {
     $html | Out-File -FilePath $htmlPath -Encoding UTF8

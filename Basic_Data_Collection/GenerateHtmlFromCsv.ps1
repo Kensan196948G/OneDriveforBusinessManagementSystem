@@ -15,6 +15,31 @@ $executorName = "管理者"
 $userType = "Member"
 $isAdmin = $true
 
+# 列名リスト
+$columns = @(
+    "ユーザー名",
+    "メールアドレス",
+    "ログインユーザー名",
+    "ユーザー種別",
+    "アカウント状態",
+    "OneDrive対応",
+    "総容量(GB)",
+    "使用容量(GB)",
+    "残り容量(GB)",
+    "使用率(%)",
+    "状態"
+)
+
+# 各列のユニーク値を抽出
+$uniqueValues = @{}
+foreach ($col in $columns) {
+    $uniqueValues[$col] = $data | Select-Object -ExpandProperty $col | Sort-Object -Unique
+}
+
+# JS用データ配列
+$json = $data | ConvertTo-Json -Compress
+
+# 1. HTML本体（tbodyまで）
 $html = @"
 <!DOCTYPE html>
 <html lang="ja">
@@ -51,7 +76,7 @@ th { background:#f2f2f2; font-weight:bold; }
 tr.danger { background:#ffebee; }
 tr.warning { background:#fff8e1; }
 tr.normal { background:#f1f8e9; }
-tr.admin { background:#e3f2fd; } /* 管理者用の強調色 */
+tr.admin { background:#e3f2fd; }
 tr.disabled { color:#999; font-style:italic; }
 .status-icon { margin-right:5px; }
 @media print {
@@ -66,6 +91,9 @@ tr.normal { background:#f1f8e9 !important; -webkit-print-color-adjust:exact; pri
 tr.admin { background:#e3f2fd !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 </style>
+<script>
+window.quotaData = $json;
+</script>
 </head>
 <body>
 <div class="container">
@@ -91,81 +119,293 @@ tr.admin { background:#e3f2fd !important; -webkit-print-color-adjust:exact; prin
 <div id="searchSuggestions"></div>
 <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
 <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
-<div class="rows-per-page">
-<label for="rowsPerPageSelect">表示件数:</label>
-<select id="rowsPerPageSelect">
-<option value="10" selected>10件</option>
-<option value="50">50件</option>
-<option value="100">100件</option>
-</select>
+</div>
+
+<!-- 凡例＋表示件数 -->
+<div style="margin-bottom:10px; display:flex; align-items:center; gap:20px;">
+  <span style="display:inline-block;width:18px;height:18px;background:#e3f2fd;border:1px solid #90caf9;vertical-align:middle;margin-right:5px;"></span>
+  <span style="vertical-align:middle;">管理者（Administrator）</span>
+<div class="rows-per-page" style="margin-left:20px; display:flex; align-items:center;">
+    <label for="rowsPerPageSelect">表示件数:</label>
+    <select id="rowsPerPageSelect">
+      <option value="25" selected>25件</option>
+      <option value="50">50件</option>
+      <option value="100">100件</option>
+    </select>
+    <span id="currentCountInfo" style="margin-left:15px; font-weight:bold;"></span>
 </div>
 </div>
 
 <div id="pagination"></div>
 
-<!-- 凡例 -->
-<div style="margin-bottom:10px;">
-  <span style="display:inline-block;width:18px;height:18px;background:#e3f2fd;border:1px solid #90caf9;vertical-align:middle;margin-right:5px;"></span>
-  <span style="vertical-align:middle;">管理者（Administrator）</span>
-</div>
-
 <table id="quotaTable">
 <thead>
 <tr>
-<th>ユーザー名</th>
-<th>メールアドレス</th>
-<th>ログインユーザー名</th>
-<th>ユーザー種別</th>
-<th>アカウント状態</th>
-<th>OneDrive対応</th>
-<th>総容量(GB)</th>
-<th>使用容量(GB)</th>
-<th>残り容量(GB)</th>
-<th>使用率(%)</th>
-<th>状態</th>
-</tr>
-<tr class="filter-row">
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-<th><select class="column-filter"><option value="">すべて</option></select></th>
-</tr>
+"@
+foreach ($col in $columns) {
+    $html += "<th>$col</th>"
+}
+$html += "</tr>`n<tr class='filter-row'>"
+foreach ($col in $columns) {
+    $html += "<th><select class='column-filter'><option value=''>すべて</option>"
+    foreach ($val in $uniqueValues[$col]) {
+        if ($val -ne $null -and $val -ne "") {
+            $escaped = [System.Net.WebUtility]::HtmlEncode($val)
+            $html += "<option value='$escaped'>$escaped</option>"
+        }
+    }
+    $html += "</select></th>"
+}
+$html += "</tr>
 </thead>
 <tbody>
-"@
-
-foreach ($row in $data) {
-    $rowClass = ""
-    if ($row.'ユーザー種別' -eq "Administrator") { $rowClass = " class='admin'" }
-    $html += "<tr$rowClass>"
-    $html += "<td>$($row.'ユーザー名')</td>"
-    $html += "<td>$($row.'メールアドレス')</td>"
-    $html += "<td>$($row.'ログインユーザー名')</td>"
-    $html += "<td>$($row.'ユーザー種別')</td>"
-    $html += "<td>$($row.'アカウント状態')</td>"
-    $html += "<td>$($row.'OneDrive対応')</td>"
-    $html += "<td>$($row.'総容量(GB)')</td>"
-    $html += "<td>$($row.'使用容量(GB)')</td>"
-    $html += "<td>$($row.'残り容量(GB)')</td>"
-    $html += "<td>$($row.'使用率(%)')</td>"
-    $html += "<td>$($row.'状態')</td>"
-    $html += "</tr>"
-}
-
-$html += @"
 </tbody>
 </table>
+"
+
+# 2. 追加HTML/JS部分は@' ... '@で連結
+$html += @'
+<!-- 取得情報表示 -->
+<div id="reportInfo" class="info-section" style="margin-top:10px;"></div>
 </div>
+<script>
+(function() {
+  // --- グローバル変数 ---
+  let quotaData = window.quotaData || [];
+  let filteredData = [];
+  let currentPage = 1;
+  let rowsPerPage = 25;
+  let headers = [];
+
+  // --- ヘッダー取得 ---
+  function getHeaders() {
+    const table = document.getElementById('quotaTable');
+    if (!table) return [];
+    return Array.from(table.tHead.rows[0].cells).map(cell => cell.textContent.trim());
+  }
+
+  // --- テーブル再描画 ---
+  function renderTable(data) {
+    const table = document.getElementById('quotaTable');
+    const tbody = table ? table.tBodies[0] : null;
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    const total = data.length;
+    const totalPages = Math.ceil(total / rowsPerPage);
+    if (currentPage > totalPages) currentPage = 1;
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = data.slice(start, end);
+
+    pageData.forEach(row => {
+      const tr = document.createElement("tr");
+      headers.forEach(header => {
+        const td = document.createElement("td");
+        td.textContent = row[header] || '';
+        tr.appendChild(td);
+      });
+      if (row["ユーザー種別"] === "管理者") tr.classList.add("admin");
+      if (row["状態"] === "危険") tr.classList.add("danger");
+      else if (row["状態"] === "警告") tr.classList.add("warning");
+      else tr.classList.add("normal");
+      tbody.appendChild(tr);
+    });
+    updateOutputCountInfo(data);
+    renderPagination(data);
+  }
+
+  // --- 件数・ページ情報 ---
+  function updateOutputCountInfo(data) {
+    const currentCountInfo = document.getElementById('currentCountInfo');
+    const total = data.length;
+    const totalPages = Math.ceil(total / rowsPerPage);
+    const start = (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(currentPage * rowsPerPage, total);
+    currentCountInfo.textContent =
+      `表示中: ${start}～${end}件 / 総件数: ${total}件（${totalPages}ページ中${currentPage}ページ）`;
+    document.getElementById('reportInfo').innerHTML =
+      `<span class="info-label">表示中:</span> ${start}～${end}件 / <span class="info-label">総件数:</span> ${total}件（${totalPages}ページ中${currentPage}ページ）`;
+  }
+
+  // --- ページネーション ---
+  function renderPagination(data) {
+    const pagination = document.getElementById('pagination');
+    const total = data.length;
+    const totalPages = Math.ceil(total / rowsPerPage);
+    pagination.innerHTML = "";
+    if (totalPages > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.textContent = '前へ';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(data); }};
+      pagination.appendChild(prevBtn);
+
+      const startPage = Math.max(1, currentPage - 5);
+      const endPage = Math.min(totalPages, startPage + 9);
+      for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i;
+        pageBtn.disabled = i === currentPage;
+        pageBtn.onclick = () => { currentPage = i; renderTable(data); };
+        pagination.appendChild(pageBtn);
+      }
+
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = '次へ';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(data); }};
+      pagination.appendChild(nextBtn);
+    }
+  }
+
+  // --- 検索候補生成 ---
+  function updateSearchSuggestions(searchTerm, results) {
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    searchSuggestions.innerHTML = '';
+    if (!searchTerm || results.length === 0) {
+      searchSuggestions.style.display = 'none';
+      return;
+    }
+    const uniqueValues = new Set();
+    results.forEach(row => {
+      Object.values(row).forEach(val => {
+        const strVal = String(val);
+        if (strVal.toLowerCase().includes(searchTerm.toLowerCase()) && !uniqueValues.has(strVal)) {
+          uniqueValues.add(strVal);
+          const suggestion = document.createElement('div');
+          suggestion.className = 'suggestion-item';
+          suggestion.textContent = strVal;
+          suggestion.addEventListener('click', () => {
+            document.getElementById('searchInput').value = strVal;
+            searchSuggestions.style.display = 'none';
+            filteredData = quotaData.filter(row =>
+              Object.values(row).some(v => String(v).toLowerCase().includes(strVal.toLowerCase()))
+            );
+            currentPage = 1;
+            renderTable(filteredData);
+          });
+          searchSuggestions.appendChild(suggestion);
+        }
+      });
+    });
+    if (uniqueValues.size > 0) {
+      searchSuggestions.style.display = 'block';
+    } else {
+      searchSuggestions.innerHTML = '<div class="suggestion-item no-results">該当する結果がありません</div>';
+      searchSuggestions.style.display = 'block';
+    }
+  }
+
+  // --- 検索実行 ---
+  function executeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value.trim();
+    if (!searchTerm) {
+      filteredData = [];
+      currentPage = 1;
+      renderTable(quotaData);
+      updateSearchSuggestions('', []);
+      return;
+    }
+    filteredData = quotaData.filter(row =>
+      Object.values(row).some(val =>
+        String(val).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    currentPage = 1;
+    renderTable(filteredData);
+    updateSearchSuggestions(searchTerm, filteredData);
+  }
+
+  // --- フィルター実行 ---
+  function executeFilter() {
+    const filters = document.querySelectorAll('.column-filter');
+    let data = quotaData;
+    filters.forEach((filter, idx) => {
+      const value = filter.value;
+      if (value) {
+        const col = headers[idx];
+        data = data.filter(row => String(row[col]) === value);
+      }
+    });
+    filteredData = data;
+    currentPage = 1;
+    renderTable(filteredData.length > 0 ? filteredData : quotaData);
+    // フィルター情報表示
+    const info = Array.from(filters).map((f, i) => f.value ? `${headers[i]}=${f.value}` : '').filter(Boolean).join(', ');
+    document.getElementById('reportInfo').innerHTML += info ? `<br><span class="info-label">フィルター:</span> ${info}` : '';
+  }
+
+  // --- イベント初期化 ---
+  function setupEventListeners() {
+    // 検索
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    searchInput.addEventListener('input', () => {
+      executeSearch();
+    });
+    searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') executeSearch();
+    });
+    // 検索候補外クリックで閉じる
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+        searchSuggestions.style.display = 'none';
+      }
+    });
+
+    // プルダウンフィルター
+    document.querySelectorAll('.column-filter').forEach(filter => {
+      filter.addEventListener('change', () => {
+        executeFilter();
+      });
+    });
+
+    // 表示件数
+    const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+    rowsPerPageSelect.addEventListener('change', function() {
+      rowsPerPage = parseInt(this.value, 10);
+      currentPage = 1;
+      renderTable(filteredData.length > 0 ? filteredData : quotaData);
+    });
+  }
+
+  // --- 検索リセット ---
+  function setupResetButton() {
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const resetSearch = document.createElement('button');
+    resetSearch.innerHTML = '<span class="button-icon">↻</span>検索リセット';
+    resetSearch.style.marginLeft = '10px';
+    resetSearch.onclick = function() {
+      searchInput.value = '';
+      searchSuggestions.style.display = 'none';
+      filteredData = [];
+      currentPage = 1;
+      renderTable(quotaData);
+    };
+    document.querySelector('.toolbar').appendChild(resetSearch);
+  }
+
+  // --- 初期化 ---
+  function initialize() {
+    headers = getHeaders();
+    filteredData = [];
+    currentPage = 1;
+    const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+    rowsPerPage = parseInt(rowsPerPageSelect.value, 10) || 25;
+    renderTable(quotaData);
+    setupEventListeners();
+    setupResetButton();
+  }
+
+  // --- 即時初期化 ---
+  initialize();
+})();
+</script>
 </body>
 </html>
-"@
+'@
 
 $html | Out-File -FilePath $OutputHtmlPath -Encoding UTF8
 Write-Host "HTMLファイルを作成しました: $OutputHtmlPath" -ForegroundColor Green
