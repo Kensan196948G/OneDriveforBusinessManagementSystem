@@ -1,0 +1,17 @@
+[2025-04-14 12:49:41] [INFO] すべての基本データ収集を開始します
+[2025-04-14 12:49:41] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414
+[2025-04-14 12:49:41] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Log
+[2025-04-14 12:49:41] [INFO] Microsoft Graphアプリケーション権限で実行中
+[2025-04-14 12:49:41] [INFO] 実行モード: 管理者モード（アプリケーション権限）
+[2025-04-14 12:49:41] [INFO] すべてのユーザー情報とOneDriveクォータ情報を取得しています...
+[2025-04-14 12:49:46] [INFO] 管理者ロール取得数: 26
+[2025-04-14 12:49:46] [INFO] 管理者ユーザーIDリスト件数: 5
+[2025-04-14 12:49:46] [INFO] ユーザー: 荒木 厚史 / UserId: 
+[2025-04-14 12:49:46] [ERROR] ユーザー情報とOneDriveクォータ情報の取得中にエラーが発生しました
+[2025-04-14 12:49:46] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414124946.csv
+[2025-04-14 12:49:46] [INFO] Excelでファイルを開いて列幅の調整とフィルターの適用を行います...
+[2025-04-14 12:49:48] [SUCCESS] Excelでの処理が完了しました。
+[2025-04-14 12:49:48] [SUCCESS] JavaScriptファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414124946.js
+[2025-04-14 12:49:48] [SUCCESS] HTMLファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414124946.html
+[2025-04-14 12:49:48] [SUCCESS] すべての基本データ収集が完了しました
+[2025-04-14 12:49:48] [SUCCESS] 出力ディレクトリを開きました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414

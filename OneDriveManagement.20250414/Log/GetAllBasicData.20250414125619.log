@@ -1,0 +1,18 @@
+[2025-04-14 12:56:19] [INFO] すべての基本データ収集を開始します
+[2025-04-14 12:56:19] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414
+[2025-04-14 12:56:19] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Log
+[2025-04-14 12:56:19] [INFO] Microsoft Graphアプリケーション権限で実行中
+[2025-04-14 12:56:19] [INFO] 実行モード: 管理者モード（アプリケーション権限）
+[2025-04-14 12:56:19] [INFO] すべてのユーザー情報とOneDriveクォータ情報を取得しています...
+[2025-04-14 12:56:21] [INFO] 取得したユーザー総数（UserPrincipalName空含む）: 524
+[2025-04-14 12:56:21] [INFO] UserPrincipalNameが空でないユーザー数: 0
+[2025-04-14 12:56:24] [INFO] 管理者ロール取得数: 26
+[2025-04-14 12:56:24] [INFO] 管理者ユーザーIDリスト件数: 5
+[2025-04-14 12:56:24] [SUCCESS] ユーザー情報とOneDriveクォータ情報の取得が完了しました。取得件数: 0
+[2025-04-14 12:56:24] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414125624.csv
+[2025-04-14 12:56:24] [INFO] Excelでファイルを開いて列幅の調整とフィルターの適用を行います...
+[2025-04-14 12:56:26] [SUCCESS] Excelでの処理が完了しました。
+[2025-04-14 12:56:26] [SUCCESS] JavaScriptファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414125624.js
+[2025-04-14 12:56:26] [SUCCESS] HTMLファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414125624.html
+[2025-04-14 12:56:26] [SUCCESS] すべての基本データ収集が完了しました
+[2025-04-14 12:56:26] [SUCCESS] 出力ディレクトリを開きました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414

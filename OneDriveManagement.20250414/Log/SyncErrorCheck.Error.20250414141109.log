@@ -1,0 +1,12 @@
+[2025-04-14 14:11:09] [ERROR] Microsoft Graphの接続確認中にエラーが発生しました
+例外タイプ: System.Management.Automation.ParameterBindingValidationException
+例外メッセージ: Cannot bind argument to parameter 'UserId' because it is an empty string.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:84 char:39
++     $currentUser = Get-MgUser -UserId $UserUPN -Property DisplayName, …
++                                       ~~~~~~~~
+スタックトレース:
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1: line 84
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 343
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 393
+at <ScriptBlock>, <No file>: line 1
+

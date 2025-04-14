@@ -45,7 +45,7 @@ $html = @"
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>OneDriveクォータレポート</title>
+<title>OneDrive 基本データレポート</title>
 <style>
 body { font-family: Arial, sans-serif; margin:20px; background:#f5f5f5; }
 .container { background:#fff; padding:20px; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
@@ -98,20 +98,34 @@ window.quotaData = $json;
 <body>
 <div class="container">
 <div class="header">
-<div class="header-icon">💾</div>
-<h1>OneDriveクォータレポート</h1>
-<div style="margin-left:auto;">
-<label for="userSelect">👤 ユーザー選択：</label>
-<select id="userSelect"><option value="">-- ユーザーを選択してください --</option></select>
-</div>
+  <div class="header-icon">📊</div>
+  <h1>OneDrive 基本データレポート <span style="font-size:22px;">🗂️</span></h1>
+  <div style="margin-left:auto;">
+    <label for="userSelect">👤 ユーザー選択：</label>
+    <select id="userSelect"><option value="">-- ユーザーを選択してください --</option></select>
+  </div>
 </div>
 
 <div class="info-section">
-<p><span class="info-label">📅 実行日時:</span> $executionDateFormatted</p>
-<p><span class="info-label">👤 実行者:</span> $executorName</p>
-<p><span class="info-label">🧑‍💼 実行者の種別:</span> $userType</p>
-<p><span class="info-label">🔑 実行モード:</span> $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})</p>
-<p><span class="info-label">📂 出力フォルダ:</span> $OutputDir</p>
+  <p><span class="info-label">📅 実行日時:</span> $executionDateFormatted</p>
+  <p><span class="info-label">👤 実行者:</span> $executorName</p>
+  <p><span class="info-label">🧑‍💼 実行者の種別:</span> $userType</p>
+  <p><span class="info-label">🔑 実行モード:</span> $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})</p>
+  <p><span class="info-label">📂 出力フォルダ:</span> $OutputDir</p>
+</div>
+
+<!-- 色の凡例 -->
+<div class="info-section" style="margin-bottom:15px;">
+  <span class="info-label">🎨 色の凡例：</span>
+  <span style="display:inline-block;width:18px;height:18px;background:#e3f2fd;border:1px solid #90caf9;vertical-align:middle;margin-right:5px;"></span>
+  <span style="vertical-align:middle;">管理者 <span style="font-size:18px;">👑</span></span>
+  <span style="display:inline-block;width:18px;height:18px;background:#ffebee;border:1px solid #ef9a9a;vertical-align:middle;margin:0 5px 0 20px;"></span>
+  <span style="vertical-align:middle;">危険（使用率90%以上）<span style="font-size:18px;">🔴</span></span>
+  <span style="display:inline-block;width:18px;height:18px;background:#fff8e1;border:1px solid #ffe082;vertical-align:middle;margin:0 5px 0 20px;"></span>
+  <span style="vertical-align:middle;">警告（使用率70%以上90%未満）<span style="font-size:18px;">🟡</span></span>
+  <span style="display:inline-block;width:18px;height:18px;background:#f1f8e9;border:1px solid #aed581;vertical-align:middle;margin:0 5px 0 20px;"></span>
+  <span style="vertical-align:middle;">正常（使用率70%未満）<span style="font-size:18px;">🟢</span></span>
+  <span style="color:#999;margin-left:20px;">無効アカウント <span style="font-size:18px;">🚫</span></span>
 </div>
 
 <div class="toolbar">

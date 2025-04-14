@@ -1,0 +1,9 @@
+[2025-04-14 13:09:37] [INFO] すべての基本データ収集を開始します
+[2025-04-14 13:09:37] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414
+[2025-04-14 13:09:37] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Log
+[2025-04-14 13:09:37] [INFO] Microsoft Graphアプリケーション権限で実行中
+[2025-04-14 13:09:37] [INFO] 実行モード: 管理者モード（アプリケーション権限）
+[2025-04-14 13:09:37] [INFO] すべてのユーザー情報とOneDriveクォータ情報を取得しています...
+[2025-04-14 13:13:09] [SUCCESS] ユーザー情報とOneDriveクォータ情報の取得が完了しました。取得件数: 524
+[2025-04-14 13:13:09] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414\AllBasicData.20250414131309.csv
+[2025-04-14 13:13:09] [SUCCESS] すべての基本データ収集が完了しました

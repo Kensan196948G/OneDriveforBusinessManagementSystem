@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OneDrive 総合レポート</title>
+    <script src="OneDriveReport.20250414094433.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        /* 横スクロール防止＆自動調整 */
+        .container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            max-width: 100%;
+            table-layout: auto; /* 内容に応じて自動調整 */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        th, td {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        th {
+            white-space: nowrap;
+        }
+        /* URLやメール列は強制折り返し＋最大幅制限 */
+        td:nth-child(2), td:nth-child(11), td:nth-child(12),
+        th:nth-child(2), th:nth-child(11), th:nth-child(12) {
+            max-width: 250px;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        /* ユーザー名列の幅を狭く固定 */
+        th:nth-child(1), td:nth-child(1) {
+            width: 120px;
+            max-width: 150px;
+            word-break: break-all;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-section {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+        #searchInput {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #searchSuggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .suggestion-item.no-results {
+            color: #999;
+            font-style: italic;
+            cursor: default;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        button:hover {
+            background-color: #106ebe;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .button-icon {
+            margin-right: 5px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .tab-button:hover {
+            background-color: #e0e0e0;
+        }
+        .tab-button.active {
+            background-color: #0078d4;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .filter-row th {
+            padding: 5px;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        tr.danger {
+            background-color: #ffebee;
+        }
+        tr.warning {
+            background-color: #fff8e1;
+        }
+        tr.normal {
+            background-color: #f1f8e9;
+        }
+        tr.info {
+            background-color: #e3f2fd;
+        }
+        tr.disabled {
+            color: #999;
+            font-style: italic;
+        }
+        .status-icon {
+            margin-right: 5px;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .page-info {
+            margin: 0 10px;
+        }
+        .rows-per-page {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .total-items {
+            margin-left: 15px;
+        }
+        
+        @media print {
+            .toolbar, button, #pagination, .filter-row, .tabs {
+                display: none;
+            }
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .header {
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.danger {
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.warning {
+                background-color: #fff8e1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.normal {
+                background-color: #f1f8e9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.info {
+                background-color: #e3f2fd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .tab-content {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">📊</div>
+            <h1>OneDrive 総合レポート</h1>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">実行日時:</span> 2025/04/14 09:44:33</p>
+            <p><span class="info-label">出力フォルダ:</span> C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Report.20250414</p>
+        </div>
+        
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="検索...">
+            <div id="searchSuggestions"></div>
+            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
+            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
+        </div>
+        
+        <div class="tabs">
+            <button id="userInfoButton" class="tab-button" onclick="switchTab('userInfo')">ユーザー情報</button>
+            <button id="oneDriveQuotaButton" class="tab-button" onclick="switchTab('oneDriveQuota')">OneDriveクォータ</button>
+            <button id="syncErrorsButton" class="tab-button" onclick="switchTab('syncErrors')">同期エラー</button>
+            <button id="sharingSettingsButton" class="tab-button" onclick="switchTab('sharingSettings')">共有設定</button>
+            <button id="externalSharingButton" class="tab-button" onclick="switchTab('externalSharing')">外部共有</button>
+        </div>
+        
+        <div id="pagination"></div>
+        
+        <!-- ユーザー情報タブ -->
+        <div id="userInfoTab" class="tab-content">
+            <table id="userInfoTable">
+                <thead>
+                    <tr>
+                        <th>表示名</th>
+                        <th>メール</th>
+                        <th>ログインユーザー名</th>
+                        <th>ユーザー種別</th>
+                        <th>アカウント状態</th>
+                        <th>最終同期日時</th>
+                    </tr>
+                </thead>
+                <tbody>                    <tr>
+                        <td colspan="6" style="text-align: center;">データがありません</td>
+                    </tr>                </tbody>
+            </table>
+        </div>
+        
+        <!-- OneDriveクォータタブ -->
+        <div id="oneDriveQuotaTab" class="tab-content">
+            <table id="oneDriveQuotaTable">
+                <thead>
+                    <tr>
+                        <th>表示名</th>
+                        <th>メール</th>
+                        <th>ログインユーザー名</th>
+                        <th>ユーザー種別</th>
+                        <th>アカウント状態</th>
+                        <th>総容量(GB)</th>
+                        <th>使用容量(GB)</th>
+                        <th>残り容量(GB)</th>
+                        <th>使用率(%)</th>
+                    </tr>
+                </thead>
+                <tbody>                    <tr>
+                        <td colspan="9" style="text-align: center;">データがありません</td>
+                    </tr>                </tbody>
+            </table>
+        </div>
+        
+        <!-- 同期エラータブ -->
+        <div id="syncErrorsTab" class="tab-content">
+            <table id="syncErrorsTable">
+                <thead>
+                    <tr>
+                        <th>表示名</th>
+                        <th>メール</th>
+                        <th>アカウント状態</th>
+                        <th>エラー種別</th>
+                        <th>ファイル名</th>
+                        <th>ファイルパス</th>
+                        <th>最終更新日時</th>
+                        <th>サイズ(KB)</th>
+                        <th>エラー詳細</th>
+                        <th>推奨対応</th>
+                    </tr>
+                </thead>
+                <tbody>                    <tr>
+                        <td colspan="10" style="text-align: center;">データがありません</td>
+                    </tr>                </tbody>
+            </table>
+        </div>
+        
+        <!-- 共有設定タブ -->
+        <div id="sharingSettingsTab" class="tab-content">
+            <table id="sharingSettingsTable">
+                <thead>
+                    <tr>
+                        <th>表示名</th>
+                        <th>メール</th>
+                        <th>アカウント状態</th>
+                        <th>共有方向</th>
+                        <th>アイテム名</th>
+                        <th>アイテムタイプ</th>
+                        <th>共有タイプ</th>
+                        <th>共有範囲</th>
+                        <th>リスクレベル</th>
+                        <th>最終更新日時</th>
+                        <th>WebURL</th>
+                    </tr>
+                </thead>
+                <tbody>                    <tr>
+                        <td colspan="11" style="text-align: center;">データがありません</td>
+                    </tr>                </tbody>
+            </table>
+        </div>
+        
+        <!-- 外部共有タブ -->
+        <div id="externalSharingTab" class="tab-content">
+            <table id="externalSharingTable">
+                <thead>
+                    <tr>
+                        <th>表示名</th>
+                        <th>メール</th>
+                        <th>アカウント状態</th>
+                        <th>アイテム名</th>
+                        <th>アイテムタイプ</th>
+                        <th>共有タイプ</th>
+                        <th>共有範囲</th>
+                        <th>共有先</th>
+                        <th>リスクレベル</th>
+                        <th>最終更新日時</th>
+                        <th>WebURL</th>
+                        <th>セキュリティ推奨</th>
+                    </tr>
+                </thead>
+                <tbody>                    <tr>
+                        <td colspan="12" style="text-align: center;">データがありません</td>
+                    </tr>                </tbody>
+            </table>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">色の凡例:</span></p>
+            <p>🟢 緑色の行: 正常なユーザー、使用率が70%未満のユーザー、低リスクの共有</p>
+            <p>🟡 黄色の行: 使用率が70%以上90%未満のユーザー、中リスクの共有、警告</p>
+            <p>🔴 赤色の行: 使用率が90%以上のユーザー、高リスクの共有、エラー</p>
+            <p>🔵 青色の行: 情報メッセージ</p>
+            <p>⚪ グレーの行: 無効なアカウント</p>
+        </div>
+    </div>
+</body>
+</html>
