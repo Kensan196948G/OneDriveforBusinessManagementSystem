@@ -1,0 +1,25 @@
+[2025-04-15 08:09:02] [INFO] 同期エラー確認を開始します
+[2025-04-15 08:09:02] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415
+[2025-04-15 08:09:02] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Log
+[2025-04-15 08:09:02] [INFO] config.jsonからAdminUPNを取得しました: admin@miraiconst.onmicrosoft.com
+[2025-04-15 08:09:03] [WARNING] ログインユーザー情報が取得できませんでした
+[2025-04-15 08:09:03] [INFO] 実行モード: 管理者モード
+[2025-04-15 08:09:03] [INFO] すべてのユーザーの同期エラーを確認しています...
+[2025-04-15 08:09:03] [SUCCESS] 同期エラーの確認が完了しました。検出されたエラー: 0
+[2025-04-15 08:09:03] [SUCCESS] 同期エラーは検出されませんでした。
+[2025-04-15 08:09:03] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415\SyncErrorCheck.20250415080903.csv
+[2025-04-15 08:09:03] [INFO] Excelでファイルを開いて列幅の調整とフィルターの適用を行います...
+[2025-04-15 08:09:04] [SUCCESS] Excelでの処理が完了しました。
+[2025-04-15 08:09:04] [SUCCESS] JavaScriptファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415\SyncErrorCheck.20250415080903.js
+[2025-04-15 08:09:05] [SUCCESS] HTMLファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415\SyncErrorCheck.20250415080903.html
+
+ユーザー名 メールアドレス アカウント状態 OneDrive対応 エラー種別 ファイル名 ファイルパス 最終更新日時       サイズ(KB) ?
+                                                                                                                       ?
+                                                                                                                       ?
+                                                                                                                       ?
+                                                                                                                       ?
+---------- -------------- -------------- ------------ ---------- ---------- ------------ ------------       ---------- -
+N/A        N/A            N/A            N/A          情報       N/A        N/A          2025/04/15 8:09:03 N/A        
+
+[2025-04-15 08:09:05] [SUCCESS] 同期エラー確認が完了しました
+[2025-04-15 08:09:05] [SUCCESS] 出力ディレクトリを開きました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415

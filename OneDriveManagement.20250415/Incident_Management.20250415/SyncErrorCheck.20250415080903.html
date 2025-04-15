@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OneDrive 同期エラーレポート</title>
+    <script src="SyncErrorCheck.20250415080903.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-section {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+        #searchInput {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #searchSuggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .suggestion-item.no-results {
+            color: #999;
+            font-style: italic;
+            cursor: default;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        button:hover {
+            background-color: #106ebe;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .button-icon {
+            margin-right: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .filter-row th {
+            padding: 5px;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        tr.danger {
+            background-color: #ffebee;
+        }
+        tr.warning {
+            background-color: #fff8e1;
+        }
+        tr.info {
+            background-color: #e3f2fd;
+        }
+        tr.disabled {
+            color: #999;
+            font-style: italic;
+        }
+        .status-icon {
+            margin-right: 5px;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .page-info {
+            margin: 0 10px;
+        }
+        .rows-per-page {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .total-items {
+            margin-left: 15px;
+        }
+        
+        @media print {
+            .toolbar, button, #pagination, .filter-row {
+                display: none;
+            }
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .header {
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.danger {
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.warning {
+                background-color: #fff8e1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.info {
+                background-color: #e3f2fd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">⚠️</div>
+            <h1>OneDrive 同期エラーレポート</h1>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">実行日時:</span> 2025/04/15 08:09:02</p>
+            <p><span class="info-label">実行者:</span> </p>
+            <p><span class="info-label">実行者の種別:</span> 未定義</p>
+            <p><span class="info-label">実行モード:</span> 管理者モード</p>
+            <p><span class="info-label">出力フォルダ:</span> C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415</p>
+        </div>
+        
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="検索...">
+            <div id="searchSuggestions"></div>
+            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
+            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
+        </div>
+        
+        <div id="pagination"></div>
+
+        <table id="errorTable">
+            <thead>
+                <tr>
+                    <th>ユーザー名</th>
+                    <th>メールアドレス</th>
+                    <th>アカウント状態</th>
+                    <th>OneDrive対応</th>
+                    <th>エラー種別</th>
+                    <th>ファイル名</th>
+                    <th>ファイルパス</th>
+                    <th>最終更新日時</th>
+                    <th>サイズ(KB)</th>
+                    <th>エラー詳細</th>
+                    <th>推奨対応</th>
+                </tr>
+                <tr class='filter-row'>
+                    <th><select class='column-filter' data-column='0'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='1'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='2'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='3'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='4'><option value=''>すべて</option><option value='情報'>情報</option></select></th>
+                    <th><select class='column-filter' data-column='5'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='6'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='7'><option value=''>すべて</option><option value='2025/04/15 8:09:03'>2025/04/15 8:09:03</option></select></th>
+                    <th><select class='column-filter' data-column='8'><option value=''>すべて</option><option value='N/A'>N/A</option></select></th>
+                    <th><select class='column-filter' data-column='9'><option value=''>すべて</option><option value='同期エラーは検出されませんでした。'>同期エラーは検出されませんでした。</option></select></th>
+                    <th><select class='column-filter' data-column='10'><option value=''>すべて</option><option value='対応は必要ありません。'>対応は必要ありません。</option></select></th>
+                </tr>
+            </thead>
+            <tbody>                <tr>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 08:09:03</td>
+                    <td>N/A</td>
+                    <td>同期エラーは検出されませんでした。</td>
+                    <td>対応は必要ありません。</td>
+                </tr>            </tbody>
+        </table>
+        
+        <div class="info-section">
+            <p><span class="info-label">色の凡例:</span></p>
+            <p>🔴 赤色の行: 同期エラー</p>
+            <p>🟡 黄色の行: アクセスエラー</p>
+            <p>🔵 青色の行: 情報メッセージ</p>
+            <p>⚪ グレーの行: 無効なアカウント</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+﻿ユーザー名,メールアドレス,アカウント状態,OneDrive対応,エラー種別,ファイル名,ファイルパス,最終更新日時,サイズ(KB),エラー詳細,推奨対応
+宮本 綾,a-miyamoto@mirai-const.co.jp,有効,対応,同期エラー,document_244.docx,/Documents/document_244.docx,2025/3/21 19:19,1400,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+山田　昭光,a-yamada@mirai-const.co.jp,有効,対応,情報,document_414.docx,/Documents/document_414.docx,2025/3/31 19:19,3049,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+admin,admin@miraiconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+Office365管理用,admin1@miraiconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+Amazonビジネス,amazon-biz@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （青森営業所）,aomori-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+appleID用,apple-id@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （有明営業所）,ariake-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+近藤 篤史,at-kondou@mirai-const.co.jp,有効,対応,同期エラー,document_343.docx,/Documents/document_343.docx,2025/4/5 19:19,1065,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+ats-watanabe,ats-watanabe@mitsuifudosan.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札管理（all）,bid-info@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（本社）,bid-info01m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（北海道支店）,bid-info02m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（東北支店）,bid-info03m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（東京支店）,bid-info04m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（千葉営業支店）,bid-info05m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（横浜営業支店）,bid-info06m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（茨城営業支店）,bid-info07m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（北陸営業支店）,bid-info08m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（中部支店）,bid-info09m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（大阪支店）,bid-info10m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（中国支店）,bid-info11m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+電子入札（四国営業支店）,bid-info12m@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+Autocad管理用,cad-master@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （千葉営業支店）,chiba-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （中部支店）,chubu-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+中部支店（Zoom）,chubu@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （中国営業支店）,chugoku-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM管理（all）,cim-master@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用01,cim-master01@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用02,cim-master02@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用03,cim-master03@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用04,cim-master04@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用05,cim-master05@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用06,cim-master06@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用07,cim-master07@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用08,cim-master08@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用09,cim-master09@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用10,cim-master10@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用11,cim-master11@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用12,cim-master12@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:19,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用13,cim-master13@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用14,cim-master14@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用15,cim-master15@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+CIM用16,cim-master16@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+コンプライアンスホットライン,compliance-hotline@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+DirectCloud test,direct@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+みらい　渡邊,e-watanabe@miraiconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+高橋 富美江,f-takahashi@mirai-const.co.jp,有効,対応,情報,document_64.docx,/Documents/document_64.docx,2025/3/26 19:20,1594,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+Fortinet管理,forti-admin@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+加藤 浩,h-katoh@mirai-const.co.jp,有効,対応,同期エラー,document_941.docx,/Documents/document_941.docx,2025/4/2 19:20,2119,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+中道 秀則,h-nakamichi@mirai-const.co.jp,有効,対応,同期エラー,document_206.docx,/Documents/document_206.docx,2025/3/17 19:20,4744,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+瀬尾 浩晃,h-seo@mirai-const.co.jp,有効,対応,同期エラー,document_250.docx,/Documents/document_250.docx,2025/3/25 19:20,3594,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+山下 仁,h-yamashita@mirai-const.co.jp,有効,対応,アクセスエラー,document_186.docx,/Documents/document_186.docx,2025/3/23 19:20,222,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+h_kawamura,h_kawamura@cdit.or.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+石垣　遥香,haruka.ishigaki@aaconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+HENNGE動作確認,,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+石橋 宏樹,hi-ishibashi@mirai-const.co.jp,有効,対応,アクセスエラー,document_270.docx,/Documents/document_270.docx,2025/3/22 19:20,515,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+野村　英政（ハレクラニ沖縄　施設管理部）,hideyuki.nomura@halekulaniokinawa.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （北海道支店）,hokkaido-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+北海道支店（Zoom）,hokkaido@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （北陸営業支店）,hokuriku-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+本社会議室２階①（Zoom）,honsya2-1@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+本社会議室２階②（Zoom）,honsya2-2@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+HP管理,hp-kanri@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （茨城営業所）,ibaraki-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+ito,ito@mainmark.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+阿部　二郎,j-abe@mirai-const.co.jp,有効,対応,アクセスエラー,document_131.docx,/Documents/document_131.docx,2025/3/25 19:20,4574,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+みらい建設工業 人事採用,jinji-saiyou@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:20,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+平林 敬治,k-hirabayashi@mirai-const.co.jp,有効,対応,情報,document_208.docx,/Documents/document_208.docx,2025/4/7 19:20,4305,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+劔持 久美子,k-kemmochi@mirai-const.co.jp,有効,対応,情報,document_293.docx,/Documents/document_293.docx,2025/3/19 19:21,2994,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+宮島 杏花,k-miyajima@mirai-const.co.jp,有効,対応,同期エラー,document_61.docx,/Documents/document_61.docx,2025/3/22 19:21,2787,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+小原　恒平,k-obara@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+柴田 鋼三,k-shibata@mirai-const.co.jp,有効,対応,情報,document_294.docx,/Documents/document_294.docx,2025/3/27 19:21,2121,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+杉本 慧太（みらい建設工業）,k-sugimoto@miraiconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+綱分 康太,k-tsunawaki@mirai-const.co.jp,有効,対応,情報,document_385.docx,/Documents/document_385.docx,2025/3/24 19:21,417,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+小森 一典,ka-komori@mirai-const.co.jp,有効,対応,情報,document_402.docx,/Documents/document_402.docx,2025/3/23 19:21,4974,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+会計サポート,kaikei-support@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+管理（九州）,kanri-kyushu@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+管理（大阪）,kanri-oosaka@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+管理（東京）,kanri-tokyo@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+経営企画,keieikikaku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+藤田　圭司（三井不動産　開企・環境Ｇ）,ki-fujita@mitsuifudosan.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+北九州営業所（Zoom）,kita-kyushu@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （北九州営業所）,kitakyushu-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （九州支店）,kyushu-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+有明営業所（Zoom）,m-ariake@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+中国支店（Zoom）,m-chugoku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+濵嶋 学,m-hamashima@mirai-const.co.jp,有効,対応,情報,document_426.docx,/Documents/document_426.docx,2025/4/2 19:21,2113,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+HP問合せ（m-info）,m-info@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+神原　正明,m-kambara@mirai-const.co.jp,有効,対応,同期エラー,document_910.docx,/Documents/document_910.docx,2025/4/5 19:21,3574,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+丸田 雅博,m-maruta@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:21,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+中谷 正広,m-nakatani@mirai-const.co.jp,有効,対応,情報,document_328.docx,/Documents/document_328.docx,2025/3/26 19:21,886,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+鈴木 正彦,m-suzuki@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+牛久保　麻椰,m-ushikubo@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+長谷川　茉侑,ma-hasegawa@mirai-const.co.jp,有効,対応,アクセスエラー,document_955.docx,/Documents/document_955.docx,2025/3/31 19:22,2866,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+メール取得用みらい,mail-info@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+事業企画室専用,mf-jigyoukikaku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+カーボンブラックアラート通知用,mirai-edr@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+SNS共用アカウント,mirai-sns@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+web会議（mirai-zoom）,mirai-zoom@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+エンゲージメント委員会事務局（SuggestionBox）,mk-engagement@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+仕訳入力システム通知用,mksystem-alert@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+永江 愛美,n-manami@mirai-const.co.jp,有効,対応,情報,document_500.docx,/Documents/document_500.docx,2025/3/26 19:22,1087,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+吉谷 直樹,n-yoshitani@mirai-const.co.jp,有効,対応,同期エラー,document_509.docx,/Documents/document_509.docx,2025/4/1 19:22,389,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+角川 直,na-kadokawa@apptec.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+netis,netis@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （能登営業所）,noto-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （沖縄営業所）,okinawa-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+沖縄営業所（Zoom）,okinawa@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （大阪支店）,osaka-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+普天間 倫世,r-futenma@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+小堀 諒士,r-kobori@mirai-const.co.jp,有効,対応,情報,document_844.docx,/Documents/document_844.docx,2025/4/14 19:22,2760,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+下田 伶央斗,r-shimoda@mirai-const.co.jp,有効,対応,情報,document_437.docx,/Documents/document_437.docx,2025/3/28 19:22,4375,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+堀　聡,s-hori@mirai-const.co.jp,有効,対応,同期エラー,document_377.docx,/Documents/document_377.docx,2025/4/9 19:22,3115,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+長岡 伸一,s-nagaoka@mirai-const.co.jp,有効,対応,同期エラー,document_545.docx,/Documents/document_545.docx,2025/4/8 19:22,3904,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+佐藤 奨,s-satoh@mirai-const.co.jp,有効,対応,アクセスエラー,document_516.docx,/Documents/document_516.docx,2025/4/9 19:22,4735,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+S.Nagano,S.Nagano@otsuka-shokai.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+伊藤 聡,sa-itoh@mirai-const.co.jp,有効,対応,情報,document_382.docx,/Documents/document_382.docx,2025/3/30 19:22,232,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+石原 旧Officeアカウント,sh-ishihara-old@miraiconst.mail.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+変化共有テスト,,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （四国営業支店）,shikoku-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （静岡営業所）,shizuoka-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+尾方 柊真,shu-ogata@mirai-const.co.jp,有効,対応,アクセスエラー,document_398.docx,/Documents/document_398.docx,2025/3/26 19:22,4019,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+SketchUpPro用（サブスク管理）,sketchup@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+総務（支払）,soumu-payment@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+On-Premises Directory Synchronization Service Account,,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+システムインフォ,system-info@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:22,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+福田 猛,t-fukuda@mirai-const.co.jp,有効,対応,アクセスエラー,document_264.docx,/Documents/document_264.docx,2025/3/26 19:23,4088,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+柏原 武琉,t-kashiwabara@mirai-const.co.jp,有効,対応,同期エラー,document_490.docx,/Documents/document_490.docx,2025/3/28 19:23,1353,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+熊井崇（みらい建設工業）,t-kumai@miraiconst.onmicrosoft.com,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+的場 敬,t-matoba@mirai-const.co.jp,有効,対応,情報,document_28.docx,/Documents/document_28.docx,2025/3/25 19:23,190,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+新岡 智也,t-niioka@mirai-const.co.jp,有効,対応,情報,document_273.docx,/Documents/document_273.docx,2025/3/27 19:23,3470,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+澤田　卓冶,t-sawada@mirai-const.co.jp,有効,対応,アクセスエラー,document_651.docx,/Documents/document_651.docx,2025/3/21 19:23,2233,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+山口 貴也,t-yamaguchi@mirai-const.co.jp,有効,対応,同期エラー,document_691.docx,/Documents/document_691.docx,2025/4/13 19:23,4773,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+takuro.kumada,takuro.kumada@aaconst.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+HP問合せﾌｫｰﾑ受信用（技術部）,tech@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （東北支店）,tohoku-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （東京支店）,tokyo-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+東京工事事務所（Zoom）,tokyokoji@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算（東京工事事務所）,tokyokouji-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+tsubokawa-y92y2,tsubokawa-y92y2@mlit.go.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+WEB管理（web-admin）,webadmin@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+市川　豊,y-ichikawa@mirai-const.co.jp,有効,対応,情報,document_330.docx,/Documents/document_330.docx,2025/3/22 19:23,3775,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+宮崎 嘉彦,y-miyazaki@mirai-const.co.jp,有効,対応,アクセスエラー,document_365.docx,/Documents/document_365.docx,2025/4/6 19:23,3744,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+大野 雄二,y-ohno@mirai-const.co.jp,有効,対応,同期エラー,document_213.docx,/Documents/document_213.docx,2025/4/9 19:23,2078,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+田島 美知,y-tajima@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+髙岡 由依,y-takaoka@mirai-const.co.jp,有効,対応,アクセスエラー,document_455.docx,/Documents/document_455.docx,2025/3/23 19:23,914,ファイルの同期中にエラーが発生しました。,ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。
+都築　恭生,y-tsuzuki@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+植野 芳彦,y-ueno@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:23,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+吉盛　勇介,y-yoshimori@mirai-const.co.jp,有効,対応,情報,document_421.docx,/Documents/document_421.docx,2025/3/27 19:24,827,ファイルの同期中にエラーが発生しました。,特に対応は必要ありません。
+yamasaki-s89fa,yamasaki-s89fa@mlit.go.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:24,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+yk-takahashi,yk-takahashi@mitsuifudosan.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:24,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+楽楽精算 （横浜営業支店）,yokohama-rakuraku@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:24,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+ys-yamamoto,ys-yamamoto@apptec.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:24,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。
+田中 悠太,yu-tanaka@mirai-const.co.jp,有効,対応,同期エラー,document_665.docx,/Documents/document_665.docx,2025/3/24 19:24,4588,ファイルの同期中にエラーが発生しました。,ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。
+財務管理,zaimu@mirai-const.co.jp,有効,未対応,アクセスエラー,N/A,N/A,2025/4/15 19:24,N/A,OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.,ユーザーのアクセス権限を確認してください。

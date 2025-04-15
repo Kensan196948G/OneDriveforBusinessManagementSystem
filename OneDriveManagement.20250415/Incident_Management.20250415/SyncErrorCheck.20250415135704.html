@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OneDrive 同期エラーレポート</title>
+    <script src="SyncErrorCheck.20250415135704.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-section {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+        #searchInput {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #searchSuggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .suggestion-item.no-results {
+            color: #999;
+            font-style: italic;
+            cursor: default;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        button:hover {
+            background-color: #106ebe;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .button-icon {
+            margin-right: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+        /* 列幅の調整 */
+        th:nth-child(1), td:nth-child(1) { width: 10%; } /* ユーザー名 */
+        th:nth-child(2), td:nth-child(2) { width: 15%; } /* メールアドレス */
+        th:nth-child(3), td:nth-child(3) { width: 8%; }  /* アカウント状態 */
+        th:nth-child(4), td:nth-child(4) { width: 8%; }  /* OneDrive対応 */
+        th:nth-child(5), td:nth-child(5) { width: 8%; }  /* エラー種別 */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* ファイル名 */
+        th:nth-child(7), td:nth-child(7) { width: 15%; } /* ファイルパス */
+        th:nth-child(8), td:nth-child(8) { width: 8%; }  /* 最終更新日時 */
+        th:nth-child(9), td:nth-child(9) { width: 5%; }  /* サイズ(KB) */
+        th:nth-child(10), td:nth-child(10) { width: 10%; } /* エラー詳細 */
+        th:nth-child(11), td:nth-child(11) { width: 15%; } /* 推奨対応 */
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .filter-row th {
+            padding: 5px;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        tr.danger {
+            background-color: #ffebee;
+        }
+        tr.warning {
+            background-color: #fff8e1;
+        }
+        tr.info {
+            background-color: #e3f2fd;
+        }
+        tr.disabled {
+            color: #999;
+            font-style: italic;
+        }
+        .status-icon {
+            margin-right: 5px;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .page-info {
+            margin: 0 10px;
+        }
+        .rows-per-page {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .total-items {
+            margin-left: 15px;
+        }
+        
+        @media print {
+            .toolbar, button, #pagination, .filter-row {
+                display: none;
+            }
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .header {
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.danger {
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.warning {
+                background-color: #fff8e1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.info {
+                background-color: #e3f2fd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">⚠️</div>
+            <h1>OneDrive 同期エラーレポート</h1>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">実行日時:</span> 2025/04/15 13:52:39</p>
+            <p><span class="info-label">実行者:</span> admin</p>
+            <p><span class="info-label">実行者の種別:</span> Member</p>
+            <p><span class="info-label">実行モード:</span> 管理者モード</p>
+            <p><span class="info-label">出力フォルダ:</span> C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250415\Incident_Management.20250415</p>
+        </div>
+        
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="検索...">
+            <div id="searchSuggestions"></div>
+            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
+            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
+        </div>
+        
+        <div id="pagination"></div>
+
+        <table id="errorTable">
+            <thead>
+                <!-- フィルター行 -->
+                <tr class="filter-row">
+                    <th>
+                        <select class="user-filter" onchange="filterByUser(this.value)">
+                            <option value="">すべてのユーザー</option>
+                        </select>
+                        <select class="onedrive-filter" onchange="filterByOneDrive(this.value)" style="margin-left: 5px;">
+                            <option value="">OneDrive対応状況</option>
+                            <option value="対応">対応</option>
+                            <option value="未対応">未対応</option>
+                            <option value="N/A">N/A</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="onedrive-detail-filter" onchange="filterByOneDriveDetail(this.value)">
+                            <option value="">詳細対応状況</option>
+                            <option value="アクセス可能">アクセス可能</option>
+                            <option value="アクセス不可">アクセス不可</option>
+                            <option value="未確認">未確認</option>
+                        </select>
+                    </th>
+                </tr>
+                <!-- ヘッダー行 -->
+                <tr>
+                    <th data-column="0">ユーザー名</th>
+                    <th data-column="1">メールアドレス</th>
+                    <th data-column="2">アカウント状態</th>
+                    <th data-column="3">OneDrive対応</th>
+                    <th data-column="4">エラー種別</th>
+                    <th data-column="5">ファイル名</th>
+                    <th data-column="6">ファイルパス</th>
+                    <th data-column="7">最終更新日時</th>
+                    <th data-column="8">サイズ(KB)</th>
+                    <th data-column="9">エラー詳細</th>
+                    <th data-column="10">推奨対応</th>
+                </tr>
+            </thead>
+            <!-- フィルター行 (JavaScriptで動的に生成) -->
+            <tfoot>
+                <tr class="filter-row"></tr>
+            </tfoot>
+            <tbody>                <tr>
+                    <td>宮本 綾</td>
+                    <td>a-miyamoto@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_880.docx</td>
+                    <td>/Documents/document_880.docx</td>
+                    <td>03/25/2025 13:53:14</td>
+                    <td>2062</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>山田　昭光</td>
+                    <td>a-yamada@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_855.docx</td>
+                    <td>/Documents/document_855.docx</td>
+                    <td>04/01/2025 13:53:18</td>
+                    <td>4023</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>admin</td>
+                    <td>admin@miraiconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:19</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>Office365管理用</td>
+                    <td>admin1@miraiconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:19</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>Amazonビジネス</td>
+                    <td>amazon-biz@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:20</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （青森営業所）</td>
+                    <td>aomori-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:20</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>appleID用</td>
+                    <td>apple-id@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:20</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （有明営業所）</td>
+                    <td>ariake-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:20</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>近藤 篤史</td>
+                    <td>at-kondou@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_288.docx</td>
+                    <td>/Documents/document_288.docx</td>
+                    <td>04/04/2025 13:53:20</td>
+                    <td>322</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>ats-watanabe</td>
+                    <td>ats-watanabe@mitsuifudosan.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:20</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札管理（all）</td>
+                    <td>bid-info@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（本社）</td>
+                    <td>bid-info01m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（北海道支店）</td>
+                    <td>bid-info02m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（東北支店）</td>
+                    <td>bid-info03m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（東京支店）</td>
+                    <td>bid-info04m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（千葉営業支店）</td>
+                    <td>bid-info05m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:21</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（横浜営業支店）</td>
+                    <td>bid-info06m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（茨城営業支店）</td>
+                    <td>bid-info07m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（北陸営業支店）</td>
+                    <td>bid-info08m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（中部支店）</td>
+                    <td>bid-info09m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（大阪支店）</td>
+                    <td>bid-info10m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（中国支店）</td>
+                    <td>bid-info11m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>電子入札（四国営業支店）</td>
+                    <td>bid-info12m@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:22</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>Autocad管理用</td>
+                    <td>cad-master@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （千葉営業支店）</td>
+                    <td>chiba-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （中部支店）</td>
+                    <td>chubu-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>中部支店（Zoom）</td>
+                    <td>chubu@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （中国営業支店）</td>
+                    <td>chugoku-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM管理（all）</td>
+                    <td>cim-master@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:24</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用01</td>
+                    <td>cim-master01@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:25</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用02</td>
+                    <td>cim-master02@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:26</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用03</td>
+                    <td>cim-master03@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:26</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用04</td>
+                    <td>cim-master04@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:27</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用05</td>
+                    <td>cim-master05@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:28</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用06</td>
+                    <td>cim-master06@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:29</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用07</td>
+                    <td>cim-master07@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用08</td>
+                    <td>cim-master08@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用09</td>
+                    <td>cim-master09@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:33</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用10</td>
+                    <td>cim-master10@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:34</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用11</td>
+                    <td>cim-master11@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:34</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用12</td>
+                    <td>cim-master12@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:36</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用13</td>
+                    <td>cim-master13@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:36</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用14</td>
+                    <td>cim-master14@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:37</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用15</td>
+                    <td>cim-master15@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:38</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>CIM用16</td>
+                    <td>cim-master16@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:39</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>コンプライアンスホットライン</td>
+                    <td>compliance-hotline@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:40</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>DirectCloud test</td>
+                    <td>direct@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:42</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>みらい　渡邊</td>
+                    <td>e-watanabe@miraiconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>高橋 富美江</td>
+                    <td>f-takahashi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_535.docx</td>
+                    <td>/Documents/document_535.docx</td>
+                    <td>04/05/2025 13:53:48</td>
+                    <td>2178</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>Fortinet管理</td>
+                    <td>forti-admin@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:53:49</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>加藤 浩</td>
+                    <td>h-katoh@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_510.docx</td>
+                    <td>/Documents/document_510.docx</td>
+                    <td>03/26/2025 13:53:53</td>
+                    <td>3271</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>中道 秀則</td>
+                    <td>h-nakamichi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_376.docx</td>
+                    <td>/Documents/document_376.docx</td>
+                    <td>03/31/2025 13:53:57</td>
+                    <td>2888</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>瀬尾 浩晃</td>
+                    <td>h-seo@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_127.docx</td>
+                    <td>/Documents/document_127.docx</td>
+                    <td>03/20/2025 13:54:02</td>
+                    <td>171</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>山下 仁</td>
+                    <td>h-yamashita@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_684.docx</td>
+                    <td>/Documents/document_684.docx</td>
+                    <td>04/14/2025 13:54:06</td>
+                    <td>69</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>h_kawamura</td>
+                    <td>h_kawamura@cdit.or.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:07</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>石垣　遥香</td>
+                    <td>haruka.ishigaki@aaconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:07</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>HENNGE動作確認</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:08</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>石橋 宏樹</td>
+                    <td>hi-ishibashi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_381.docx</td>
+                    <td>/Documents/document_381.docx</td>
+                    <td>03/28/2025 13:54:09</td>
+                    <td>2285</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>野村　英政（ハレクラニ沖縄　施設管理部）</td>
+                    <td>hideyuki.nomura@halekulaniokinawa.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:12</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北海道支店）</td>
+                    <td>hokkaido-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:12</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>北海道支店（Zoom）</td>
+                    <td>hokkaido@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北陸営業支店）</td>
+                    <td>hokuriku-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>本社会議室２階①（Zoom）</td>
+                    <td>honsya2-1@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>本社会議室２階②（Zoom）</td>
+                    <td>honsya2-2@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>HP管理</td>
+                    <td>hp-kanri@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （茨城営業所）</td>
+                    <td>ibaraki-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:14</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>ito</td>
+                    <td>ito@mainmark.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:14</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>阿部　二郎</td>
+                    <td>j-abe@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_698.docx</td>
+                    <td>/Documents/document_698.docx</td>
+                    <td>03/28/2025 13:54:15</td>
+                    <td>2481</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>みらい建設工業 人事採用</td>
+                    <td>jinji-saiyou@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:18</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>平林 敬治</td>
+                    <td>k-hirabayashi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_921.docx</td>
+                    <td>/Documents/document_921.docx</td>
+                    <td>04/11/2025 13:54:21</td>
+                    <td>2096</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>劔持 久美子</td>
+                    <td>k-kemmochi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_400.docx</td>
+                    <td>/Documents/document_400.docx</td>
+                    <td>03/26/2025 13:54:25</td>
+                    <td>1683</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>宮島 杏花</td>
+                    <td>k-miyajima@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_912.docx</td>
+                    <td>/Documents/document_912.docx</td>
+                    <td>03/30/2025 13:54:29</td>
+                    <td>2047</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>小原　恒平</td>
+                    <td>k-obara@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:30</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>柴田 鋼三</td>
+                    <td>k-shibata@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_35.docx</td>
+                    <td>/Documents/document_35.docx</td>
+                    <td>04/14/2025 13:54:33</td>
+                    <td>1011</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>杉本 慧太（みらい建設工業）</td>
+                    <td>k-sugimoto@miraiconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:34</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>綱分 康太</td>
+                    <td>k-tsunawaki@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_912.docx</td>
+                    <td>/Documents/document_912.docx</td>
+                    <td>04/04/2025 13:54:37</td>
+                    <td>823</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>小森 一典</td>
+                    <td>ka-komori@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_782.docx</td>
+                    <td>/Documents/document_782.docx</td>
+                    <td>03/17/2025 13:54:42</td>
+                    <td>194</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>会計サポート</td>
+                    <td>kaikei-support@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:43</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>管理（九州）</td>
+                    <td>kanri-kyushu@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:43</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>管理（大阪）</td>
+                    <td>kanri-oosaka@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:43</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>管理（東京）</td>
+                    <td>kanri-tokyo@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>経営企画</td>
+                    <td>keieikikaku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>藤田　圭司（三井不動産　開企・環境Ｇ）</td>
+                    <td>ki-fujita@mitsuifudosan.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>北九州営業所（Zoom）</td>
+                    <td>kita-kyushu@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北九州営業所）</td>
+                    <td>kitakyushu-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:44</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （九州支店）</td>
+                    <td>kyushu-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:45</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>有明営業所（Zoom）</td>
+                    <td>m-ariake@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:45</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>中国支店（Zoom）</td>
+                    <td>m-chugoku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:46</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>濵嶋 学</td>
+                    <td>m-hamashima@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_691.docx</td>
+                    <td>/Documents/document_691.docx</td>
+                    <td>04/06/2025 13:54:47</td>
+                    <td>4273</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>HP問合せ（m-info）</td>
+                    <td>m-info@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:49</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>神原　正明</td>
+                    <td>m-kambara@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_298.docx</td>
+                    <td>/Documents/document_298.docx</td>
+                    <td>03/25/2025 13:54:51</td>
+                    <td>1206</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>丸田 雅博</td>
+                    <td>m-maruta@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:54:53</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>中谷 正広</td>
+                    <td>m-nakatani@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_877.docx</td>
+                    <td>/Documents/document_877.docx</td>
+                    <td>04/12/2025 13:54:56</td>
+                    <td>2347</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>鈴木 正彦</td>
+                    <td>m-suzuki@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:01</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>牛久保　麻椰</td>
+                    <td>m-ushikubo@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:05</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>長谷川　茉侑</td>
+                    <td>ma-hasegawa@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_181.docx</td>
+                    <td>/Documents/document_181.docx</td>
+                    <td>03/21/2025 13:55:08</td>
+                    <td>2297</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>メール取得用みらい</td>
+                    <td>mail-info@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:09</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>事業企画室専用</td>
+                    <td>mf-jigyoukikaku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:11</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>カーボンブラックアラート通知用</td>
+                    <td>mirai-edr@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>SNS共用アカウント</td>
+                    <td>mirai-sns@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>web会議（mirai-zoom）</td>
+                    <td>mirai-zoom@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:13</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>エンゲージメント委員会事務局（SuggestionBox）</td>
+                    <td>mk-engagement@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:14</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>仕訳入力システム通知用</td>
+                    <td>mksystem-alert@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:16</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>永江 愛美</td>
+                    <td>n-manami@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_791.docx</td>
+                    <td>/Documents/document_791.docx</td>
+                    <td>04/06/2025 13:55:20</td>
+                    <td>1293</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>吉谷 直樹</td>
+                    <td>n-yoshitani@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_685.docx</td>
+                    <td>/Documents/document_685.docx</td>
+                    <td>03/31/2025 13:55:25</td>
+                    <td>4966</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>角川 直</td>
+                    <td>na-kadokawa@apptec.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:25</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>netis</td>
+                    <td>netis@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:25</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （能登営業所）</td>
+                    <td>noto-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:28</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （沖縄営業所）</td>
+                    <td>okinawa-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>沖縄営業所（Zoom）</td>
+                    <td>okinawa@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （大阪支店）</td>
+                    <td>osaka-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>普天間 倫世</td>
+                    <td>r-futenma@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:31</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>小堀 諒士</td>
+                    <td>r-kobori@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_802.docx</td>
+                    <td>/Documents/document_802.docx</td>
+                    <td>04/06/2025 13:55:34</td>
+                    <td>115</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>下田 伶央斗</td>
+                    <td>r-shimoda@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_628.docx</td>
+                    <td>/Documents/document_628.docx</td>
+                    <td>03/23/2025 13:55:38</td>
+                    <td>1481</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>堀　聡</td>
+                    <td>s-hori@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_592.docx</td>
+                    <td>/Documents/document_592.docx</td>
+                    <td>03/31/2025 13:55:43</td>
+                    <td>387</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>長岡 伸一</td>
+                    <td>s-nagaoka@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_463.docx</td>
+                    <td>/Documents/document_463.docx</td>
+                    <td>04/01/2025 13:55:47</td>
+                    <td>3408</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>佐藤 奨</td>
+                    <td>s-satoh@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_271.docx</td>
+                    <td>/Documents/document_271.docx</td>
+                    <td>04/14/2025 13:55:52</td>
+                    <td>1906</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>S.Nagano</td>
+                    <td>S.Nagano@otsuka-shokai.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:56</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>伊藤 聡</td>
+                    <td>sa-itoh@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_731.docx</td>
+                    <td>/Documents/document_731.docx</td>
+                    <td>03/24/2025 13:55:56</td>
+                    <td>694</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>石原 旧Officeアカウント</td>
+                    <td>sh-ishihara-old@miraiconst.mail.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:57</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>変化共有テスト</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:55:59</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （四国営業支店）</td>
+                    <td>shikoku-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:00</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （静岡営業所）</td>
+                    <td>shizuoka-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:01</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>尾方 柊真</td>
+                    <td>shu-ogata@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_949.docx</td>
+                    <td>/Documents/document_949.docx</td>
+                    <td>03/28/2025 13:56:03</td>
+                    <td>1295</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>SketchUpPro用（サブスク管理）</td>
+                    <td>sketchup@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:03</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>総務（支払）</td>
+                    <td>soumu-payment@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:03</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>On-Premises Directory Synchronization Service Account</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:05</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>システムインフォ</td>
+                    <td>system-info@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:06</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>福田 猛</td>
+                    <td>t-fukuda@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_875.docx</td>
+                    <td>/Documents/document_875.docx</td>
+                    <td>04/07/2025 13:56:09</td>
+                    <td>1742</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>柏原 武琉</td>
+                    <td>t-kashiwabara@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_77.docx</td>
+                    <td>/Documents/document_77.docx</td>
+                    <td>04/14/2025 13:56:13</td>
+                    <td>4355</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>熊井崇（みらい建設工業）</td>
+                    <td>t-kumai@miraiconst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:15</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>的場 敬</td>
+                    <td>t-matoba@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_913.docx</td>
+                    <td>/Documents/document_913.docx</td>
+                    <td>04/12/2025 13:56:18</td>
+                    <td>32</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>新岡 智也</td>
+                    <td>t-niioka@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_9.docx</td>
+                    <td>/Documents/document_9.docx</td>
+                    <td>03/22/2025 13:56:23</td>
+                    <td>3128</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>澤田　卓冶</td>
+                    <td>t-sawada@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_609.docx</td>
+                    <td>/Documents/document_609.docx</td>
+                    <td>04/06/2025 13:56:27</td>
+                    <td>227</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>山口 貴也</td>
+                    <td>t-yamaguchi@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_601.docx</td>
+                    <td>/Documents/document_601.docx</td>
+                    <td>04/03/2025 13:56:32</td>
+                    <td>4655</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>takuro.kumada</td>
+                    <td>takuro.kumada@aaconst.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:36</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>HP問合せﾌｫｰﾑ受信用（技術部）</td>
+                    <td>tech@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:37</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （東北支店）</td>
+                    <td>tohoku-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:37</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （東京支店）</td>
+                    <td>tokyo-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:37</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>東京工事事務所（Zoom）</td>
+                    <td>tokyokoji@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:38</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算（東京工事事務所）</td>
+                    <td>tokyokouji-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:38</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>tsubokawa-y92y2</td>
+                    <td>tsubokawa-y92y2@mlit.go.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:38</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>WEB管理（web-admin）</td>
+                    <td>webadmin@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:39</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>市川　豊</td>
+                    <td>y-ichikawa@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_896.docx</td>
+                    <td>/Documents/document_896.docx</td>
+                    <td>03/17/2025 13:56:42</td>
+                    <td>1143</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>宮崎 嘉彦</td>
+                    <td>y-miyazaki@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_427.docx</td>
+                    <td>/Documents/document_427.docx</td>
+                    <td>04/01/2025 13:56:47</td>
+                    <td>3271</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>大野 雄二</td>
+                    <td>y-ohno@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>document_441.docx</td>
+                    <td>/Documents/document_441.docx</td>
+                    <td>03/19/2025 13:56:51</td>
+                    <td>4659</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。</td>
+                </tr>                <tr>
+                    <td>田島 美知</td>
+                    <td>y-tajima@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:55</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>髙岡 由依</td>
+                    <td>y-takaoka@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔴</span>同期エラー</td>
+                    <td>document_595.docx</td>
+                    <td>/Documents/document_595.docx</td>
+                    <td>04/06/2025 13:56:55</td>
+                    <td>4342</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。</td>
+                </tr>                <tr>
+                    <td>都築　恭生</td>
+                    <td>y-tsuzuki@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:57</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>植野 芳彦</td>
+                    <td>y-ueno@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:58</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>吉盛　勇介</td>
+                    <td>y-yoshimori@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_698.docx</td>
+                    <td>/Documents/document_698.docx</td>
+                    <td>03/31/2025 13:56:59</td>
+                    <td>2690</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>yamasaki-s89fa</td>
+                    <td>yamasaki-s89fa@mlit.go.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:59</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>yk-takahashi</td>
+                    <td>yk-takahashi@mitsuifudosan.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:56:59</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （横浜営業支店）</td>
+                    <td>yokohama-rakuraku@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:57:00</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>ys-yamamoto</td>
+                    <td>ys-yamamoto@apptec.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:57:00</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>                <tr>
+                    <td>田中 悠太</td>
+                    <td>yu-tanaka@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>対応</td>
+                    <td><span class="status-icon">🔵</span>情報</td>
+                    <td>document_746.docx</td>
+                    <td>/Documents/document_746.docx</td>
+                    <td>04/12/2025 13:57:02</td>
+                    <td>2905</td>
+                    <td>ファイルの同期中にエラーが発生しました。</td>
+                    <td>特に対応は必要ありません。</td>
+                </tr>                <tr>
+                    <td>財務管理</td>
+                    <td>zaimu@mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td>未対応</td>
+                    <td><span class="status-icon">🟡</span>アクセスエラー</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>04/15/2025 13:57:04</td>
+                    <td>N/A</td>
+                    <td>OneDriveにアクセスできませんでした: [ResourceNotFound] : User's mysite not found.</td>
+                    <td>ユーザーのアクセス権限を確認してください。</td>
+                </tr>            </tbody>
+        </table>
+        
+        <div class="info-section">
+            <p><span class="info-label">色の凡例:</span></p>
+            <p>🔴 赤色の行: 同期エラー</p>
+            <p>🟡 黄色の行: アクセスエラー</p>
+            <p>🔵 青色の行: 情報メッセージ</p>
+            <p>⚪ グレーの行: 無効なアカウント</p>
+        </div>
+    </div>
+</body>
+</html>

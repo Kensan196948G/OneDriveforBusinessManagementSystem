@@ -1,4 +1,0 @@
-[2025-04-14 08:46:17] [INFO] すべての基本データ収集を開始します
-[2025-04-14 08:46:17] [INFO] 出力ディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Basic_Data_Collection.20250414
-[2025-04-14 08:46:17] [INFO] ログディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250414\Log
-[2025-04-14 08:46:17] [ERROR] Microsoft Graph認証情報にユーザー情報（Account）が含まれていません。認証状態を確認し、必ずMain.ps1から実行してください。

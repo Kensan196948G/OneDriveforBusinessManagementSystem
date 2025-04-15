@@ -1,0 +1,90 @@
+[2025-04-15 17:52:10] [ERROR] スクリプト実行中にエラーが発生しました: C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1
+例外タイプ: System.Management.Automation.ParseException
+例外メッセージ: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:2176 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:3396 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:22 char:26
++     [string]$OutputDir = "$(Get-Location)",
++                          ~~~~~~~~~~~~~~~~~
+The assignment expression is not valid. The input to an assignment operator must be an object that is able to accept assignments, such as a variable or a property.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+スタックトレース:
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 343
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 393
+
+[2025-04-15 17:53:52] [ERROR] スクリプト実行中にエラーが発生しました: C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1
+例外タイプ: System.Management.Automation.ParseException
+例外メッセージ: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:2176 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:3396 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:22 char:26
++     [string]$OutputDir = "$(Get-Location)",
++                          ~~~~~~~~~~~~~~~~~
+The assignment expression is not valid. The input to an assignment operator must be an object that is able to accept assignments, such as a variable or a property.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+スタックトレース:
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 343
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 393
+
+[2025-04-15 17:58:37] [ERROR] スクリプト実行中にエラーが発生しました: C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1
+例外タイプ: System.Management.Automation.ParseException
+例外メッセージ: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:2176 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+
+At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:3396 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1322 char:1
++ }
++ ~
+スタックトレース:
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 343
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 393
+
+[2025-04-15 18:05:54] [ERROR] スクリプト実行中にエラーが発生しました: C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1
+例外タイプ: System.Management.Automation.RuntimeException
+例外メッセージ: You cannot call a method on a null-valued expression.
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1:1080 char:93
++ … ect class='column-filter' data-column='$($columns.IndexOf($col))'>`n"
++                                            ~~~~~~~~~~~~~~~~~~~~~~
+スタックトレース:
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Incident_Management\SyncErrorCheck.ps1: line 1080
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 343
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 393
+

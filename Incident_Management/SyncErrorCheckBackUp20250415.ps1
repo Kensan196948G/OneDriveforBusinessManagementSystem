@@ -972,16 +972,6 @@ $htmlContent = @"
         }
         .status-icon {
             margin-right: 5px;
-            font-size: 1.2em;
-            vertical-align: middle;
-        }
-        .column-filter {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: white;
-            font-size: 14px;
         }
         #pagination {
             display: flex;
@@ -1083,27 +1073,35 @@ $htmlContent = @"
                     <th>エラー詳細</th>
                     <th>推奨対応</th>
                 </tr>
-                <tr class="filter-row">
-                    <th><select class="column-filter" data-column="0">
-                        <option value="">すべて</option>
-                    </select></th>
-                    <th></th>
-                    <th></th>
-                    <th><select class="column-filter" data-column="3">
-                        <option value="">すべて</option>
-                    </select></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th><select class="column-filter" data-column="9">
-                        <option value="">すべて</option>
-                    </select></th>
-                    <th><select class="column-filter" data-column="10">
-                        <option value="">すべて</option>
-                    </select></th>
-                </tr>
+@{
+# エラーリストが空でないことを確認
+if ($errorList -and $errorList.Count -gt 0) {
+    $filterRowHtml = "                <tr class='filter-row'>`n"
+    foreach ($col in $columnNames) {
+        # 各列のユニーク値を抽出
+        $uniqueVals = $errorList | Select-Object -ExpandProperty $col | Sort-Object -Unique
+        $filterRowHtml += "                    <th><select class='column-filter' data-column='$($columnNames.IndexOf($col))'>`n"
+        $filterRowHtml += "                        <option value=''>すべて</option>`n"
+        foreach ($val in $uniqueVals) {
+            $escapedVal = [System.Web.HttpUtility]::HtmlEncode($val)
+            $filterRowHtml += "                        <option value='$escapedVal'>$escapedVal</option>`n"
+        }
+        $filterRowHtml += "                    </select></th>`n"
+    }
+    $filterRowHtml += "                </tr>`n"
+    $filterRowHtml
+} else {
+    # エラーリストが空の場合の処理
+    $filterRowHtml = "                <tr class='filter-row'>`n"
+    foreach ($col in $columnNames) {
+        $filterRowHtml += "                    <th><select class='column-filter' data-column='$($columnNames.IndexOf($col))'>`n"
+        $filterRowHtml += "                        <option value=''>すべて</option>`n"
+        $filterRowHtml += "                    </select></th>`n"
+    }
+    $filterRowHtml += "                </tr>`n"
+    $filterRowHtml
+}
+}
             </thead>
             <tbody>
 "@
@@ -1121,22 +1119,16 @@ foreach ($error in $errorList) {
     # 行を追加
     $htmlContent += @"
                 <tr>
-                    <td>$($error.'ユーザー名' -replace '(.{20})', '$1<br>')</td>
-                    <td>$($error.'メールアドレス' -replace '(.{20})', '$1<br>')</td>
+                    <td>$($error.'ユーザー名')</td>
+                    <td>$($error.'メールアドレス')</td>
                     <td>$($error.'アカウント状態')</td>
-                    <td style="font-size: 0.7em;">$($error.'OneDrive対応')</td>
-                    <td><span class="status-icon" title="$($error.'エラー種別')">$(switch ($error.'エラー種別') {
-                        "同期エラー" { "🔴" }
-                        "アクセスエラー" { "🟡" }
-                        "情報" { "🔵" }
-                        default { "❓" }
-                    })</span> <span style="font-size: 0.8em;">$($error.'エラー種別')</span></td>
-                    <td style="font-size: 0.8em;">$($error.'ファイル名' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em;">$($error.'ファイルパス' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em;">$(if($error.'最終更新日時' -eq 'N/A'){'取得不可'}else{$error.'最終更新日時'})</td>
-                    <td style="font-size: 0.8em;">$(if($error.'サイズ(KB)' -eq 'N/A'){'取得不可'}else{$error.'サイズ(KB)'})</td>
-                    <td style="font-size: 0.8em;">$($error.'エラー詳細' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">$(if([string]::IsNullOrWhiteSpace($error.'推奨対応')){'1. エラーの詳細を確認<br>2. 該当ユーザーに連絡<br>3. 必要に応じて管理者へ報告'}else{$error.'推奨対応' -replace '(.{10})', '$1<br>'})</td>
+                    <td><span class="status-icon">$errorTypeIcon</span>$($error.'エラー種別')</td>
+                    <td>$($error.'ファイル名')</td>
+                    <td>$($error.'ファイルパス')</td>
+                    <td>$($error.'最終更新日時')</td>
+                    <td>$($error.'サイズ(KB)')</td>
+                    <td>$($error.'エラー詳細')</td>
+                    <td>$($error.'推奨対応')</td>
                 </tr>
 "@
 }
