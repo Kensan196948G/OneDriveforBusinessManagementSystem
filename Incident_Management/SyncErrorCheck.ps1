@@ -156,32 +156,38 @@ try {
 
             $oneDriveSupported = "未対応"
             try {
-                # ユーザーのOneDriveを取得
-                $drive = Get-MgUserDrive -UserId $user.UserPrincipalName -ErrorAction Stop
-                $oneDriveSupported = "対応"
+                # UserPrincipalNameが空でないことを確認
+                if (-not [string]::IsNullOrEmpty($user.UserPrincipalName)) {
+                    # ユーザーのOneDriveを取得
+                    $drive = Get-MgUserDrive -UserId $user.UserPrincipalName -ErrorAction Stop
+                    $oneDriveSupported = "対応"
 
-                # OneDriveのルートアイテムを取得（DriveId優先、失敗時はUserIdで再試行）
-                $rootItems = $null
-                $rootSuccess = $false
+                    # OneDriveのルートアイテムを取得（DriveId優先、失敗時はUserIdで再試行）
+                    $rootItems = $null
+                    $rootSuccess = $false
 
-                # DriveIdもUserIdも空の場合は絶対に呼び出さない
-                # 厳密なnull/空文字チェックでプロンプト入力待ちを完全防止
-                $hasDriveId = ($drive -and -not [string]::IsNullOrEmpty($drive.Id))
-if ($hasDriveId) {
-    Write-Log "DEBUG: $($user.DisplayName) のDriveId: $($drive.Id)" "INFO"
-    try {
-        Write-Log "DEBUG: Get-MgUserDriveRoot 実行直前 DriveId: $($drive.Id)" "INFO"
-        $rootItems = Get-MgDriveRoot -DriveId ([string]$drive.Id) -ExpandProperty Children -ErrorAction Stop
-        Write-Log "DEBUG: Get-MgUserDriveRoot 実行直後 DriveId: $($drive.Id)" "INFO"
-        $rootSuccess = $true
-    } catch {
-        Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdでの取得に失敗。スキップします。" "WARNING"
-        continue
-    }
-} else {
-    Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdが取得できないためスキップします。" "WARNING"
-    continue
-}
+                    # DriveIdもUserIdも空の場合は絶対に呼び出さない
+                    # 厳密なnull/空文字チェックでプロンプト入力待ちを完全防止
+                    $hasDriveId = ($drive -and -not [string]::IsNullOrEmpty($drive.Id))
+                    if ($hasDriveId) {
+                        Write-Log "DEBUG: $($user.DisplayName) のDriveId: $($drive.Id)" "INFO"
+                        try {
+                            Write-Log "DEBUG: Get-MgUserDriveRoot 実行直前 DriveId: $($drive.Id)" "INFO"
+                            $rootItems = Get-MgDriveRoot -DriveId ([string]$drive.Id) -ExpandProperty Children -ErrorAction Stop
+                            Write-Log "DEBUG: Get-MgUserDriveRoot 実行直後 DriveId: $($drive.Id)" "INFO"
+                            $rootSuccess = $true
+                        } catch {
+                            Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdでの取得に失敗。スキップします。" "WARNING"
+                            continue
+                        }
+                    } else {
+                        Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdが取得できないためスキップします。" "WARNING"
+                        continue
+                    }
+                } else {
+                    Write-Log "ユーザー $($user.DisplayName) のUserPrincipalNameが空のため、OneDriveの取得をスキップします。" "WARNING"
+                    continue
+                }
 
                 # 同期エラーを確認（実際のAPIでは直接同期エラーを取得できないため、シミュレーション）
                 # 実際の実装では、Microsoft GraphのAPIを使用して同期エラーを取得する必要があります

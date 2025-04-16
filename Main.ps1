@@ -147,7 +147,7 @@ function Connect-ToMicrosoftGraph {
             # TEMPフォルダにトークンを保存
             $tempDir = Join-Path -Path $PSScriptRoot -ChildPath "TEMP"
             if (-not (Test-Path -Path $tempDir)) {
-                New-Item -Path $tempDir -ItemType Directory | Out-Null
+                New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
             }
             $tokenFile = Join-Path -Path $tempDir -ChildPath "graph_token.txt"
             Set-Content -Path $tokenFile -Value $global:AccessToken -Encoding UTF8
@@ -320,7 +320,8 @@ function Invoke-SelectedScript {
         [string]$ScriptPath,
         [string]$BaseFolder,
         [string]$CategoryName,
-        [string]$LogFolder
+        [string]$LogFolder,
+        [array]$ArgumentList
     )
     
     if (-not (Test-Path -Path $ScriptPath)) {
@@ -340,7 +341,11 @@ function Invoke-SelectedScript {
     Write-ExecutionLog "スクリプト実行開始: $ScriptPath ($CategoryName)" "INFO"
     
     try {
-        & $ScriptPath -OutputDir $categoryFolderPath -LogDir $LogFolder
+        if ($ArgumentList -and $ArgumentList.Count -gt 0) {
+            & $ScriptPath -OutputDir $categoryFolderPath -LogDir $LogFolder @ArgumentList
+        } else {
+            & $ScriptPath -OutputDir $categoryFolderPath -LogDir $LogFolder
+        }
         Write-ExecutionLog "スクリプト実行完了: $ScriptPath" "SUCCESS"
     } catch {
         Write-ErrorLog $_ "スクリプト実行中にエラーが発生しました: $ScriptPath"
@@ -396,7 +401,47 @@ try {
             "2" {
                 $scriptPath = Show-ChangeManagementMenu
                 if ($scriptPath) {
-                    Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Change_Management" -LogFolder $logFolderPath
+                    Write-ExecutionLog "変更管理スクリプトを実行します: $scriptPath" "DEBUG"
+                    
+                    # サービスプリンシパル情報を取得
+                    try {
+                        $context = Get-MgContext
+                        if (-not $context) {
+                            Write-ExecutionLog "Microsoft Graphコンテキストを取得できませんでした" "ERROR"
+                            Write-Host "エラー: Graph接続情報を取得できません" -ForegroundColor Red
+                            return
+                        }
+                        
+                        # サービスプリンシパル名を取得
+                        $servicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$($context.ClientId)'" -Top 1
+                        if (-not $servicePrincipal) {
+                            Write-ExecutionLog "サービスプリンシパル情報を取得できませんでした" "ERROR"
+                            Write-Host "エラー: サービスプリンシパル情報が取得できません" -ForegroundColor Red
+                            return
+                        }
+                        
+                        $currentUser = $servicePrincipal.DisplayName
+                        Write-ExecutionLog "サービスプリンシパル: $currentUser" "DEBUG"
+                        
+                        # 出力ディレクトリを作成
+                        $changeMgmtDir = "$dateFolderPath\Change_Management.$($executionTime.ToString('yyyyMMdd'))"
+                        if (-not (Test-Path -Path $changeMgmtDir)) {
+                            New-Item -Path $changeMgmtDir -ItemType Directory | Out-Null
+                        }
+
+                        # スクリプトを実行 (明示的にPowerShellで実行)
+                        try {
+                            $arguments = "-OutputDir `"$changeMgmtDir`" -LogDir `"$logFolderPath`" -TargetUser `"$currentUser`" -AccessToken `"$global:AccessToken`""
+                            Start-Process "powershell.exe" -ArgumentList "-File `"$scriptPath`" $arguments" -Wait -NoNewWindow
+                            Write-ExecutionLog "スクリプト実行が完了しました" "SUCCESS"
+                        } catch {
+                            Write-ErrorLog $_ "SharingCheckスクリプト実行中にエラーが発生しました"
+                            Write-Host "エラー: SharingCheckスクリプトの実行に失敗しました" -ForegroundColor Red
+                        }
+                    } catch {
+                        Write-ErrorLog $_ "変更管理スクリプトの実行中にエラーが発生しました"
+                        Write-Host "エラー: スクリプト実行中に問題が発生しました" -ForegroundColor Red
+                    }
                 }
             }
             "3" {
@@ -405,19 +450,19 @@ try {
                     Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Security_Management" -LogFolder $logFolderPath
                 }
             }
+            "4" {
+                # 総合レポート生成
+                $reportScriptPath = "$scriptRoot\GenerateReport.ps1"
+                if (Test-Path -Path $reportScriptPath) {
+                    Invoke-SelectedScript -ScriptPath $reportScriptPath -BaseFolder $dateFolderPath -CategoryName "Report" -LogFolder $logFolderPath
+                }
+            }
             "5" {
                 Disconnect-MgGraph | Out-Null
                 $connected = Connect-ToMicrosoftGraph
                 if (-not $connected) {
                     Write-ExecutionLog "Microsoft Graphへの再接続に失敗したため、プログラムを終了します。" "ERROR"
                     exit
-                }
-            }
-            "4" {
-                # 総合レポート生成
-                $reportScriptPath = "$scriptRoot\GenerateReport.ps1"
-                if (Test-Path -Path $reportScriptPath) {
-                    Invoke-SelectedScript -ScriptPath $reportScriptPath -BaseFolder $dateFolderPath -CategoryName "Report" -LogFolder $logFolderPath
                 }
             }
             "Q" {

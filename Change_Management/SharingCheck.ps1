@@ -2,14 +2,24 @@
 # SharingCheck.ps1 - 共有設定確認スクリプト
 
 param (
-    [string]$OutputDir = "$(Get-Location)",
-    [string]$LogDir = "$(Get-Location)\Log"
+    [Parameter(Mandatory=$true)]
+    [string]$OutputDir,
+    [Parameter(Mandatory=$true)] 
+    [string]$LogDir,
+    [string]$TargetUser = "",
+    [Parameter(Mandatory=$true)]
+    [string]$AccessToken
 )
+
+# 出力ディレクトリの存在確認
+if (-not (Test-Path -Path $OutputDir)) {
+    throw "出力ディレクトリが存在しません: $OutputDir"
+}
 
 # 実行開始時刻を記録
 $executionTime = Get-Date
 
-# ログファイルのパスを設定
+# ログファイルのパスを設定 (Main.ps1で作成済みのLogフォルダを使用)
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $logFilePath = Join-Path -Path $LogDir -ChildPath "SharingCheck.$timestamp.log"
 $errorLogPath = Join-Path -Path $LogDir -ChildPath "SharingCheck.Error.$timestamp.log"
@@ -20,18 +30,14 @@ function Write-Log {
         [string]$Message,
         [string]$Level = "INFO"
     )
-    
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logMessage = "[$timestamp] [$Level] $Message"
-    
-    # コンソールに出力
     switch ($Level) {
         "ERROR" { Write-Host $logMessage -ForegroundColor Red }
         "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
         "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
         default { Write-Host $logMessage }
     }
-    
     # ログファイルに出力
     Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
 }
@@ -41,7 +47,6 @@ function Write-ErrorLog {
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
         [string]$Message
     )
-    
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $errorMessage = "[$timestamp] [ERROR] $Message"
     $errorDetails = @"
@@ -50,9 +55,7 @@ function Write-ErrorLog {
 位置: $($ErrorRecord.InvocationInfo.PositionMessage)
 スタックトレース:
 $($ErrorRecord.ScriptStackTrace)
-
 "@
-    
     # コンソールに出力
     Write-Host $errorMessage -ForegroundColor Red
     
@@ -69,38 +72,92 @@ Write-Log "共有設定確認を開始します" "INFO"
 Write-Log "出力ディレクトリ: $OutputDir" "INFO"
 Write-Log "ログディレクトリ: $LogDir" "INFO"
 
+# 必要なモジュールをインポート
+try {
+    Import-Module Microsoft.PowerShell.Security -ErrorAction Stop
+    Write-Log "Microsoft.PowerShell.Securityモジュールをインポートしました" "DEBUG"
+} catch {
+    Write-ErrorLog $_ "Microsoft.PowerShell.Securityモジュールのインポートに失敗しました"
+    exit 1
+}
+
 # Microsoft Graphの接続確認
 try {
     $context = Get-MgContext
     if (-not $context) {
         Write-Log "Microsoft Graphに接続されていません。Main.ps1から実行してください。" "ERROR"
-        exit
+        exit 1
     }
-    
-    # ログインユーザーのUPN（メールアドレス）を自動取得
-    $UserUPN = $context.Account
-    
-    # ログイン済ユーザー情報を取得
-    $currentUser = Get-MgUser -UserId $UserUPN -Property DisplayName,Mail,onPremisesSamAccountName,AccountEnabled,onPremisesLastSyncDateTime,UserType
-    
-    # グローバル管理者かどうかを判定
-    $isAdmin = ($context.Scopes -contains "Directory.ReadWrite.All")
-    
-    Write-Log "ログインユーザー: $($currentUser.DisplayName) ($UserUPN)" "INFO"
-    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})" "INFO"
 } catch {
     Write-ErrorLog $_ "Microsoft Graphの接続確認中にエラーが発生しました"
-    exit
+    Write-Log "Microsoft Graphへの接続に失敗しました。Main.ps1から再実行してください。" "ERROR"
+    exit 1
 }
+
+    # サービスプリンシパル情報を取得
+    try {
+        $servicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$($context.ClientId)'" -Top 1
+        if (-not $servicePrincipal) {
+            throw "サービスプリンシパル情報を取得できませんでした"
+        }
+    } catch {
+        Write-ErrorLog $_ "サービスプリンシパル情報の取得中にエラーが発生しました"
+        exit 1
+    }
+
+    # サービスプリンシパルモード判定
+    $isAdmin = $false
+    $currentUser = $servicePrincipal
+    
+    # サービスプリンシパル判定条件
+    $isServicePrincipal = ($context.AppName -ne $null) -or 
+                         ($context.Account -match "appId=") -or
+                         ($context.Account -eq $servicePrincipal.DisplayName)
+    
+    if (-not $isServicePrincipal) {
+        # ユーザーモードの場合のみユーザー情報取得を試みる
+        try {
+            if (-not [string]::IsNullOrEmpty($context.Account)) {
+                $me = Get-MgUser -UserId $context.Account -ErrorAction Stop
+                $isAdmin = $true
+                $currentUser = $me
+            }
+        } catch {
+            Write-Log "ユーザー情報取得に失敗しました。サービスプリンシパルモードで続行します。" "WARNING"
+        }
+    }
+    
+    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"サービスプリンシパルモード"})" "INFO"
+    
+    Write-Log "サービスプリンシパル: $($servicePrincipal.DisplayName)" "INFO"
+    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"標準モード"})" "INFO"
+
+    # 管理者モードでない場合、対象ユーザー/サービスプリンシパルをパラメータで受け取る
+    if (-not $isAdmin) {
+        if (-not $PSBoundParameters.ContainsKey('TargetUser')) {
+            throw "管理者モードでない場合、-TargetUserパラメータで対象ユーザーまたはサービスプリンシパルを指定してください"
+        }
+        $UserUPN = $TargetUser
+        Write-Log "対象ユーザー/サービスプリンシパル: $UserUPN" "INFO"
+    }
+} # if (-not $isAdmin)の閉じ括弧
 
 # 出力用の共有設定リスト
 $sharingList = @()
+# 全ユーザーの処理ステータスを保持するリスト
+$allUserStatuses = @()
 
 try {
-    if ($isAdmin) {
-        # グローバル管理者の場合、すべてのユーザーの共有設定を確認
-        Write-Log "すべてのユーザーの共有設定を確認しています..." "INFO"
-        $allUsers = Get-MgUser -All -Property DisplayName,Mail,AccountEnabled
+    # サービスプリンシパルまたは管理者アカウントの場合、全ユーザーの共有設定を確認する
+    if ($true) { # サービスプリンシパルでの実行を前提とする
+        # 全ユーザーの共有設定を確認
+        Write-Log "すべてのユーザーの共有設定を確認しています (サービスプリンシパルモード)..." "INFO"
+        if ($context) {
+            $allUsers = Get-MgUser -All -Property Id,DisplayName,Mail,UserPrincipalName,AccountEnabled -ErrorAction Stop
+        } else {
+            Write-Log "Microsoft Graphコンテキストが利用できません。処理をスキップします。" "WARNING"
+            return
+        }
         
         $totalUsers = $allUsers.Count
         $processedUsers = 0
@@ -110,935 +167,130 @@ try {
             $percentComplete = [math]::Round(($processedUsers / $totalUsers) * 100, 2)
             Write-Progress -Activity "共有設定を確認中" -Status "$processedUsers / $totalUsers ユーザー処理中 ($percentComplete%)" -PercentComplete $percentComplete
             
+            # このユーザーの処理ステータスを初期化
+            $oneDriveStatus = "不明"
+            $userAccountStatus = if($user.AccountEnabled){"有効"}else{"無効"}
+            $userHasShares = $false # このユーザーが共有設定を持っているかのフラグ
+
             try {
-                # ユーザーのOneDriveを取得
-                $drive = Get-MgUserDrive -UserId $user.UserPrincipalName -ErrorAction Stop
-                
-                # 共有設定を確認（実際のAPIでは直接共有設定を取得できないため、シミュレーション）
-                # 実際の実装では、Microsoft GraphのAPIを使用して共有設定を取得する必要があります
-                
-                # サンプルデータ（実際の実装では削除）
-                if ($processedUsers % 5 -eq 0) { # 5人に1人は共有設定があるとシミュレーション
-                    $sharingDirections = @("送信", "受信")
-                    $sharingDirection = $sharingDirections[(Get-Random -Minimum 0 -Maximum 2)]
-                    
-                    $itemTypes = @("フォルダ", "ドキュメント", "画像", "スプレッドシート")
-                    $itemType = $itemTypes[(Get-Random -Minimum 0 -Maximum 4)]
-                    
-                    $itemName = "共有$itemType`_$(Get-Random -Minimum 1 -Maximum 1000)"
-                    
-                    $sharingTypes = @("リンク共有", "直接共有", "グループ共有")
-                    $sharingType = $sharingTypes[(Get-Random -Minimum 0 -Maximum 3)]
-                    
-                    $sharingScopes = @("組織内", "特定ユーザー", "誰でも（リンク所有者のみ）", "誰でも（編集可能）")
-                    $sharingScope = $sharingScopes[(Get-Random -Minimum 0 -Maximum 4)]
-                    
-                    # リスクレベルを設定
-                    $riskLevel = "低"
-                    if ($sharingScope -eq "誰でも（編集可能）") {
-                        $riskLevel = "高"
-                    } elseif ($sharingScope -eq "誰でも（リンク所有者のみ）") {
-                        $riskLevel = "中"
-                    }
-                    
-                    $lastModified = (Get-Date).AddDays(-(Get-Random -Minimum 1 -Maximum 30))
-                    $webUrl = "https://tenant.sharepoint.com/personal/$($user.UserPrincipalName.Replace('@', '_').Replace('.', '_'))/Documents/$itemName"
-                    
-                    $sharingList += [PSCustomObject]@{
+                # アカウント無効ユーザーの処理
+                if (-not $user.AccountEnabled) {
+                    $oneDriveStatus = "未対応 (アカウント無効)"
+                    $allUserStatuses += [PSCustomObject]@{
                         "ユーザー名"       = $user.DisplayName
                         "メールアドレス"   = $user.Mail
-                        "アカウント状態"   = if($user.AccountEnabled){"有効"}else{"無効"}
-                        "共有方向"         = $sharingDirection
-                        "アイテム名"       = $itemName
-                        "アイテムタイプ"   = $itemType
-                        "共有タイプ"       = $sharingType
-                        "共有範囲"         = $sharingScope
-                        "リスクレベル"     = $riskLevel
-                        "最終更新日時"     = $lastModified
-                        "WebURL"           = $webUrl
+                        "アカウント状態"   = $userAccountStatus
+                        "OneDrive対応状況" = $oneDriveStatus
+                        "共有方向"         = "N/A"
+                        "アイテム名"       = "N/A"
+                        "アイテムタイプ"   = "N/A"
+                        "共有タイプ"       = "N/A"
+                        "共有範囲"         = "N/A"
+                        "共有相手"         = "N/A"
+                        "リスクレベル"     = "N/A"
+                        "最終更新日時"     = "N/A"
+                        "WebURL"           = "N/A"
+                        "権限ID"           = "N/A"
                     }
-                    
-                    Write-Log "ユーザー $($user.UserPrincipalName) の共有設定を検出しました: $sharingType - $itemName" "INFO"
+                    continue # 次のユーザーへ
                 }
-            } catch {
-                Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveにアクセスできませんでした: $_" "WARNING"
-            }
-        }
-        
-        Write-Progress -Activity "共有設定を確認中" -Completed
-        Write-Log "共有設定の確認が完了しました。検出された共有設定: $($sharingList.Count)" "SUCCESS"
-    } else {
-        # 一般ユーザーまたはゲストの場合、自分自身の共有設定のみ確認
-        Write-Log "自分自身の共有設定を確認しています..." "INFO"
-        
-        try {
-            # 自分のOneDriveを取得
-            $myDrive = Get-MgUserDrive -UserId $UserUPN -ErrorAction Stop
-            
-            # 共有設定を確認（実際のAPIでは直接共有設定を取得できないため、シミュレーション）
-            # 実際の実装では、Microsoft GraphのAPIを使用して共有設定を取得する必要があります
-            
-            # サンプルデータ（実際の実装では削除）
-            if (Get-Random -Minimum 0 -Maximum 2 -eq 0) { # 50%の確率で共有設定があるとシミュレーション
-                $sharingDirections = @("送信", "受信")
-                $sharingDirection = $sharingDirections[(Get-Random -Minimum 0 -Maximum 2)]
-                
-                $itemTypes = @("フォルダ", "ドキュメント", "画像", "スプレッドシート")
-                $itemType = $itemTypes[(Get-Random -Minimum 0 -Maximum 4)]
-                
-                $itemName = "共有$itemType`_$(Get-Random -Minimum 1 -Maximum 1000)"
-                
-                $sharingTypes = @("リンク共有", "直接共有", "グループ共有")
-                $sharingType = $sharingTypes[(Get-Random -Minimum 0 -Maximum 3)]
-                
-                $sharingScopes = @("組織内", "特定ユーザー", "誰でも（リンク所有者のみ）", "誰でも（編集可能）")
-                $sharingScope = $sharingScopes[(Get-Random -Minimum 0 -Maximum 4)]
-                
-                # リスクレベルを設定
-                $riskLevel = "低"
-                if ($sharingScope -eq "誰でも（編集可能）") {
-                    $riskLevel = "高"
-                } elseif ($sharingScope -eq "誰でも（リンク所有者のみ）") {
-                    $riskLevel = "中"
-                }
-                
-                $lastModified = (Get-Date).AddDays(-(Get-Random -Minimum 1 -Maximum 30))
-                $webUrl = "https://tenant.sharepoint.com/personal/$($UserUPN.Replace('@', '_').Replace('.', '_'))/Documents/$itemName"
-                
-                $sharingList += [PSCustomObject]@{
-                    "ユーザー名"       = $currentUser.DisplayName
-                    "メールアドレス"   = $currentUser.Mail
-                    "アカウント状態"   = if($currentUser.AccountEnabled){"有効"}else{"無効"}
-                    "共有方向"         = $sharingDirection
-                    "アイテム名"       = $itemName
-                    "アイテムタイプ"   = $itemType
-                    "共有タイプ"       = $sharingType
-                    "共有範囲"         = $sharingScope
-                    "リスクレベル"     = $riskLevel
-                    "最終更新日時"     = $lastModified
-                    "WebURL"           = $webUrl
-                }
-                
-                Write-Log "共有設定を検出しました: $sharingType - $itemName" "INFO"
-            } else {
-                Write-Log "共有設定は検出されませんでした。" "SUCCESS"
-            }
-        } catch {
-            Write-ErrorLog $_ "OneDriveにアクセスできませんでした"
-        }
-        
-        Write-Log "共有設定の確認が完了しました。検出された共有設定: $($sharingList.Count)" "SUCCESS"
-    }
-} catch {
-    Write-ErrorLog $_ "共有設定の確認中にエラーが発生しました"
-}
 
-# 共有設定が検出されなかった場合のメッセージ
-if ($sharingList.Count -eq 0) {
-    $sharingList += [PSCustomObject]@{
-        "ユーザー名"       = "N/A"
-        "メールアドレス"   = "N/A"
-        "アカウント状態"   = "N/A"
-        "共有方向"         = "N/A"
-        "アイテム名"       = "N/A"
-        "アイテムタイプ"   = "N/A"
-        "共有タイプ"       = "N/A"
-        "共有範囲"         = "N/A"
-        "リスクレベル"     = "低"
-        "最終更新日時"     = Get-Date
-        "WebURL"           = "N/A"
-    }
-    
-    Write-Log "共有設定は検出されませんでした。" "SUCCESS"
-}
+                # 有効なユーザーのOneDriveを取得
+                if (-not [string]::IsNullOrEmpty($user.UserPrincipalName)) {
+                    try {
+                        Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveドライブを取得中..." "DEBUG"
+                        $driveInfo = Get-MgUserDrive -UserId $user.Id -ErrorAction SilentlyContinue # UserPrincipalNameではなくIdを使用
+                        if (-not $driveInfo) {
+                            $oneDriveStatus = "未対応 (アクセス不可/存在せず)"
+                            Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveドライブが見つからないか、アクセス権がありません。" "WARNING"
+                            $allUserStatuses += [PSCustomObject]@{ "ユーザー名" = $user.DisplayName; "メールアドレス" = $user.Mail; "アカウント状態" = $userAccountStatus; "OneDrive対応状況" = $oneDriveStatus; "共有方向"="N/A"; "アイテム名"="N/A"; "アイテムタイプ"="N/A"; "共有タイプ"="N/A"; "共有範囲"="N/A"; "共有相手"="N/A"; "リスクレベル"="N/A"; "最終更新日時"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
+                            continue # 次のユーザーへ
+                        }
+                        # 複数のドライブが返る可能性を考慮し、最初のものを取得
+                        $drive = $driveInfo[0]
+                        # ドライブオブジェクト自体またはそのIDが取得できたか確認し、空または空白ならスキップ
+                        if ($drive -eq $null -or [string]::IsNullOrWhiteSpace($drive.Id)) {
+                            $oneDriveStatus = "未対応 (ドライブID取得失敗)"
+                            Write-Log "ユーザー $($user.UserPrincipalName) のドライブ情報またはドライブIDが取得できませんでした (空または空白)。スキップします。" "WARNING"
+                            $allUserStatuses += [PSCustomObject]@{ "ユーザー名" = $user.DisplayName; "メールアドレス" = $user.Mail; "アカウント状態" = $userAccountStatus; "OneDrive対応状況" = $oneDriveStatus; "共有方向"="N/A"; "アイテム名"="N/A"; "アイテムタイプ"="N/A"; "共有タイプ"="N/A"; "共有範囲"="N/A"; "共有相手"="N/A"; "リスクレベル"="N/A"; "最終更新日時"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
+                            continue # 次のユーザーへ
+                        }
+                        # DriveId が有効な場合のみログ出力と後続処理へ
+                        Write-Log "ユーザー $($user.UserPrincipalName) のドライブID: $($drive.Id)" "DEBUG"
 
-# タイムスタンプ
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+                        # ドライブ内の全アイテムを取得 (権限情報は別途取得)
+                        Write-Log "ユーザー $($user.UserPrincipalName) のドライブ $($drive.Id) 内のアイテムを取得中..." "DEBUG"
+                        $items = $null # items変数を初期化
+                        try {
+                            # Get-MgDriveItem 呼び出しを try-catch で囲む
+                            try {
+                                # -Filter "id ne ''" を追加して filter 要求エラーを回避試行
+                                # -ErrorAction Stop を追加してエラーを捕捉可能にする
+                                $items = Get-MgDriveItem -DriveId $drive.Id -All -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -Filter "id ne ''" -ErrorAction Stop 
+                            } catch { # Get-MgDriveItem のエラーを捕捉
+                                $oneDriveStatus = "未対応 (アイテム取得エラー: $($_.Exception.Message))"
+                                Write-Log "ユーザー $($user.UserPrincipalName) のドライブアイテム取得中にエラーが発生しました: $($_.Exception.Message)" "WARNING"
+                                # Filter 要求エラーの場合、-All なしで再試行
+                                if ($_.Exception.Message -like "*The 'filter' query option must be provided*") {
+                                    Write-Log "  -> Filterエラーのため、ルートアイテムのみ取得して再試行します..." "WARNING"
+                                    try {
+                                        # 再試行時も -ErrorAction Stop を追加
+                                        $items = Get-MgDriveItem -DriveId $drive.Id -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -ErrorAction Stop # -All を削除
+                                        $oneDriveStatus = "対応 (ルートアイテムのみ)" # 재시도 성공 시에는 상태 변경
+                                    } catch { 
+                                        # 재시도 시에도 -ErrorAction Stop 을 추가
+                                        $items = Get-MgDriveItem -DriveId $drive.Id -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -ErrorAction Stop # -All 을 삭제
+                                        $oneDriveStatus = "대응 (루트 아이템만)" # 재시도 성공 시에는 상태 변경
+                                    }
+                                } else {
+                                    # Filter요구 이외의 에러의 경우는 상세를 로그에 기록해 스킵
+                                    Write-Log "  -> Filter요구 이외의 에러입니다. 스킵합니다。" "WARNING"
+                                    Write-Log "  상세: $($_.ScriptStackTrace)" "DEBUG"
+                                    $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
+                                    continue # 다음 사용자로
+                                }
+                            }
+                        } catch { # 바깥쪽의 try-catch (예기치 않은 에러용)
+                             $oneDriveStatus = "미대응 (아이템 획득 처리 에러: $($_.Exception.Message))"
+                             Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브 아이템 획득 처리 중에 예상치 못한 오류가 발생했습니다: $($_.Exception.Message)" "WARNING"
+                             Write-Log "상세 정보: $($_.ScriptStackTrace)" "DEBUG"
+                             $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
+                             continue # 다음 사용자로
+                        }
 
-# 出力ファイル名の設定
-$csvFile = "SharingCheck.$timestamp.csv"
-$htmlFile = "SharingCheck.$timestamp.html"
-$jsFile = "SharingCheck.$timestamp.js"
+                        # アイテム 획득에 성공한 경우 (에러로부터의 복귀 포함)
+                        if ($oneDriveStatus -notlike "미대응*") {
+                            $oneDriveStatus = "대응" # 기본 상태를 「대응」으로 설정
+                        }
 
-# 出力パスの設定
-$csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
-$htmlPath = Join-Path -Path $OutputDir -ChildPath $htmlFile
-$jsPath = Join-Path -Path $OutputDir -ChildPath $jsFile
+                        # アイテム을 획득할 수 없었던 경우는 스킵 (에러 처리 완료되었을 것이지만 만약을 위해)
+                        if ($items -eq $null) {
+                            $oneDriveStatus = "대응 (아이템 없음)"
+                            Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브에 아이템이 발견되지 않았습니다。" "DEBUG"
+                            # 공유는 없지만, 상태는 기록
+                            $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
+                            continue # 다음 사용자로
+                        }
+                        Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브로부터 $($items.Count) 개의 아이템을 획득했습니다。" "DEBUG"
 
-# CSV出力（文字化け対策済み）
-try {
-    # PowerShell Core (バージョン 6.0以上)の場合
-    if ($PSVersionTable.PSVersion.Major -ge 6) {
-        $sharingList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8BOM
-    }
-    # PowerShell 5.1以下の場合
-    else {
-        $sharingList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
-        # BOMを追加して文字化け対策
-        $content = [System.IO.File]::ReadAllText($csvPath)
-        [System.IO.File]::WriteAllText($csvPath, $content, [System.Text.Encoding]::UTF8)
-    }
-    Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
-    
-    # CSVファイルをExcelで開き、列幅の調整とフィルターの適用を行う
-    try {
-        Write-Log "Excelでファイルを開いて列幅の調整とフィルターの適用を行います..." "INFO"
-        $excel = New-Object -ComObject Excel.Application
-        $excel.Visible = $true
-        $workbook = $excel.Workbooks.Open($csvPath)
-        $worksheet = $workbook.Worksheets.Item(1)
-        
-        # 列幅の自動調整
-        $usedRange = $worksheet.UsedRange
-        $usedRange.Columns.AutoFit() | Out-Null
-        
-        # フィルターの適用
-        $usedRange.AutoFilter() | Out-Null
-        
-        # ウィンドウを最前面に表示
-        $excel.ActiveWindow.WindowState = -4143 # xlMaximized
-        
-        # 変更を保存
-        $workbook.Save()
-        
-        Write-Log "Excelでの処理が完了しました。" "SUCCESS"
-    }
-    catch {
-        Write-Log "Excelでの処理中にエラーが発生しました: $_" "WARNING"
-        Write-Log "CSVファイルは正常に作成されましたが、Excel処理はスキップされました。" "WARNING"
-    }
-} catch {
-    Write-ErrorLog $_ "CSVファイルの作成中にエラーが発生しました"
-}
+                        # アイテム마다 권한을 획득해 처리
+                        foreach ($item in $items) {
+                            # Write-Log "  아이템 '$($item.Name)' (ID: $($item.Id)) 의 권한을 획득 중..." "DEBUG" # 상세 로그 삭제
+                            try {
+                                # アイテム마다 권한을 획득
+                                $permissions = Get-MgDriveItemPermission -DriveId $drive.Id -DriveItemId $item.Id -All -ErrorAction Stop 
+                                if ($permissions -eq $null -or $permissions.Count -eq 0) {
+                                    # Write-Log "  아이템 '$($item.Name)' 에는 명시적인 권한 정보가 없습니다。" "DEBUG"
+                                    continue # 권한 정보가 없는 아이템은 스킵 (다음 아이템으로)
+                                }
+                                # Write-Log "  아이템 '$($item.Name)' 로부터 $($permissions.Count) 개의 권한을 획득했습니다。" "DEBUG" # 상세 로그 삭제
 
-# JavaScript ファイルの生成
-$jsContent = @"
-// SharingCheck データ操作用 JavaScript
+                                foreach ($permission in $permissions) {
+                                    # 1. 소유자 권한은 스킵
+                                    if ($permission.Roles -contains 'owner') {
+                                        # Write-Log "    -> Skipping (Owner)" "DEBUG"
+                                        continue
+                                    }
 
-// グローバル変数
-let currentPage = 1;
-let rowsPerPage = 10; // デフォルトの1ページあたりの行数
-let filteredRows = []; // フィルタリングされた行を保持する配列
-
-// テーブルを検索する関数（インクリメンタル検索対応）
-function searchTable() {
-    var input = document.getElementById('searchInput').value.toLowerCase();
-    var table = document.getElementById('sharingTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    filteredRows = [];
-    
-    for (var i = 0; i < rows.length; i++) {
-        var found = false;
-        var cells = rows[i].getElementsByTagName('td');
-        var rowData = {};
-        
-        for (var j = 0; j < cells.length; j++) {
-            var cellText = cells[j].textContent || cells[j].innerText;
-            // 列のヘッダー名を取得
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[j].textContent;
-            rowData[headerText] = cellText;
-            
-            if (cellText.toLowerCase().indexOf(input) > -1) {
-                found = true;
-            }
-        }
-        
-        if (found) {
-            filteredRows.push({row: rows[i], data: rowData});
-        }
-    }
-    
-    // 検索候補の表示
-    showSearchSuggestions(input);
-    
-    // 検索結果が空の場合は検索候補を非表示
-    if (filteredRows.length === 0 && input.length > 0) {
-        document.getElementById('searchSuggestions').innerHTML = '<div class="suggestion-item">検索結果がありません</div>';
-        document.getElementById('searchSuggestions').style.display = 'block';
-    }
-    
-    // ページングの更新
-    currentPage = 1;
-    updatePagination();
-}
-
-// 検索候補を表示する関数
-function showSearchSuggestions(input) {
-    var suggestionsDiv = document.getElementById('searchSuggestions');
-    suggestionsDiv.innerHTML = '';
-    
-    if (input.length < 1) {
-        suggestionsDiv.style.display = 'none';
-        return;
-    }
-    
-    // 一致する値を収集（重複なし）
-    var matches = new Set();
-    filteredRows.forEach(item => {
-        Object.values(item.data).forEach(value => {
-            if (value.toLowerCase().indexOf(input.toLowerCase()) > -1) {
-                matches.add(value);
-            }
-        });
-    });
-    
-    // 最大5件まで表示（より見やすく）
-    var count = 0;
-    matches.forEach(match => {
-        if (count < 5) {
-            var div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = match;
-            div.onclick = function() {
-                document.getElementById('searchInput').value = match;
-                searchTable();
-                suggestionsDiv.style.display = 'none';
-            };
-            suggestionsDiv.appendChild(div);
-            count++;
-        }
-    });
-    
-    if (count > 0) {
-        suggestionsDiv.style.display = 'block';
-    } else if (input.length > 0) {
-        // 検索結果がない場合のメッセージ
-        var noResults = document.createElement('div');
-        noResults.className = 'suggestion-item no-results';
-        noResults.textContent = '検索結果がありません';
-        suggestionsDiv.appendChild(noResults);
-        suggestionsDiv.style.display = 'block';
-    } else {
-        suggestionsDiv.style.display = 'none';
-    }
-}
-
-// 列フィルターを作成する関数
-function createColumnFilters() {
-    var table = document.getElementById('sharingTable');
-    var headers = table.getElementsByTagName('thead')[0].getElementsByTagName('th');
-    var filterRow = document.createElement('tr');
-    filterRow.className = 'filter-row';
-    
-    for (var i = 0; i < headers.length; i++) {
-        var cell = document.createElement('th');
-        var select = document.createElement('select');
-        select.className = 'column-filter';
-        select.setAttribute('data-column', i);
-        
-        // デフォルトのオプション
-        var defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'すべて';
-        select.appendChild(defaultOption);
-        
-        // 列の一意の値を取得
-        var uniqueValues = new Set();
-        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-        for (var j = 0; j < rows.length; j++) {
-            var cellValue = rows[j].getElementsByTagName('td')[i].textContent;
-            uniqueValues.add(cellValue);
-        }
-        
-        // 一意の値をソートしてオプションとして追加
-        Array.from(uniqueValues).sort().forEach(value => {
-            var option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
-        });
-        
-        // 変更イベントリスナーを追加
-        select.addEventListener('change', applyColumnFilters);
-        
-        cell.appendChild(select);
-        filterRow.appendChild(cell);
-    }
-    
-    // フィルター行をテーブルヘッダーに追加
-    table.getElementsByTagName('thead')[0].appendChild(filterRow);
-}
-
-// 列フィルターを適用する関数
-function applyColumnFilters() {
-    var table = document.getElementById('sharingTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    var filters = document.getElementsByClassName('column-filter');
-    filteredRows = [];
-    
-    // 各行に対してフィルターを適用
-    for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var cells = row.getElementsByTagName('td');
-        var rowData = {};
-        var includeRow = true;
-        
-        // 各フィルターをチェック
-        for (var j = 0; j < filters.length; j++) {
-            var filter = filters[j];
-            var columnIndex = parseInt(filter.getAttribute('data-column'));
-            var filterValue = filter.value;
-            
-            // 列のヘッダー名を取得
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[columnIndex].textContent;
-            var cellValue = cells[columnIndex].textContent;
-            rowData[headerText] = cellValue;
-            
-            // フィルター値が設定されていて、セルの値と一致しない場合は行を除外
-            if (filterValue && cellValue !== filterValue) {
-                includeRow = false;
-                break;
-            }
-        }
-        
-        if (includeRow) {
-            filteredRows.push({row: row, data: rowData});
-        }
-    }
-    
-    // 検索フィールドの値も考慮
-    var searchInput = document.getElementById('searchInput').value.toLowerCase();
-    if (searchInput) {
-        filteredRows = filteredRows.filter(item => {
-            return Object.values(item.data).some(value => 
-                value.toLowerCase().indexOf(searchInput) > -1
-            );
-        });
-    }
-    
-    // ページングの更新
-    currentPage = 1;
-    updatePagination();
-}
-
-// ページングを更新する関数
-function updatePagination() {
-    var table = document.getElementById('sharingTable');
-    var tbody = table.getElementsByTagName('tbody')[0];
-    var rows = tbody.getElementsByTagName('tr');
-    
-    // すべての行を非表示にする
-    for (var i = 0; i < rows.length; i++) {
-        rows[i].style.display = 'none';
-    }
-    
-    // フィルタリングされた行のみを表示
-    var startIndex = (currentPage - 1) * rowsPerPage;
-    var endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
-    
-    for (var i = startIndex; i < endIndex; i++) {
-        filteredRows[i].row.style.display = '';
-    }
-    
-    // ページネーションコントロールを更新
-    updatePaginationControls();
-}
-
-// ページネーションコントロールを更新する関数
-function updatePaginationControls() {
-    var paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = '';
-    
-    var totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    
-    // 「前へ」ボタン
-    var prevButton = document.createElement('button');
-    prevButton.innerHTML = '<span class="button-icon">◀</span>前へ';
-    prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            updatePagination();
-        }
-    });
-    paginationDiv.appendChild(prevButton);
-    
-    // ページ番号
-    var pageInfo = document.createElement('span');
-    pageInfo.className = 'page-info';
-    pageInfo.textContent = currentPage + ' / ' + (totalPages || 1) + ' ページ';
-    paginationDiv.appendChild(pageInfo);
-    
-    // 「次へ」ボタン
-    var nextButton = document.createElement('button');
-    nextButton.innerHTML = '次へ<span class="button-icon">▶</span>';
-    nextButton.disabled = currentPage === totalPages || totalPages === 0;
-    nextButton.addEventListener('click', function() {
-        if (currentPage < totalPages) {
-            currentPage++;
-            updatePagination();
-        }
-    });
-    paginationDiv.appendChild(nextButton);
-    
-    // 1ページあたりの行数を選択
-    var rowsPerPageDiv = document.createElement('div');
-    rowsPerPageDiv.className = 'rows-per-page';
-    
-    var rowsPerPageLabel = document.createElement('span');
-    rowsPerPageLabel.textContent = '表示件数: ';
-    rowsPerPageDiv.appendChild(rowsPerPageLabel);
-    
-    var rowsPerPageSelect = document.createElement('select');
-    [10, 20, 50, 100].forEach(function(value) {
-        var option = document.createElement('option');
-        option.value = value;
-        option.textContent = value + '件';
-        if (value === rowsPerPage) {
-            option.selected = true;
-        }
-        rowsPerPageSelect.appendChild(option);
-    });
-    
-    rowsPerPageSelect.addEventListener('change', function() {
-        rowsPerPage = parseInt(this.value);
-        currentPage = 1;
-        updatePagination();
-    });
-    
-    rowsPerPageDiv.appendChild(rowsPerPageSelect);
-    paginationDiv.appendChild(rowsPerPageDiv);
-    
-    // 総件数表示
-    var totalItems = document.createElement('span');
-    totalItems.className = 'total-items';
-    totalItems.textContent = '全 ' + filteredRows.length + ' 件';
-    paginationDiv.appendChild(totalItems);
-}
-
-// 検索入力フィールドからフォーカスが外れたときに検索候補を非表示にする
-function hideSearchSuggestions() {
-    // 少し遅延させて、候補をクリックする時間を確保
-    setTimeout(function() {
-        document.getElementById('searchSuggestions').style.display = 'none';
-    }, 200);
-}
-
-// CSVとしてエクスポートする関数 (文字化け対策済み)
-function exportTableToCSV() {
-    var table = document.getElementById('sharingTable');
-    var headerRow = table.getElementsByTagName('thead')[0].getElementsByTagName('tr')[0]; // ヘッダー行（1行目）のみ
-    var bodyRows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    var csv = [];
-    
-    // ヘッダー行を処理
-    var headerCols = headerRow.getElementsByTagName('th');
-    var headerData = [];
-    for (var i = 0; i < headerCols.length; i++) {
-        var data = headerCols[i].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/"/g, '""');
-        headerData.push('"' + data + '"');
-    }
-    csv.push(headerData.join(','));
-    
-    // データ行を処理（フィルター行は除外）
-    for (var i = 0; i < bodyRows.length; i++) {
-        var row = [], cols = bodyRows[i].getElementsByTagName('td');
-        for (var j = 0; j < cols.length; j++) {
-            // セル内のテキストから改行や引用符を適切に処理
-            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/"/g, '""');
-            row.push('"' + data.trim() + '"');
-        }
-        csv.push(row.join(','));
-    }
-    
-    // CSVファイルのダウンロード（UTF-8 BOM付きで文字化け対策）
-    var csvContent = '\uFEFF' + csv.join('\n'); // BOMを追加
-    var csvFile = new Blob([csvContent], {type: 'text/csv;charset=utf-8'});
-    var downloadLink = document.createElement('a');
-    downloadLink.download = 'SharingCheck_Export.csv';
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = 'none';
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-}
-
-// 印刷機能
-function printTable() {
-    window.print();
-}
-
-// 表の行に色を付ける
-function colorizeRows() {
-    var table = document.getElementById('sharingTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    
-    for (var i = 0; i < rows.length; i++) {
-        var riskLevelCell = rows[i].querySelector('td:nth-child(9)'); // リスクレベルのセル
-        
-        if (riskLevelCell) {
-            var riskLevel = riskLevelCell.textContent;
-            
-            if (riskLevel === '高') {
-                rows[i].classList.add('danger');
-            } else if (riskLevel === '中') {
-                rows[i].classList.add('warning');
-            } else if (riskLevel === '低') {
-                rows[i].classList.add('normal');
-            }
-        }
-        
-        // アカウント状態によっても色分け
-        var accountStatus = rows[i].querySelector('td:nth-child(3)'); // アカウント状態のセル
-        if (accountStatus && accountStatus.textContent === '無効') {
-            rows[i].classList.add('disabled');
-        }
-    }
-}
-
-// ページロード時に実行
-window.onload = function() {
-    colorizeRows();
-    createColumnFilters();
-    
-    // 検索イベントリスナーを設定
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        // リアルタイムで検索を実行（インクリメンタル検索）
-        searchTable();
-    });
-    document.getElementById('searchInput').addEventListener('blur', hideSearchSuggestions);
-    
-    // エクスポートボタンにイベントリスナーを設定
-    document.getElementById('exportBtn').addEventListener('click', exportTableToCSV);
-    
-    // 印刷ボタンにイベントリスナーを設定
-    document.getElementById('printBtn').addEventListener('click', printTable);
-    
-    // 初期ページングの設定
-    var table = document.getElementById('sharingTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    for (var i = 0; i < rows.length; i++) {
-        var cells = rows[i].getElementsByTagName('td');
-        var rowData = {};
-        
-        for (var j = 0; j < cells.length; j++) {
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[j].textContent;
-            rowData[headerText] = cells[j].textContent;
-        }
-        
-        filteredRows.push({row: rows[i], data: rowData});
-    }
-    
-    updatePagination();
-};
-"@
-
-# JavaScript ファイルを出力
-$jsContent | Out-File -FilePath $jsPath -Encoding UTF8
-Write-Log "JavaScriptファイルを作成しました: $jsPath" "SUCCESS"
-
-# 実行日時とユーザー情報を取得
-$executionDateFormatted = $executionTime.ToString("yyyy/MM/dd HH:mm:ss")
-$executorName = $currentUser.DisplayName
-$userType = if($currentUser.UserType){$currentUser.UserType}else{"未定義"}
-
-# HTML ファイルの生成
-$htmlContent = @"
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>OneDrive 共有設定レポート</title>
-    <script src="$jsFile"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #0078d4;
-            color: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-        }
-        .header-icon {
-            font-size: 24px;
-            margin-right: 10px;
-        }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .info-section {
-            background-color: #f0f0f0;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        .info-label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-        .toolbar {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            position: relative;
-        }
-        #searchInput {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            flex-grow: 1;
-        }
-        #searchSuggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 0 0 4px 4px;
-            z-index: 1000;
-            display: none;
-        }
-        .suggestion-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .suggestion-item:hover {
-            background-color: #f0f0f0;
-        }
-        .suggestion-item.no-results {
-            color: #999;
-            font-style: italic;
-            cursor: default;
-        }
-        button {
-            padding: 8px 12px;
-            background-color: #0078d4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        button:hover {
-            background-color: #106ebe;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .button-icon {
-            margin-right: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .filter-row th {
-            padding: 5px;
-        }
-        .column-filter {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        tr.danger {
-            background-color: #ffebee;
-        }
-        tr.warning {
-            background-color: #fff8e1;
-        }
-        tr.normal {
-            background-color: #f1f8e9;
-        }
-        tr.disabled {
-            color: #999;
-            font-style: italic;
-        }
-        .status-icon {
-            margin-right: 5px;
-        }
-        #pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .page-info {
-            margin: 0 10px;
-        }
-        .rows-per-page {
-            margin-left: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .total-items {
-            margin-left: 15px;
-        }
-        
-        @media print {
-            .toolbar, button, #pagination, .filter-row {
-                display: none;
-            }
-            body {
-                background-color: white;
-                margin: 0;
-            }
-            .container {
-                box-shadow: none;
-                padding: 0;
-            }
-            .header {
-                background-color: black !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            th {
-                background-color: #f2f2f2 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.danger {
-                background-color: #ffebee !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.warning {
-                background-color: #fff8e1 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.normal {
-                background-color: #f1f8e9 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="header-icon">🔄</div>
-            <h1>OneDrive 共有設定レポート</h1>
-        </div>
-        
-        <div class="info-section">
-            <p><span class="info-label">実行日時:</span> $executionDateFormatted</p>
-            <p><span class="info-label">実行者:</span> $executorName</p>
-            <p><span class="info-label">実行者の種別:</span> $userType</p>
-            <p><span class="info-label">実行モード:</span> $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})</p>
-            <p><span class="info-label">出力フォルダ:</span> $OutputDir</p>
-        </div>
-        
-        <div class="toolbar">
-            <input type="text" id="searchInput" placeholder="検索...">
-            <div id="searchSuggestions"></div>
-            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
-            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
-        </div>
-        
-        <div id="pagination"></div>
-
-        <table id="sharingTable">
-            <thead>
-                <tr>
-                    <th>ユーザー名</th>
-                    <th>メールアドレス</th>
-                    <th>アカウント状態</th>
-                    <th>共有方向</th>
-                    <th>アイテム名</th>
-                    <th>アイテムタイプ</th>
-                    <th>共有タイプ</th>
-                    <th>共有範囲</th>
-                    <th>リスクレベル</th>
-                    <th>最終更新日時</th>
-                    <th>WebURL</th>
-                </tr>
-            </thead>
-            <tbody>
-"@
-
-# HTML テーブル本体の作成
-foreach ($sharing in $sharingList) {
-    # リスクレベルに応じたアイコンを設定
-    $riskLevelIcon = switch ($sharing.'リスクレベル') {
-        "高" { "🔴" }
-        "中" { "🟡" }
-        "低" { "🟢" }
-        default { "❓" }
-    }
-    
-    # 行を追加
-    $htmlContent += @"
-                <tr>
-                    <td>$($sharing.'ユーザー名')</td>
-                    <td>$($sharing.'メールアドレス')</td>
-                    <td>$($sharing.'アカウント状態')</td>
-                    <td>$($sharing.'共有方向')</td>
-                    <td>$($sharing.'アイテム名')</td>
-                    <td>$($sharing.'アイテムタイプ')</td>
-                    <td>$($sharing.'共有タイプ')</td>
-                    <td>$($sharing.'共有範囲')</td>
-                    <td><span class="status-icon">$riskLevelIcon</span>$($sharing.'リスクレベル')</td>
-                    <td>$($sharing.'最終更新日時')</td>
-                    <td>$($sharing.'WebURL')</td>
-                </tr>
-"@
-}
-
-# HTML 終了部分
-$htmlContent += @"
-            </tbody>
-        </table>
-        
-        <div class="info-section">
-            <p><span class="info-label">色の凡例:</span></p>
-            <p>🟢 緑色の行: 低リスクの共有設定</p>
-            <p>🟡 黄色の行: 中リスクの共有設定</p>
-            <p>🔴 赤色の行: 高リスクの共有設定</p>
-            <p>⚪ グレーの行: 無効なアカウント</p>
-        </div>
-    </div>
-</body>
-</html>
-"@
-
-# HTML ファイルを出力
-$htmlContent | Out-File -FilePath $htmlPath -Encoding UTF8
-Write-Log "HTMLファイルを作成しました: $htmlPath" "SUCCESS"
-
-# ログファイルに出力
-$sharingList | Format-Table -AutoSize | Out-File -FilePath $logFilePath -Encoding UTF8 -Append
-Write-Log "共有設定確認が完了しました" "SUCCESS"
-
-# 出力ディレクトリを開く
-try {
-    Start-Process -FilePath "explorer.exe" -ArgumentList $OutputDir
-    Write-Log "出力ディレクトリを開きました: $OutputDir" "SUCCESS"
-} catch {
-    Write-Log "出力ディレクトリを開けませんでした: $_" "WARNING"
-}
+                                    # 2. 링크 공유인지 직접 공유인지를 판정
+                                    $isLinkShare = $permission.Link
