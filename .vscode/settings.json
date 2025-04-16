@@ -1,3 +1,4 @@
 {
-    "cline.preferredLanguage": "Japanese - 日本語"
+    "cline.preferredLanguage": "Japanese - 日本語",
+    "cline.vsCodeLmModelSelector": {}
 }

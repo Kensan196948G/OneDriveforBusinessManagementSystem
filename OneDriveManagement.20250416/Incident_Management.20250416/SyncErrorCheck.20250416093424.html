@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OneDrive 同期エラーレポート</title>
+    <script src="SyncErrorCheck.20250416093424.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #0078d4;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .header-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-section {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+        #searchInput {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #searchSuggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .suggestion-item.no-results {
+            color: #999;
+            font-style: italic;
+            cursor: default;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        button:hover {
+            background-color: #106ebe;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .button-icon {
+            margin-right: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .filter-row th {
+            padding: 5px;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        tr.danger {
+            background-color: #ffebee;
+        }
+        tr.warning {
+            background-color: #fff8e1;
+        }
+        tr.info {
+            background-color: #e3f2fd;
+        }
+        tr.disabled {
+            color: #999;
+            font-style: italic;
+        }
+        .status-icon {
+            margin-right: 5px;
+            font-size: 1.2em;
+            vertical-align: middle;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .page-info {
+            margin: 0 10px;
+        }
+        .rows-per-page {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .total-items {
+            margin-left: 15px;
+        }
+        
+        @media print {
+            .toolbar, button, #pagination, .filter-row {
+                display: none;
+            }
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .header {
+                background-color: black !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.danger {
+                background-color: #ffebee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.warning {
+                background-color: #fff8e1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.info {
+                background-color: #e3f2fd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">⚠️</div>
+            <h1>OneDrive 同期エラーレポート</h1>
+        </div>
+        
+        <div class="info-section">
+            <p><span class="info-label">実行日時:</span> 2025/04/16 09:29:11</p>
+            <p><span class="info-label">実行者:</span> admin</p>
+            <p><span class="info-label">実行者の種別:</span> Member</p>
+            <p><span class="info-label">実行モード:</span> 管理者モード</p>
+            <p><span class="info-label">出力フォルダ:</span> C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250416\Incident_Management.20250416</p>
+        </div>
+        
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="検索...">
+            <div id="searchSuggestions"></div>
+            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
+            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
+        </div>
+        
+        <div id="pagination"></div>
+
+        <table id="errorTable">
+            <thead>
+                <tr>
+                    <th>ユーザー名</th>
+                    <th>メールアドレス</th>
+                    <th>アカウント状態</th>
+                    <th>OneDrive対応</th>
+                    <th>エラー種別</th>
+                    <th>ファイル名</th>
+                    <th>ファイルパス</th>
+                    <th>最終更新日時</th>
+                    <th>サイズ(KB)</th>
+                    <th>エラー詳細</th>
+                    <th>推奨対応</th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="column-filter" data-column="0">
+                        <option value="">すべて</option>
+                    </select></th>
+                    <th></th>
+                    <th></th>
+                    <th><select class="column-filter" data-column="3">
+                        <option value="">すべて</option>
+                    </select></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th><select class="column-filter" data-column="9">
+                        <option value="">すべて</option>
+                    </select></th>
+                    <th><select class="column-filter" data-column="10">
+                        <option value="">すべて</option>
+                    </select></th>
+                </tr>
+            </thead>
+            <tbody>                <tr>
+                    <td>宮本 綾</td>
+                    <td>a-miyamoto@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_3<br>82.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>382.docx</td>
+                    <td style="font-size: 0.8em;">04/06/2025 09:29:18</td>
+                    <td style="font-size: 0.8em;">883</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>山田　昭光</td>
+                    <td>a-yamada@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_4<br>15.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>415.docx</td>
+                    <td style="font-size: 0.8em;">04/15/2025 09:29:25</td>
+                    <td style="font-size: 0.8em;">3906</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>admin</td>
+                    <td>admin@miraiconst.onm<br>icrosoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:25</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>Office365管理用</td>
+                    <td>admin1@miraiconst.on<br>microsoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:26</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>Amazonビジネス</td>
+                    <td>amazon-biz@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:28</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （青森営業所）</td>
+                    <td>aomori-rakuraku@mira<br>i-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:29</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>appleID用</td>
+                    <td>apple-id@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:29</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （有明営業所）</td>
+                    <td>ariake-rakuraku@mira<br>i-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:31</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>近藤 篤史</td>
+                    <td>at-kondou@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>2.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>52.docx</td>
+                    <td style="font-size: 0.8em;">04/02/2025 09:29:32</td>
+                    <td style="font-size: 0.8em;">3220</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>ats-watanabe</td>
+                    <td>ats-watanabe@mitsuif<br>udosan.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:32</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札管理（all）</td>
+                    <td>bid-info@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:33</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（本社）</td>
+                    <td>bid-info01m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:34</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（北海道支店）</td>
+                    <td>bid-info02m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:35</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（東北支店）</td>
+                    <td>bid-info03m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:36</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（東京支店）</td>
+                    <td>bid-info04m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:37</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（千葉営業支店）</td>
+                    <td>bid-info05m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:37</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（横浜営業支店）</td>
+                    <td>bid-info06m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:39</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（茨城営業支店）</td>
+                    <td>bid-info07m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:40</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（北陸営業支店）</td>
+                    <td>bid-info08m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:40</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（中部支店）</td>
+                    <td>bid-info09m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:42</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（大阪支店）</td>
+                    <td>bid-info10m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:43</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（中国支店）</td>
+                    <td>bid-info11m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:44</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>電子入札（四国営業支店）</td>
+                    <td>bid-info12m@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:45</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>Autocad管理用</td>
+                    <td>cad-master@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:48</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （千葉営業支店）</td>
+                    <td>chiba-rakuraku@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:48</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （中部支店）</td>
+                    <td>chubu-rakuraku@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:49</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>中部支店（Zoom）</td>
+                    <td>chubu@mirai-const.co<br>.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:50</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （中国営業支店）</td>
+                    <td>chugoku-rakuraku@mir<br>ai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:51</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM管理（all）</td>
+                    <td>cim-master@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:53</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用01</td>
+                    <td>cim-master01@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:54</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用02</td>
+                    <td>cim-master02@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:55</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用03</td>
+                    <td>cim-master03@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:55</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用04</td>
+                    <td>cim-master04@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:57</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用05</td>
+                    <td>cim-master05@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:58</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用06</td>
+                    <td>cim-master06@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:59</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用07</td>
+                    <td>cim-master07@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:29:59</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用08</td>
+                    <td>cim-master08@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:01</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用09</td>
+                    <td>cim-master09@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:02</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用10</td>
+                    <td>cim-master10@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:02</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用11</td>
+                    <td>cim-master11@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:04</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用12</td>
+                    <td>cim-master12@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:05</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用13</td>
+                    <td>cim-master13@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:06</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用14</td>
+                    <td>cim-master14@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:07</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用15</td>
+                    <td>cim-master15@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:08</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>CIM用16</td>
+                    <td>cim-master16@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:09</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>コンプライアンスホットライン</td>
+                    <td>compliance-hotline@m<br>irai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:09</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>DirectCloud test</td>
+                    <td>direct@mirai-const.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:11</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>みらい　渡邊</td>
+                    <td>e-watanabe@miraicons<br>t.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:12</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>高橋 富美江</td>
+                    <td>f-takahashi@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_4<br>05.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>405.docx</td>
+                    <td style="font-size: 0.8em;">03/30/2025 09:30:16</td>
+                    <td style="font-size: 0.8em;">2063</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>Fortinet管理</td>
+                    <td>forti-admin@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:16</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>加藤 浩</td>
+                    <td>h-katoh@mirai-const.<br>co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_6<br>66.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>666.docx</td>
+                    <td style="font-size: 0.8em;">03/23/2025 09:30:21</td>
+                    <td style="font-size: 0.8em;">3006</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>中道 秀則</td>
+                    <td>h-nakamichi@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>45.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>745.docx</td>
+                    <td style="font-size: 0.8em;">04/06/2025 09:30:27</td>
+                    <td style="font-size: 0.8em;">4047</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>瀬尾 浩晃</td>
+                    <td>h-seo@mirai-const.co<br>.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>99.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>899.docx</td>
+                    <td style="font-size: 0.8em;">03/27/2025 09:30:32</td>
+                    <td style="font-size: 0.8em;">1443</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>山下 仁</td>
+                    <td>h-yamashita@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>4.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>84.docx</td>
+                    <td style="font-size: 0.8em;">04/05/2025 09:30:37</td>
+                    <td style="font-size: 0.8em;">2189</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>h_kawamura</td>
+                    <td>h_kawamura@cdit.or.j<br>p</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:39</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>石垣　遥香</td>
+                    <td>haruka.ishigaki@aaco<br>nst.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:39</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>HENNGE動作確認</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:40</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>石橋 宏樹</td>
+                    <td>hi-ishibashi@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_2<br>46.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>246.docx</td>
+                    <td style="font-size: 0.8em;">04/06/2025 09:30:43</td>
+                    <td style="font-size: 0.8em;">4836</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>野村　英政（ハレクラニ沖縄　施設管理部）<br></td>
+                    <td>hideyuki.nomura@hale<br>kulaniokinawa.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北海道支店）</td>
+                    <td>hokkaido-rakuraku@mi<br>rai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>北海道支店（Zoom）</td>
+                    <td>hokkaido@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北陸営業支店）</td>
+                    <td>hokuriku-rakuraku@mi<br>rai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>本社会議室２階①（Zoom）</td>
+                    <td>honsya2-1@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>本社会議室２階②（Zoom）</td>
+                    <td>honsya2-2@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>HP管理</td>
+                    <td>hp-kanri@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:47</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （茨城営業所）</td>
+                    <td>ibaraki-rakuraku@mir<br>ai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:49</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>ito</td>
+                    <td>ito@mainmark.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:49</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>阿部　二郎</td>
+                    <td>j-abe@mirai-const.co<br>.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_4<br>47.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>447.docx</td>
+                    <td style="font-size: 0.8em;">04/15/2025 09:30:49</td>
+                    <td style="font-size: 0.8em;">2098</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>みらい建設工業 人事採用</td>
+                    <td>jinji-saiyou@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:30:51</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>平林 敬治</td>
+                    <td>k-hirabayashi@mirai-<br>const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_6<br>04.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>604.docx</td>
+                    <td style="font-size: 0.8em;">03/20/2025 09:30:55</td>
+                    <td style="font-size: 0.8em;">2060</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>劔持 久美子</td>
+                    <td>k-kemmochi@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_3<br>34.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>334.docx</td>
+                    <td style="font-size: 0.8em;">03/18/2025 09:31:00</td>
+                    <td style="font-size: 0.8em;">3665</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>宮島 杏花</td>
+                    <td>k-miyajima@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>39.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>739.docx</td>
+                    <td style="font-size: 0.8em;">03/29/2025 09:31:05</td>
+                    <td style="font-size: 0.8em;">3960</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>小原　恒平</td>
+                    <td>k-obara@mirai-const.<br>co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:07</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>柴田 鋼三</td>
+                    <td>k-shibata@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_9<br>3.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>93.docx</td>
+                    <td style="font-size: 0.8em;">04/05/2025 09:31:10</td>
+                    <td style="font-size: 0.8em;">2463</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>杉本 慧太（みらい建設工業）</td>
+                    <td>k-sugimoto@miraicons<br>t.onmicrosoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:11</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>綱分 康太</td>
+                    <td>k-tsunawaki@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>8.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>88.docx</td>
+                    <td style="font-size: 0.8em;">04/06/2025 09:31:15</td>
+                    <td style="font-size: 0.8em;">2770</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>小森 一典</td>
+                    <td>ka-komori@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>27.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>527.docx</td>
+                    <td style="font-size: 0.8em;">03/21/2025 09:31:20</td>
+                    <td style="font-size: 0.8em;">2124</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>会計サポート</td>
+                    <td>kaikei-support@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:22</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>管理（九州）</td>
+                    <td>kanri-kyushu@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:22</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>管理（大阪）</td>
+                    <td>kanri-oosaka@mirai-c<br>onst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:22</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>管理（東京）</td>
+                    <td>kanri-tokyo@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:22</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>経営企画</td>
+                    <td>keieikikaku@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>藤田　圭司（三井不動産　開企・環境Ｇ）</td>
+                    <td>ki-fujita@mitsuifudo<br>san.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>北九州営業所（Zoom）</td>
+                    <td>kita-kyushu@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （北九州営業所）</td>
+                    <td>kitakyushu-rakuraku@<br>mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （九州支店）</td>
+                    <td>kyushu-rakuraku@mira<br>i-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:26</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>有明営業所（Zoom）</td>
+                    <td>m-ariake@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:27</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>中国支店（Zoom）</td>
+                    <td>m-chugoku@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:28</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>濵嶋 学</td>
+                    <td>m-hamashima@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>38.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>538.docx</td>
+                    <td style="font-size: 0.8em;">03/21/2025 09:31:33</td>
+                    <td style="font-size: 0.8em;">2280</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>HP問合せ（m-info）</td>
+                    <td>m-info@mirai-const.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:36</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>神原　正明</td>
+                    <td>m-kambara@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>18.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>818.docx</td>
+                    <td style="font-size: 0.8em;">04/11/2025 09:31:38</td>
+                    <td style="font-size: 0.8em;">699</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>丸田 雅博</td>
+                    <td>m-maruta@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:40</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>中谷 正広</td>
+                    <td>m-nakatani@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_4<br>64.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>464.docx</td>
+                    <td style="font-size: 0.8em;">03/31/2025 09:31:44</td>
+                    <td style="font-size: 0.8em;">2139</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>鈴木 正彦</td>
+                    <td>m-suzuki@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:52</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>牛久保　麻椰</td>
+                    <td>m-ushikubo@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:31:56</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>長谷川　茉侑</td>
+                    <td>ma-hasegawa@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>43.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>743.docx</td>
+                    <td style="font-size: 0.8em;">03/25/2025 09:32:00</td>
+                    <td style="font-size: 0.8em;">1070</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>メール取得用みらい</td>
+                    <td>mail-info@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:03</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>事業企画室専用</td>
+                    <td>mf-jigyoukikaku@mira<br>i-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:05</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>カーボンブラックアラート通知用</td>
+                    <td>mirai-edr@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:06</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>SNS共用アカウント</td>
+                    <td>mirai-sns@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:07</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>web会議（mirai-zoom）</td>
+                    <td>mirai-zoom@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:08</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>エンゲージメント委員会事務局（Sugge<br>stionBox）</td>
+                    <td>mk-engagement@mirai-<br>const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:08</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>仕訳入力システム通知用</td>
+                    <td>mksystem-alert@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:09</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>永江 愛美</td>
+                    <td>n-manami@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>4.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>74.docx</td>
+                    <td style="font-size: 0.8em;">04/01/2025 09:32:16</td>
+                    <td style="font-size: 0.8em;">1049</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>吉谷 直樹</td>
+                    <td>n-yoshitani@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>96.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>796.docx</td>
+                    <td style="font-size: 0.8em;">04/12/2025 09:32:22</td>
+                    <td style="font-size: 0.8em;">573</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>角川 直</td>
+                    <td>na-kadokawa@apptec.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>netis</td>
+                    <td>netis@mirai-const.co<br>.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:23</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （能登営業所）</td>
+                    <td>noto-rakuraku@mirai-<br>const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:25</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （沖縄営業所）</td>
+                    <td>okinawa-rakuraku@mir<br>ai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:28</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>沖縄営業所（Zoom）</td>
+                    <td>okinawa@mirai-const.<br>co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:29</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （大阪支店）</td>
+                    <td>osaka-rakuraku@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:30</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>普天間 倫世</td>
+                    <td>r-futenma@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:32</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>小堀 諒士</td>
+                    <td>r-kobori@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_1<br>60.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>160.docx</td>
+                    <td style="font-size: 0.8em;">04/08/2025 09:32:36</td>
+                    <td style="font-size: 0.8em;">1952</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>下田 伶央斗</td>
+                    <td>r-shimoda@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_2<br>98.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>298.docx</td>
+                    <td style="font-size: 0.8em;">04/10/2025 09:32:40</td>
+                    <td style="font-size: 0.8em;">568</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>堀　聡</td>
+                    <td>s-hori@mirai-const.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>38.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>538.docx</td>
+                    <td style="font-size: 0.8em;">04/08/2025 09:32:45</td>
+                    <td style="font-size: 0.8em;">4414</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>長岡 伸一</td>
+                    <td>s-nagaoka@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>26.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>826.docx</td>
+                    <td style="font-size: 0.8em;">03/20/2025 09:32:50</td>
+                    <td style="font-size: 0.8em;">3511</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>佐藤 奨</td>
+                    <td>s-satoh@mirai-const.<br>co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_8<br>36.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>836.docx</td>
+                    <td style="font-size: 0.8em;">03/28/2025 09:32:55</td>
+                    <td style="font-size: 0.8em;">4420</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>S.Nagano</td>
+                    <td>S.Nagano@otsuka-shok<br>ai.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:32:58</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>伊藤 聡</td>
+                    <td>sa-itoh@mirai-const.<br>co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_3<br>50.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>350.docx</td>
+                    <td style="font-size: 0.8em;">04/03/2025 09:32:59</td>
+                    <td style="font-size: 0.8em;">2295</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>石原 旧Officeアカウント</td>
+                    <td>sh-ishihara-old@mira<br>iconst.mail.onmicros<br>oft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:00</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>変化共有テスト</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:02</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （四国営業支店）</td>
+                    <td>shikoku-rakuraku@mir<br>ai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:02</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （静岡営業所）</td>
+                    <td>shizuoka-rakuraku@mi<br>rai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:02</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>尾方 柊真</td>
+                    <td>shu-ogata@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_1<br>10.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>110.docx</td>
+                    <td style="font-size: 0.8em;">03/27/2025 09:33:03</td>
+                    <td style="font-size: 0.8em;">2142</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>SketchUpPro用（サブスク管理）<br></td>
+                    <td>sketchup@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:03</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>総務（支払）</td>
+                    <td>soumu-payment@mirai-<br>const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:03</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>On-Premises Director<br>y Synchronization Se<br>rvice Account</td>
+                    <td></td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:03</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>システムインフォ</td>
+                    <td>system-info@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:03</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>福田 猛</td>
+                    <td>t-fukuda@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_1<br>25.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>125.docx</td>
+                    <td style="font-size: 0.8em;">04/05/2025 09:33:06</td>
+                    <td style="font-size: 0.8em;">753</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>柏原 武琉</td>
+                    <td>t-kashiwabara@mirai-<br>const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_7<br>82.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>782.docx</td>
+                    <td style="font-size: 0.8em;">04/02/2025 09:33:11</td>
+                    <td style="font-size: 0.8em;">4130</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>熊井崇（みらい建設工業）</td>
+                    <td>t-kumai@miraiconst.o<br>nmicrosoft.com</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:13</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>的場 敬</td>
+                    <td>t-matoba@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_2<br>65.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>265.docx</td>
+                    <td style="font-size: 0.8em;">04/06/2025 09:33:22</td>
+                    <td style="font-size: 0.8em;">2724</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>新岡 智也</td>
+                    <td>t-niioka@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="同期エラー">🔴</span> <span style="font-size: 0.8em;">同期エラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>39.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>539.docx</td>
+                    <td style="font-size: 0.8em;">03/18/2025 09:33:27</td>
+                    <td style="font-size: 0.8em;">716</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ネットワーク接続を確<br>認し、OneDriv<br>eクライアントを再起<br>動してください。解決<br>しない場合はファイル<br>を再アップロードして<br>ください。</td>
+                </tr>                <tr>
+                    <td>澤田　卓冶</td>
+                    <td>t-sawada@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_6<br>58.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>658.docx</td>
+                    <td style="font-size: 0.8em;">04/07/2025 09:33:31</td>
+                    <td style="font-size: 0.8em;">422</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>山口 貴也</td>
+                    <td>t-yamaguchi@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_5<br>62.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>562.docx</td>
+                    <td style="font-size: 0.8em;">04/13/2025 09:33:36</td>
+                    <td style="font-size: 0.8em;">2094</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>takuro.kumada</td>
+                    <td>takuro.kumada@aacons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:40</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>HP問合せﾌｫｰﾑ受信用（技術部）</td>
+                    <td>tech@mirai-const.co.<br>jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:41</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （東北支店）</td>
+                    <td>tohoku-rakuraku@mira<br>i-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:42</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （東京支店）</td>
+                    <td>tokyo-rakuraku@mirai<br>-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:42</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>東京工事事務所（Zoom）</td>
+                    <td>tokyokoji@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:42</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算（東京工事事務所）</td>
+                    <td>tokyokouji-rakuraku@<br>mirai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:42</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>tsubokawa-y92y2</td>
+                    <td>tsubokawa-y92y2@mlit<br>.go.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:43</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>WEB管理（web-admin）</td>
+                    <td>webadmin@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:33:44</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>市川　豊</td>
+                    <td>y-ichikawa@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_1<br>78.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>178.docx</td>
+                    <td style="font-size: 0.8em;">04/02/2025 09:33:47</td>
+                    <td style="font-size: 0.8em;">545</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>宮崎 嘉彦</td>
+                    <td>y-miyazaki@mirai-con<br>st.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_3<br>43.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>343.docx</td>
+                    <td style="font-size: 0.8em;">04/02/2025 09:34:00</td>
+                    <td style="font-size: 0.8em;">2349</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>大野 雄二</td>
+                    <td>y-ohno@mirai-const.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="情報">🔵</span> <span style="font-size: 0.8em;">情報</span></td>
+                    <td style="font-size: 0.8em;">document_6<br>23.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>623.docx</td>
+                    <td style="font-size: 0.8em;">03/27/2025 09:34:04</td>
+                    <td style="font-size: 0.8em;">3265</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">特に対応は必要ありま<br>せん。</td>
+                </tr>                <tr>
+                    <td>田島 美知</td>
+                    <td>y-tajima@mirai-const<br>.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:09</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>髙岡 由依</td>
+                    <td>y-takaoka@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_9<br>86.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>986.docx</td>
+                    <td style="font-size: 0.8em;">04/07/2025 09:34:10</td>
+                    <td style="font-size: 0.8em;">3585</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>都築　恭生</td>
+                    <td>y-tsuzuki@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:12</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>植野 芳彦</td>
+                    <td>y-ueno@mirai-const.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:13</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>吉盛　勇介</td>
+                    <td>y-yoshimori@mirai-co<br>nst.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_1<br>63.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>163.docx</td>
+                    <td style="font-size: 0.8em;">04/03/2025 09:34:16</td>
+                    <td style="font-size: 0.8em;">4476</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>yamasaki-s89fa</td>
+                    <td>yamasaki-s89fa@mlit.<br>go.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:16</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>yk-takahashi</td>
+                    <td>yk-takahashi@mitsuif<br>udosan.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:17</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>楽楽精算 （横浜営業支店）</td>
+                    <td>yokohama-rakuraku@mi<br>rai-const.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:18</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>ys-yamamoto</td>
+                    <td>ys-yamamoto@apptec.c<br>o.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:20</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>                <tr>
+                    <td>田中 悠太</td>
+                    <td>yu-tanaka@mirai-cons<br>t.co.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">document_6<br>97.docx</td>
+                    <td style="font-size: 0.8em;">/Documents<br>/document_<br>697.docx</td>
+                    <td style="font-size: 0.8em;">03/30/2025 09:34:22</td>
+                    <td style="font-size: 0.8em;">4507</td>
+                    <td style="font-size: 0.8em;">ファイルの同期中にエ<br>ラーが発生しました。<br></td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのOneDr<br>ive権限を確認し、<br>必要に応じて管理者へ<br>連絡してください。</td>
+                </tr>                <tr>
+                    <td>財務管理</td>
+                    <td>zaimu@mirai-const.co<br>.jp</td>
+                    <td>有効</td>
+                    <td style="font-size: 0.7em;">未対応</td>
+                    <td><span class="status-icon" title="アクセスエラー">🟡</span> <span style="font-size: 0.8em;">アクセスエラー</span></td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">N/A</td>
+                    <td style="font-size: 0.8em;">04/16/2025 09:34:24</td>
+                    <td style="font-size: 0.8em;">取得不可</td>
+                    <td style="font-size: 0.8em;">OneDriveにア<br>クセスできませんでし<br>た: [Resour<br>ceNotFound<br>] : User's<br> mysite no<br>t found.</td>
+                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">ユーザーのアクセス権<br>限を確認してください<br>。</td>
+                </tr>            </tbody>
+        </table>
+        
+        <div class="info-section">
+            <p><span class="info-label">色の凡例:</span></p>
+            <p>🔴 赤色の行: 同期エラー</p>
+            <p>🟡 黄色の行: アクセスエラー</p>
+            <p>🔵 青色の行: 情報メッセージ</p>
+            <p>⚪ グレーの行: 無効なアカウント</p>
+        </div>
+    </div>
+</body>
+</html>
