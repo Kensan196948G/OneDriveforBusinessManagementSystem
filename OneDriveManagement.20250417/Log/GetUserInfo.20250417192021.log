@@ -1,0 +1,9 @@
+[2025-04-17 19:20:21] [INFO] ユーザー情報取得を開始します
+[2025-04-17 19:20:21] [INFO] ベースディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem
+[2025-04-17 19:20:21] [INFO] 出力ルートディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250417
+[2025-04-17 19:20:21] [INFO] レポートディレクトリ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250417\Report
+[2025-04-17 19:20:21] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-17 19:20:21] [INFO] Microsoft Graph REST APIで全ユーザー情報を取得します...
+[2025-04-17 19:21:55] [SUCCESS] ユーザー情報の取得が完了しました。取得件数: 525
+[2025-04-17 19:21:55] [SUCCESS] CSVファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250417\Report\UserInfo.20250417192155.csv
+[2025-04-17 19:21:55] [SUCCESS] HTMLファイルを作成しました: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250417\Report\UserInfo.20250417192155.html

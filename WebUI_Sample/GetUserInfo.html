@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ユーザー情報レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --email-color: #ffd54f;
+  --login-color: #ba68c8;
+  --type-color: #81c784;
+  --status-color: #ffb74d;
+  --lastsync-color: #4dd0e1;
+}
+
+.column-user { 
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-email { 
+  background: linear-gradient(135deg, var(--email-color), #ffca28);
+  color: #333;
+}
+.column-login { 
+  background: linear-gradient(135deg, var(--login-color), #9c27b0);
+  color: white;
+}
+.column-type { 
+  background: linear-gradient(135deg, var(--type-color), #43a047);
+  color: white;
+}
+.column-status { 
+  background: linear-gradient(135deg, var(--status-color), #ff8a65);
+  color: white;
+}
+.column-lastsync { 
+  background: linear-gradient(135deg, var(--lastsync-color), #26c6da);
+  color: white;
+}
+
+.status-active { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+}
+.status-inactive { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+}
+.status-disabled { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center mb-4">
+      <i class="fas fa-users me-3 text-primary"></i>
+      ユーザー情報レポート
+      <i class="fas fa-id-card ms-3 text-primary"></i>
+    </h1>
+    
+    <div class="filter-container">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="statusFilter">
+                    <option value="">すべてのステータス</option>
+                    <option value="active">有効のみ</option>
+                    <option value="inactive">無効のみ</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-export me-1"></i>CSVエクスポート
+                </button>
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>印刷
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="userTable">
+            <thead>
+                <tr>
+                    <th class="column-user">
+                      <i class="fas fa-user-circle me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー名</span>
+                    </th>
+                    <th class="column-email">
+                      <i class="fas fa-envelope me-2"></i>
+                      <span class="badge bg-white text-dark">メールアドレス</span>
+                    </th>
+                    <th class="column-login">
+                      <i class="fas fa-sign-in-alt me-2"></i>
+                      <span class="badge bg-white text-dark">ログイン名</span>
+                    </th>
+                    <th class="column-type">
+                      <i class="fas fa-user-tag me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー種別</span>
+                    </th>
+                    <th class="column-status">
+                      <i class="fas fa-power-off me-2"></i>
+                      <span class="badge bg-white text-dark">アカウント状態</span>
+                    </th>
+                    <th class="column-lastsync">
+                      <i class="fas fa-sync-alt me-2"></i>
+                      <span class="badge bg-white text-dark">最終同期日時</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select" id="syncDateFilter" onchange="filterTable()">
+                        <option value="">すべての同期日時</option>
+                    </select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="status-active">
+                    <td>山田 太郎</td>
+                    <td>t-yamada@example.com</td>
+                    <td>yamada_t</td>
+                    <td>一般ユーザー</td>
+                    <td>有効</td>
+                    <td>2025/04/15 10:23</td>
+                </tr>
+                <tr class="status-inactive">
+                    <td>佐藤 花子</td>
+                    <td>h-sato@example.com</td>
+                    <td>sato_h</td>
+                    <td>管理者</td>
+                    <td>無効</td>
+                    <td>2025/03/28 15:42</td>
+                </tr>
+                <tr class="status-disabled">
+                    <td>鈴木 一郎</td>
+                    <td>i-suzuki@example.com</td>
+                    <td>suzuki_i</td>
+                    <td>ゲスト</td>
+                    <td>停止中</td>
+                    <td>2024/12/10 09:15</td>
+                </tr>
+                <tr class="status-active">
+                    <td>田中 健太</td>
+                    <td>k-tanaka@example.com</td>
+                    <td>tanaka_k</td>
+                    <td>一般ユーザー</td>
+                    <td>有効</td>
+                    <td>2025/04/10 08:30</td>
+                </tr>
+                <tr class="status-active">
+                    <td>高橋 裕子</td>
+                    <td>y-takahashi@example.com</td>
+                    <td>takahashi_y</td>
+                    <td>一般ユーザー</td>
+                    <td>有効</td>
+                    <td>2025/04/12 11:45</td>
+                </tr>
+                <tr class="status-inactive">
+                    <td>伊藤 正</td>
+                    <td>t-ito@example.com</td>
+                    <td>ito_t</td>
+                    <td>一般ユーザー</td>
+                    <td>無効</td>
+                    <td>2025/02/20 14:15</td>
+                </tr>
+                <tr class="status-active">
+                    <td>渡辺 美咲</td>
+                    <td>m-watanabe@example.com</td>
+                    <td>watanabe_m</td>
+                    <td>管理者</td>
+                    <td>有効</td>
+                    <td>2025/04/14 09:20</td>
+                </tr>
+                <tr class="status-disabled">
+                    <td>中村 隆</td>
+                    <td>t-nakamura@example.com</td>
+                    <td>nakamura_t</td>
+                    <td>ゲスト</td>
+                    <td>停止中</td>
+                    <td>2024/11/05 16:30</td>
+                </tr>
+                <tr class="status-active">
+                    <td>小林 翔子</td>
+                    <td>s-kobayashi@example.com</td>
+                    <td>kobayashi_s</td>
+                    <td>一般ユーザー</td>
+                    <td>有効</td>
+                    <td>2025/04/16 13:10</td>
+                </tr>
+                <tr class="status-inactive">
+                    <td>加藤 大輔</td>
+                    <td>d-kato@example.com</td>
+                    <td>kato_d</td>
+                    <td>一般ユーザー</td>
+                    <td>無効</td>
+                    <td>2025/01/15 10:00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// サンプルデータ
+window.userData = [
+    {
+        "ユーザー名": "山田 太郎",
+        "メールアドレス": "t-yamada@example.com",
+        "ログイン名": "yamada_t",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "最終同期日時": "2025/04/15 10:23"
+    },
+    {
+        "ユーザー名": "佐藤 花子",
+        "メールアドレス": "h-sato@example.com",
+        "ログイン名": "sato_h",
+        "ユーザー種別": "管理者",
+        "アカウント状態": "無効",
+        "最終同期日時": "2025/03/28 15:42"
+    },
+    {
+        "ユーザー名": "鈴木 一郎",
+        "メールアドレス": "i-suzuki@example.com",
+        "ログイン名": "suzuki_i",
+        "ユーザー種別": "ゲスト",
+        "アカウント状態": "停止中",
+        "最終同期日時": "2024/12/10 09:15"
+    },
+    {
+        "ユーザー名": "田中 健太",
+        "メールアドレス": "k-tanaka@example.com",
+        "ログイン名": "tanaka_k",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "最終同期日時": "2025/04/10 08:30"
+    },
+    {
+        "ユーザー名": "高橋 裕子",
+        "メールアドレス": "y-takahashi@example.com",
+        "ログイン名": "takahashi_y",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "最終同期日時": "2025/04/12 11:45"
+    },
+    {
+        "ユーザー名": "伊藤 正",
+        "メールアドレス": "t-ito@example.com",
+        "ログイン名": "ito_t",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "無効",
+        "最終同期日時": "2025/02/20 14:15"
+    },
+    {
+        "ユーザー名": "渡辺 美咲",
+        "メールアドレス": "m-watanabe@example.com",
+        "ログイン名": "watanabe_m",
+        "ユーザー種別": "管理者",
+        "アカウント状態": "有効",
+        "最終同期日時": "2025/04/14 09:20"
+    },
+    {
+        "ユーザー名": "中村 隆",
+        "メールアドレス": "t-nakamura@example.com",
+        "ログイン名": "nakamura_t",
+        "ユーザー種別": "ゲスト",
+        "アカウント状態": "停止中",
+        "最終同期日時": "2024/11/05 16:30"
+    },
+    {
+        "ユーザー名": "小林 翔子",
+        "メールアドレス": "s-kobayashi@example.com",
+        "ログイン名": "kobayashi_s",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "最終同期日時": "2025/04/16 13:10"
+    },
+    {
+        "ユーザー名": "加藤 大輔",
+        "メールアドレス": "d-kato@example.com",
+        "ログイン名": "kato_d",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "無効",
+        "最終同期日時": "2025/01/15 10:00"
+    }
+];
+
+// フィルターメニュー初期化
+function initFilters() {
+    const columns = ['ユーザー名', 'メールアドレス', 'ログイン名', 'ユーザー種別', 'アカウント状態', '最終同期日時'];
+    
+    columns.forEach((col, index) => {
+        const select = document.querySelectorAll('.filter-row select')[index];
+        const uniqueValues = [...new Set(window.userData.map(item => item[col]))];
+        
+        // デフォルトオプション
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `すべての${col}`;
+        select.appendChild(defaultOption);
+        
+        // ユニークな値を追加
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+    });
+}
+
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.querySelector('#userTable tbody');
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const statusClass = {
+            '有効': 'status-active',
+            '無効': 'status-inactive',
+            '停止中': 'status-disabled'
+        }[item['アカウント状態']] || '';
+        
+        row.className = statusClass;
+        
+        row.innerHTML = `
+            <td>${item['ユーザー名']}</td>
+            <td>${item['メールアドレス']}</td>
+            <td>${item['ログイン名']}</td>
+            <td>${item['ユーザー種別']}</td>
+            <td>${item['アカウント状態']}</td>
+            <td>${item['最終同期日時']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// フィルター適用
+function filterTable() {
+    const filters = [];
+    document.querySelectorAll('.filter-row select').forEach((select, index) => {
+        filters[index] = select.value;
+    });
+    
+    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const filteredData = window.userData.filter(item => {
+        // グローバル検索
+        if (globalSearch) {
+            const found = Object.values(item).some(val => 
+                String(val).toLowerCase().includes(globalSearch)
+            );
+            if (!found) return false;
+        }
+        
+        // ステータスフィルター
+        if (statusFilter && item['アカウント状態'] !== statusFilter) {
+            return false;
+        }
+        
+        // カラムフィルター
+        return ['ユーザー名', 'メールアドレス', 'ログイン名', 'ユーザー種別', 'アカウント状態', '最終同期日時']
+            .every((col, colIndex) => {
+                if (!filters[colIndex]) return true;
+                return String(item[col]) === filters[colIndex];
+            });
+    });
+    
+    renderTable(filteredData);
+}
+
+// 初期化
+window.onload = function() {
+    initFilters();
+    renderTable(window.userData);
+    
+    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+    document.getElementById('statusFilter').addEventListener('change', filterTable);
+    document.querySelectorAll('.filter-row select').forEach(select => {
+        select.addEventListener('change', filterTable);
+    });
+};
+</script>
+</body>
+</html>

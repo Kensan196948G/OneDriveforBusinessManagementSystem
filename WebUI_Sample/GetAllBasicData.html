@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>基本データ収集レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #4fc3f7;
+  --email-color: #ffd54f; 
+  --login-color: #ba68c8;
+  --type-color: #81c784;
+  --status-color: #ffb74d;
+  --onedrive-color: #aed581;
+  --quota-color: #4dd0e1;
+  --lastactive-color: #ff8a65;
+  --state-color: #ff5252;
+}
+
+.column-user { 
+  background-color: var(--user-color);
+  color: white;
+}
+.column-email { 
+  background: linear-gradient(135deg, var(--email-color), #ffb74d);
+  color: #333;
+}
+.column-login { 
+  background-color: var(--login-color);
+  color: white;
+}
+.column-type { 
+  background-color: var(--type-color);
+  color: white;
+}
+.column-status { 
+  background: linear-gradient(135deg, var(--status-color), #ff8a65);
+  color: white;
+}
+.column-onedrive { 
+  background: linear-gradient(135deg, var(--onedrive-color), #7cb342);
+  color: white;
+}
+
+.column-user { min-width: 180px; }
+.column-email { min-width: 280px; }
+.column-login { min-width: 180px; }
+.column-type { min-width: 150px; }
+.column-status { min-width: 150px; }
+.column-onedrive { min-width: 120px; }
+.column-quota { min-width: 120px; }
+.column-lastactive { min-width: 150px; }
+.column-state { min-width: 120px; }
+.column-quota { 
+  background-color: var(--quota-color);
+  color: white;
+}
+.column-lastactive { 
+  background-color: var(--lastactive-color);
+  color: white;
+}
+.column-state { 
+  background-color: var(--state-color);
+  color: white;
+}
+
+.status-danger { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+}
+.status-warning { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+}
+.status-normal { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    min-width: 120px;
+    padding: 8px;
+    background-color: white;
+    font-size: 0.9rem;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.count-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 10px;
+}
+.badge-count {
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+</style>
+</head>
+<body>
+<div class="container-fluid px-4">
+    <h1 class="text-center mb-4">
+      <i class="fas fa-database me-3 text-primary"></i>
+      基本データ収集レポート
+      <i class="fas fa-table ms-3 text-primary"></i>
+    </h1>
+    
+    <div class="filter-container">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="全体検索..." onkeyup="filterTable()">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="pageSize" onchange="updatePageSize()">
+                        <option value="10">10件表示</option>
+                        <option value="20">20件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                        <option value="0">全件表示</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-5 text-end">
+                <button class="btn btn-outline-secondary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-csv me-1"></i>CSVエクスポート
+                </button>
+                <button class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>印刷
+                </button>
+            </div>
+        </div>
+        <div id="filterInfo" class="count-info"></div>
+    </div>
+
+    <div class="table-responsive" style="width: 100%; overflow-x: auto;">
+        <table class="table table-hover" id="dataTable" style="min-width: 1800px; width: 100%;">
+            <thead>
+                <tr>
+                    <th class="column-user">
+                      <i class="fas fa-user-circle me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー名</span>
+                    </th>
+                    <th class="column-email">
+                      <i class="fas fa-envelope-open-text me-2"></i>
+                      <span class="badge bg-white text-dark">メールアドレス</span>
+                    </th>
+                    <th class="column-login">
+                      <i class="fas fa-id-card-alt me-2"></i>
+                      <span class="badge bg-white text-dark">ログインユーザー名</span>
+                    </th>
+                    <th class="column-type">
+                      <i class="fas fa-user-tag me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー種別</span>
+                    </th>
+                    <th class="column-status">
+                      <i class="fas fa-user-check me-2"></i>
+                      <span class="badge bg-white text-dark">アカウント状態</span>
+                    </th>
+                    <th class="column-onedrive">
+                      <i class="fas fa-cloud-upload-alt me-2"></i>
+                      <span class="badge bg-white text-dark">OneDrive対応</span>
+                    </th>
+                    <th class="column-quota">
+                      <i class="fas fa-hdd me-2"></i>
+                      <span class="badge bg-white text-dark">クォータ(GB)</span>
+                    </th>
+                    <th class="column-lastactive">
+                      <i class="fas fa-history me-2"></i>
+                      <span class="badge bg-white text-dark">最終アクセス日</span>
+                    </th>
+                    <th class="column-state">
+                      <i class="fas fa-shield-alt me-2"></i>
+                      <span class="badge bg-white text-dark">状態</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// サンプルデータ（実際にはCSVから読み込まれる）
+window.reportData = [
+    {
+        "ユーザー名": "山田 太郎",
+        "メールアドレス": "t-yamada@example.com",
+        "ログインユーザー名": "yamada_t",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/04/15",
+        "状態": "正常"
+    },
+    {
+        "ユーザー名": "佐藤 花子",
+        "メールアドレス": "h-sato@example.com",
+        "ログインユーザー名": "sato_h",
+        "ユーザー種別": "管理者",
+        "アカウント状態": "無効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/03/28",
+        "状態": "警告"
+    },
+    {
+        "ユーザー名": "鈴木 一郎",
+        "メールアドレス": "i-suzuki@example.com",
+        "ログインユーザー名": "suzuki_i",
+        "ユーザー種別": "ゲスト",
+        "アカウント状態": "停止中",
+        "OneDrive対応": "いいえ",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2024/12/10",
+        "状態": "危険"
+    },
+    {
+        "ユーザー名": "田中 健太",
+        "メールアドレス": "k-tanaka@example.com",
+        "ログインユーザー名": "tanaka_k",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/04/10",
+        "状態": "正常"
+    },
+    {
+        "ユーザー名": "高橋 裕子",
+        "メールアドレス": "y-takahashi@example.com",
+        "ログインユーザー名": "takahashi_y",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/04/12",
+        "状態": "正常"
+    },
+    {
+        "ユーザー名": "伊藤 正",
+        "メールアドレス": "t-ito@example.com",
+        "ログインユーザー名": "ito_t",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "無効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/02/20",
+        "状態": "警告"
+    },
+    {
+        "ユーザー名": "渡辺 美咲",
+        "メールアドレス": "m-watanabe@example.com",
+        "ログインユーザー名": "watanabe_m",
+        "ユーザー種別": "管理者",
+        "アカウント状態": "有効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/04/14",
+        "状態": "正常"
+    },
+    {
+        "ユーザー名": "中村 隆",
+        "メールアドレス": "t-nakamura@example.com",
+        "ログインユーザー名": "nakamura_t",
+        "ユーザー種別": "ゲスト",
+        "アカウント状態": "停止中",
+        "OneDrive対応": "いいえ",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2024/11/05",
+        "状態": "危険"
+    },
+    {
+        "ユーザー名": "小林 翔子",
+        "メールアドレス": "s-kobayashi@example.com",
+        "ログインユーザー名": "kobayashi_s",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "有効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/04/16",
+        "状態": "正常"
+    },
+    {
+        "ユーザー名": "加藤 大輔",
+        "メールアドレス": "d-kato@example.com",
+        "ログインユーザー名": "kato_d",
+        "ユーザー種別": "一般ユーザー",
+        "アカウント状態": "無効",
+        "OneDrive対応": "はい",
+        "クォータ(GB)": "1024",
+        "最終アクセス日": "2025/01/15",
+        "状態": "警告"
+    }
+];
+
+const displayColumns = [
+    'ユーザー名',
+    'メールアドレス',
+    'ログインユーザー名',
+    'ユーザー種別',
+    'アカウント状態',
+    'OneDrive対応',
+    'クォータ(GB)',
+    '最終アクセス日',
+    '状態'
+];
+
+// フィルターメニュー初期化
+function initFilters() {
+    const columns = ['ユーザー名', 'メールアドレス', 'ログインユーザー名', 'ユーザー種別', 'アカウント状態', 'OneDrive対応', 'クォータ(GB)', '最終アクセス日', '状態'];
+    
+    columns.forEach((col, index) => {
+        const select = document.querySelectorAll('.filter-row select')[index];
+        const uniqueValues = [...new Set(window.reportData.map(item => item[col]))];
+        
+        // デフォルトオプション
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `すべての${col}`;
+        select.appendChild(defaultOption);
+        
+        // ユニークな値を追加
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+    });
+}
+
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.querySelector('#dataTable tbody');
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const statusClass = {
+            '危険': 'status-danger',
+            '警告': 'status-warning',
+            '正常': 'status-normal'
+        }[item['状態']] || '';
+        
+        row.className = statusClass;
+        
+        row.innerHTML = `
+            <td>${item['ユーザー名']}</td>
+            <td>${item['メールアドレス']}</td>
+            <td>${item['ログインユーザー名']}</td>
+            <td>${item['ユーザー種別']}</td>
+            <td>${item['アカウント状態']}</td>
+            <td>${item['OneDrive対応']}</td>
+            <td>${item['クォータ(GB)']}</td>
+            <td>${item['最終アクセス日']}</td>
+            <td>${item['状態']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// フィルター適用
+function filterTable() {
+    const filters = [];
+    document.querySelectorAll('.filter-row select').forEach((select, index) => {
+        filters[index] = select.value;
+    });
+    
+    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
+    const pageSize = parseInt(document.getElementById('pageSize').value) || window.reportData.length;
+    
+    const filteredData = window.reportData.filter(item => {
+        // グローバル検索
+        if (globalSearch) {
+            const found = Object.values(item).some(val => 
+                String(val).toLowerCase().includes(globalSearch)
+            );
+            if (!found) return false;
+        }
+        
+        // カラムフィルター
+        return ['ユーザー名', 'メールアドレス', 'ログインユーザー名', 'ユーザー種別', 'アカウント状態', 'OneDrive対応', 'クォータ(GB)', '最終アクセス日', '状態']
+            .every((col, colIndex) => {
+                if (!filters[colIndex]) return true;
+                return String(item[col]) === filters[colIndex];
+            });
+    });
+    
+    renderTable(filteredData.slice(0, pageSize));
+}
+
+// ページサイズ更新
+function updatePageSize() {
+    filterTable();
+}
+
+// CSVエクスポート
+function exportToCsv() {
+    const headers = displayColumns.join(',') + '\n';
+    const csvContent = headers + window.reportData.map(item => 
+        displayColumns.map(col => `"${item[col]}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'BasicDataReport.csv');
+    link.click();
+}
+
+// 初期化
+window.onload = function() {
+    initFilters();
+    renderTable(window.reportData);
+    
+    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+    document.getElementById('pageSize').addEventListener('change', updatePageSize);
+    document.querySelectorAll('.filter-row select').forEach(select => {
+        select.addEventListener('change', filterTable);
+    });
+};
+</script>
+</body>
+</html>
