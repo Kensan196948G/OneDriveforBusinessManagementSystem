@@ -13,6 +13,23 @@ OneDrive for Businessの管理ツールで使用するWebUIの仕様書です。
   - 印刷機能
   - ページネーション
 
+### 2.1 認証方式
+各レポートは以下の2つの方法でデータを取得可能:
+
+1. **CSVファイルから生成**:
+   - 既存のCSVデータを使用
+   - 認証不要
+   - オフライン環境で利用可能
+
+2. **Microsoft Graph APIから直接取得**:
+   - Azure ADアプリ登録が必要
+   - 必要な権限:
+     - User.Read.All
+     - Files.Read.All  
+     - Sites.Read.All
+   - config.jsonに認証情報を設定
+   - 非対話型認証(client_credentials grant)を使用
+
 ## 3. 各レポート仕様
 
 ### 3.1 ユーザー情報取得 (GetUserInfo.html)
