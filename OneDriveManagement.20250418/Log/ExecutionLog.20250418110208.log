@@ -1,9 +1,0 @@
-[2025-04-18 11:02:08] [INFO] OneDrive for Business 運用ツール - ITSM準拠 を開始しました
-[2025-04-18 11:02:08] [INFO] 出力フォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250418
-[2025-04-18 11:02:08] [INFO] ログフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250418\Log
-[2025-04-18 11:02:08] [INFO] レポートフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250418\Report
-[2025-04-18 11:02:08] [INFO] Microsoft.Graph モジュールは既にインストールされています
-[2025-04-18 11:02:08] [INFO] config.jsonから認証情報を読み込みます...
-[2025-04-18 11:02:08] [INFO] Microsoft Graph用アクセストークンを取得します...
-[2025-04-18 11:02:11] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
-[2025-04-18 11:07:56] [INFO] プログラムを終了します。

@@ -107,7 +107,19 @@ try {
         $url = $response.'@odata.nextLink'
     } while ($url)
 
+    $totalUsers = $users.Count
+    $processed = 0
+    
     foreach ($user in $users) {
+        $processed++
+        $progressParams = @{
+            Activity = "ユーザー情報を処理中"
+            Status = "$processed/$totalUsers 完了"
+            PercentComplete = ($processed / $totalUsers * 100)
+            CurrentOperation = "処理中: $($user.userPrincipalName)"
+        }
+        Write-Progress @progressParams
+        
         $userTypeValue = "Member"
         if ($user.userPrincipalName -match "#EXT#" -or $user.userType -eq "Guest") {
             $userTypeValue = "Guest"
@@ -146,7 +158,9 @@ try {
         }
     }
 
+    Write-Progress -Activity "ユーザー情報処理" -Completed
     Write-Log "ユーザー情報の取得が完了しました。取得件数: $($userList.Count)" "SUCCESS"
+    Write-Host "`nユーザー情報処理が完了しました: $($userList.Count)件のレコードを取得" -ForegroundColor Green
 } catch {
     Write-ErrorLog $_ "ユーザー情報の取得中にエラーが発生しました"
 }
@@ -176,11 +190,173 @@ try {
 # HTMLテンプレート生成と保存
 $htmlContent = @"
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-<meta charset="UTF-8">
 <title>ユーザー情報レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <style>
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --email-color: #ffd54f;
+  --login-color: #ba68c8;
+  --type-color: #81c784;
+  --status-color: #ffb74d;
+  --lastsync-color: #4dd0e1;
+}
+
+.column-user {
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-email {
+  background: linear-gradient(135deg, var(--email-color), #ffca28);
+  color: #333;
+}
+.column-login {
+  background: linear-gradient(135deg, var(--login-color), #9c27b0);
+  color: white;
+}
+.column-type {
+  background: linear-gradient(135deg, var(--type-color), #43a047);
+  color: white;
+}
+.column-status {
+  background: linear-gradient(135deg, var(--status-color), #ff8a65);
+  color: white;
+}
+.column-lastsync {
+  background: linear-gradient(135deg, var(--lastsync-color), #26c6da);
+  color: white;
+}
+
+.status-active {
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+}
+.status-inactive {
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+}
+.status-disabled {
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --email-color: #ffd54f;
+  --login-color: #ba68c8;
+  --type-color: #81c784;
+  --status-color: #ffb74d;
+  --lastsync-color: #4dd0e1;
+}
+
+.column-user {
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-email {
+  background: linear-gradient(135deg, var(--email-color), #ffca28);
+  color: #333;
+}
+.column-login {
+  background: linear-gradient(135deg, var(--login-color), #9c27b0);
+  color: white;
+}
+.column-type {
+  background: linear-gradient(135deg, var(--type-color), #43a047);
+  color: white;
+}
+.column-status {
+  background: linear-gradient(135deg, var(--status-color), #ff8a65);
+  color: white;
+}
+.column-lastsync {
+  background: linear-gradient(135deg, var(--lastsync-color), #26c6da);
+  color: white;
+}
+
+.status-active {
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+}
+.status-inactive {
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+}
+.status-disabled {
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
 body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
 .container { background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .table-container { overflow-x: auto; }
@@ -385,14 +561,18 @@ window.onload = function() {
 "@
 
 foreach ($user in $userList) {
-    $statusIcon = if ($user.'アカウント状態' -eq "有効") { "✅" } else { "❌" }
+    $statusClass = switch ($user.'アカウント状態') {
+        "有効" { "status-active" }
+        "無効" { "status-inactive" }
+        default { "" }
+    }
     $htmlContent += @"
-<tr>
+<tr class="$statusClass">
 <td>$($user.'ユーザー名')</td>
 <td>$($user.'メールアドレス')</td>
 <td>$($user.'ログインユーザー名')</td>
 <td>$($user.'ユーザー種別')</td>
-<td><span class="status-icon">$statusIcon</span>$($user.'アカウント状態')</td>
+<td>$($user.'アカウント状態')</td>
 <td>$($user.'最終同期日時')</td>
 </tr>
 "@

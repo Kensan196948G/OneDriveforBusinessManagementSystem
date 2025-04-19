@@ -3,8 +3,24 @@ param(
     [string]$OutputHtmlPath = "$(Get-Location)\OneDriveQuota_FromCsv.html"
 )
 
+# CSVファイルが指定されていない場合、最新のファイルを自動検索
+if ([string]::IsNullOrEmpty($CsvPath)) {
+    $latestCsv = Get-ChildItem -Path "$PSScriptRoot\..\OneDriveManagement.*\Report\OneDriveQuota.*.csv" |
+                 Sort-Object LastWriteTime -Descending |
+                 Select-Object -First 1
+    
+    if ($latestCsv) {
+        $CsvPath = $latestCsv.FullName
+        Write-Host "最新のCSVファイルを使用します: $CsvPath" -ForegroundColor Yellow
+    }
+}
+
 if (-not (Test-Path $CsvPath)) {
-    Write-Host "CSVファイルが見つかりません: $CsvPath" -ForegroundColor Red
+    Write-Host "エラー: CSVファイルが見つかりません" -ForegroundColor Red
+    Write-Host "指定パス: $CsvPath" -ForegroundColor Red
+    Write-Host "利用可能なCSVファイル:" -ForegroundColor Cyan
+    Get-ChildItem -Path "$PSScriptRoot\..\OneDriveManagement.*\Report\OneDriveQuota.*.csv" |
+        Format-Table FullName, LastWriteTime -AutoSize
     exit 1
 }
 
@@ -140,6 +156,8 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script>
 window.quotaData = $json;
 
@@ -261,11 +279,37 @@ function updatePaginationInfo() {
         
         const filterInfo = document.getElementById('filterInfo');
         if (filterInfo) {
-            filterInfo.innerHTML = @"
-                <span class="badge bg-primary badge-count">全 $(totalItems) 件</span>
-                <span class="badge bg-success badge-count">表示中 $(showingFrom)-$(showingTo) 件</span>
-                $($(totalPages > 1 ? '<span class="badge bg-info badge-count">ページ $(currentPage)/$(totalPages)</span>' : ''))
-            "@;
+            // ページネーション情報を更新
+            try {
+                const totalItems = filteredData.length;
+                const totalPages = pageSize > 0 ? Math.ceil(totalItems / pageSize) : 1;
+                const showingFrom = Math.min((currentPage-1)*pageSize+1, totalItems);
+                const showingTo = Math.min(currentPage*pageSize, totalItems);
+                
+                let paginationHtml = '';
+                if (totalPages > 1) {
+                    paginationHtml = `<span class="badge bg-info badge-count">ページ ${currentPage}/${totalPages}</span>`;
+                }
+
+                filterInfo.innerHTML = `
+                    <span class="badge bg-primary badge-count">全 ${totalItems} 件</span>
+                    <span class="badge bg-success badge-count">表示中 ${showingFrom}-${showingTo} 件</span>
+                    ${paginationHtml}
+                `;
+
+                const activeFilters = Array.from(document.querySelectorAll('.filter-row select, .filter-row input'))
+                    .filter(el => el.value).length;
+                
+                if (activeFilters > 0) {
+                    filterInfo.innerHTML += `
+                        <span class="badge bg-warning text-dark badge-count">
+                            <i class="fas fa-filter me-1"></i>${activeFilters} フィルタ適用中
+                        </span>
+                    `;
+                }
+            } catch (error) {
+                console.error('ページ情報更新エラー:', error);
+            }
         }
     } catch (error) {
         console.error('ページ情報更新エラー:', error);
@@ -297,23 +341,37 @@ function exportToCsv() {
     link.click();
 }
 
-window.onload = function() {
+// プルダウンメニュー初期化関数
+function initFilters() {
     try {
-        // 各カラムにプルダウンメニューを設定
+        console.log('フィルタ初期化開始');
+        
+        // 状態フィルタの選択肢を固定
+        const statusFilter = document.querySelector('.filter-row th:nth-child(11) select');
+        if (statusFilter) {
+            statusFilter.innerHTML = `
+                <option value="">すべて</option>
+                <option value="危険">危険</option>
+                <option value="警告">警告</option>
+                <option value="正常">正常</option>
+            `;
+            statusFilter.onchange = filterTable;
+        }
+
+        // その他のフィルタを初期化
         document.querySelectorAll('.filter-row th').forEach((th, index) => {
-            if (index >= displayColumns.length) return;
+            if (index >= displayColumns.length || index === 10) return; // 状態フィルタはスキップ
             
             const select = document.createElement('select');
             select.className = 'form-select';
             select.onchange = filterTable;
             
-            // デフォルトオプション
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.textContent = 'すべて';
             select.appendChild(defaultOption);
             
-            // ユニークな値を取得してオプション追加
+            // ユニークな値を取得
             const uniqueValues = [...new Set(
                 window.quotaData.map(item => String(item[displayColumns[index]]))
             )].filter(Boolean).sort();
@@ -328,6 +386,17 @@ window.onload = function() {
             th.innerHTML = '';
             th.appendChild(select);
         });
+
+        console.log('フィルタ初期化完了');
+    } catch (error) {
+        console.error('フィルタ初期化エラー:', error);
+    }
+}
+
+window.onload = function() {
+    try {
+        // フィルタ初期化
+        initFilters();
         
         // 初期データ表示
         console.log('初期データ読み込み開始');
