@@ -1,0 +1,10 @@
+{
+  "name": "Context7 Integration",
+  "description": "RooCode + DeepSeek + MCP連携用構成",
+  "entry": "context7-runner/index.js",
+  "variables": {
+    "MCP_MODE": "stdio",
+    "ANALYSIS_ENABLED": true
+  },
+  "tags": ["mcp", "deepseek", "integration"]
+}
