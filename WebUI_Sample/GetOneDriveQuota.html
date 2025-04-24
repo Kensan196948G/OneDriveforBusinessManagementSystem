@@ -110,20 +110,31 @@ body {
     
     <div class="filter-container">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select class="form-select" id="statusFilter">
                     <option value="">すべてのステータス</option>
                     <option value="warning">警告のみ</option>
                     <option value="danger">危険のみ</option>
                 </select>
             </div>
-            <div class="col-md-4 text-end">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="entriesPerPage">
+                        <option value="10">10件表示</option>
+                        <option value="25">25件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 text-end">
                 <button class="btn btn-primary me-2" onclick="exportToCsv()">
                     <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
@@ -521,6 +532,18 @@ body {
     </div>
 </div>
 
+<!-- ページネーション情報とコントロール -->
+<div class="row mt-3">
+    <div class="col-md-6">
+        <p id="tableInfo" class="text-muted"></p>
+    </div>
+    <div class="col-md-6">
+        <nav aria-label="Page navigation" class="float-end">
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // サンプルデータ
@@ -587,7 +610,12 @@ function renderTable(data) {
     const tbody = document.querySelector('#quotaTable tbody');
     tbody.innerHTML = '';
     
-    data.forEach(item => {
+    const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value);
+    const startIndex = (currentPage - 1) * entriesPerPage;
+    const endIndex = startIndex + entriesPerPage;
+    const pageData = data.slice(startIndex, endIndex);
+    
+    pageData.forEach(item => {
         const row = document.createElement('tr');
         const statusClass = {
             '危険': 'status-danger',
@@ -615,6 +643,14 @@ function renderTable(data) {
         
         tbody.appendChild(row);
     });
+    
+    // ページネーション情報の表示
+    const totalPages = Math.ceil(data.length / entriesPerPage);
+    updatePagination(totalPages);
+    
+    // 表示件数の情報を更新
+    document.getElementById('tableInfo').textContent = 
+        `${data.length}件中 ${startIndex + 1}～${Math.min(endIndex, data.length)}件を表示`;
 }
 
 // フィルター適用
@@ -668,6 +704,9 @@ function exportToCsv() {
     link.click();
 }
 
+let currentPage = 1;
+let filteredData = [];
+
 // 初期化
 window.onload = function() {
     initFilters();
@@ -675,6 +714,10 @@ window.onload = function() {
     
     document.getElementById('globalSearch').addEventListener('keyup', filterTable);
     document.getElementById('statusFilter').addEventListener('change', filterTable);
+    document.getElementById('entriesPerPage').addEventListener('change', function() {
+        currentPage = 1;
+        renderTable();
+    });
     document.querySelectorAll('.filter-row select').forEach(select => {
         select.addEventListener('change', filterTable);
     });
