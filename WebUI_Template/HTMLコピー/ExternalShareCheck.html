@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>外部共有レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --item-color: #ffd54f;
+  --external-color: #ef5350;
+  --date-color: #4dd0e1;
+  --action-color: #66bb6a;
+}
+
+.column-user { 
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-item { 
+  background: linear-gradient(135deg, var(--item-color), #ffca28);
+  color: #333;
+}
+.column-external { 
+  background: linear-gradient(135deg, var(--external-color), #e53935);
+  color: white;
+}
+.column-date { 
+  background: linear-gradient(135deg, var(--date-color), #26c6da);
+  color: white;
+}
+.column-action { 
+  background: linear-gradient(135deg, var(--action-color), #43a047);
+  color: white;
+}
+
+.status-alert { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.status-warning { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.status-normal { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 5px;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: none;
+}
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center mb-4">
+      <i class="fas fa-user-shield me-3 text-primary"></i>
+      外部共有レポート
+      <i class="fas fa-external-link-alt ms-3 text-danger"></i>
+    </h1>
+    
+
+    <div class="filter-container">
+        <!-- 1行目: 検索欄、ステータスフィルター、アイコン付き件数表示、ボタン群 -->
+        <div class="row mb-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="検索..." id="globalSearch">
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <select class="form-select" onchange="filterTable()">
+                    <option>すべてのステータス</option>
+                    <option>問題なし</option>
+                    <option>即時対応</option>
+                    <option>確認推奨</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-list-ol me-2"></i>
+                    <select class="form-select" onchange="changeItemsPerPage(this.value)">
+                        <option value="10">10件</option>
+                        <option value="25">25件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="0">全件</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md-4 text-end">
+                <button class="btn btn-outline-secondary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-csv"></i> CSVエクスポート
+                </button>
+                <button class="btn btn-outline-secondary me-2" onclick="window.print()">
+                    <i class="fas fa-print"></i> 印刷
+                </button>
+                <button class="btn btn-outline-secondary" onclick="loadData()">
+                    <i class="fas fa-sync-alt"></i> 更新
+                </button>
+            </div>
+        </div>
+        
+        <!-- 2行目: ページネーション情報 -->
+        <div class="row mb-2 align-items-center">
+            <div class="col-md-12 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <span id="paginationInfo" class="fs-5 me-3">0件中 1～0件を表示</span>
+                    <div class="btn-group ms-2">
+                        <button class="btn btn-outline-secondary me-1" onclick="changePage(currentPage - 1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="changePage(currentPage + 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="externalShareTable">
+            <thead>
+                <tr>
+                    <th width="20%" class="column-user">
+                      <i class="fas fa-user-shield me-2"></i>
+                      <span class="badge bg-white text-dark">所有者（ユーザー名）</span>
+                    </th>
+                    <th width="20%" class="column-item">
+                      <i class="fas fa-file-contract me-2"></i>
+                      <span class="badge bg-white text-dark">共有アイテム</span>
+                    </th>
+                    <th width="20%" class="column-external">
+                      <i class="fas fa-globe-americas me-2"></i>
+                      <span class="badge bg-white text-dark">外部共有先</span>
+                    </th>
+                    <th width="20%" class="column-date">
+                      <i class="fas fa-calendar-check me-2"></i>
+                      <span class="badge bg-white text-dark">共有日</span>
+                    </th>
+                    <th width="20%" class="column-action">
+                      <i class="fas fa-tasks me-2"></i>
+                      <span class="badge bg-white text-dark">推奨アクション</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th width="20%"><select class="form-select" onchange="filterTable()"><option>すべての所有者</option></select></th>
+                    <th width="20%"><select class="form-select" onchange="filterTable()"><option>すべての共有アイテム</option></select></th>
+                    <th width="20%"><select class="form-select" onchange="filterTable()"><option>すべての外部共有先</option></select></th>
+                    <th width="20%"><select class="form-select" onchange="filterTable()"><option>すべての共有日</option></select></th>
+                    <th width="20%"><select class="form-select" onchange="filterTable()"><option>すべての推奨アクション</option></select></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <div>外部共有データを取得中...お待ちください</div>
+    </div>
+</div>
+
+<!-- エラーメッセージを最下部に移動 -->
+<div class="container mt-4">
+    <div id="errorContainer" class="error-message alert alert-danger" style="display: none;">
+        <h4><i class="fas fa-exclamation-triangle me-2"></i>外部共有データ取得エラー</h4>
+        <p>外部共有データの取得に失敗しました。以下の手順で確認してください:</p>
+        <ol>
+            <li>PowerShellスクリプト <code>ExternalShareCheck.ps1</code> が正しく実行できるか確認</li>
+            <li>必要な権限があるか確認</li>
+            <li>ネットワーク接続を確認</li>
+        </ol>
+        <div class="text-end">
+            <button class="btn btn-danger me-2" onclick="loadData()">
+                <i class="fas fa-sync-alt me-1"></i>再試行
+            </button>
+            <button class="btn btn-warning" onclick="loadData()">
+                <i class="fas fa-sync-alt me-1"></i>再読み込み
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// 表示件数設定
+let itemsPerPage = 10;
+let currentPage = 1;
+
+// 表示件数変更
+function changeItemsPerPage(value) {
+    itemsPerPage = parseInt(value);
+    renderTable();
+}
+
+// データ取得
+function loadData() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    document.getElementById('errorContainer').style.display = 'none';
+    
+    // 実際にはここでAPI呼び出しやCSV読み込みを行う
+    setTimeout(() => {
+        try {
+            // Graph APIから外部共有情報を取得
+            fetch('https://graph.microsoft.com/v1.0/drives/' + driveId + '/items/' + itemId + '/permissions', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 外部共有データ処理
+                const permissions = data.value;
+                permissions.forEach(perm => {
+                    if (perm.grantedToIdentities) {
+                        // 外部共有としてテーブルに追加
+                        addExternalShareToTable(perm);
+                    }
+                });
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // エラーメッセージ表示
+                showErrorMessage('外部共有情報の取得に失敗しました');
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            });
+            
+            initFilters();
+            renderTable();
+            setupPagination();
+            document.getElementById('loadingOverlay').style.display = 'none';
+        } catch (error) {
+            console.error('外部共有データ取得エラー:', error);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+    }, 1500);
+}
+
+// フィルターメニュー初期化
+function initFilters() {
+    const columns = ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション'];
+    
+    columns.forEach((col, index) => {
+        const select = document.querySelectorAll('.filter-row select')[index];
+        
+        // 既存のオプションをクリア
+        select.innerHTML = '';
+        
+        // デフォルトオプションを追加
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `すべての${col}`;
+        select.appendChild(defaultOption);
+        
+        // データがある場合のみユニークな値を追加
+        if (window.shareData && window.shareData.length > 0) {
+            const uniqueValues = [...new Set(window.shareData.map(item => item[col]))];
+            uniqueValues.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+    });
+}
+
+// テーブルデータ表示
+function renderTable() {
+    const tbody = document.querySelector('#externalShareTable tbody');
+    tbody.innerHTML = '';
+    
+    const filteredData = applyFilters(window.shareData, ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション']);
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+    
+    paginatedData.forEach(item => {
+        const row = document.createElement('tr');
+        const statusClass = {
+            '即時対応が必要': 'status-alert',
+            '確認推奨': 'status-warning',
+            '問題なし': 'status-normal'
+        }[item['推奨アクション']] || '';
+        
+        row.className = statusClass;
+        
+        row.innerHTML = `
+            <td>${item['所有者']}</td>
+            <td>${item['共有アイテム']}</td>
+            <td>${item['外部共有先']}</td>
+            <td>${item['共有日']}</td>
+            <td>${item['推奨アクション']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+// ページネーション設定
+function setupPagination() {
+    const filteredData = applyFilters(window.shareData, ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション']);
+    const totalItems = filteredData.length;
+    const startItem = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    
+    // ページネーション情報更新
+    document.getElementById('paginationInfo').textContent =
+        `${totalItems}件中 ${startItem}～${endItem}件を表示`;
+    
+    // 左右ボタンの有効/無効切り替え
+    const prevBtn = document.querySelector('.btn-group button:first-child');
+    const nextBtn = document.querySelector('.btn-group button:last-child');
+    
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage * itemsPerPage >= totalItems;
+}
+
+// ページ変更
+function changePage(page) {
+    if (page < 1) return;
+    const filteredData = applyFilters(window.shareData, ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション']);
+    const maxPage = Math.ceil(filteredData.length / itemsPerPage);
+    if (page > maxPage) return;
+    
+    currentPage = page;
+    renderTable();
+    setupPagination();
+}
+
+// CSVエクスポート
+function exportToCsv() {
+    const headers = ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション'].join(',') + '\n';
+    const csvContent = headers + window.shareData.map(item => 
+        ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション']
+        .map(col => `"${item[col]}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'ExternalShareReport.csv');
+    link.click();
+}
+
+// フィルター適用
+function filterTable() {
+    currentPage = 1;
+    
+    // 検索クエリを適用
+    const searchQuery = document.getElementById('globalSearch').value.toLowerCase();
+    if (searchQuery) {
+        const filtered = window.shareData.filter(item =>
+            Object.values(item).some(val =>
+                String(val).toLowerCase().includes(searchQuery)
+            )
+        );
+        window.filteredData = filtered;
+    } else {
+        window.filteredData = window.shareData;
+    }
+    
+    renderTable();
+    setupPagination();
+}
+
+// 初期化
+window.onload = function() {
+    loadData();
+    
+    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+    document.querySelectorAll('.filter-row select').forEach(select => {
+        select.addEventListener('change', filterTable);
+    });
+};
+</script>
+</body>
+</html>

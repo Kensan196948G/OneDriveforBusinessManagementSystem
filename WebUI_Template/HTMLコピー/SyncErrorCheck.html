@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>同期エラーレポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+/* ローディングオーバーレイ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --email-color: #ffd54f;
+  --error-color: #ef5350;
+  --date-color: #4dd0e1;
+  --status-color: #66bb6a;
+}
+
+.column-user { 
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-email { 
+  background: linear-gradient(135deg, var(--email-color), #ffca28);
+  color: #333;
+}
+.column-error { 
+  background: linear-gradient(135deg, var(--error-color), #e53935);
+  color: white;
+}
+.column-date { 
+  background: linear-gradient(135deg, var(--date-color), #26c6da);
+  color: white;
+}
+.column-status { 
+  background: linear-gradient(135deg, var(--status-color), #43a047);
+  color: white;
+}
+
+.status-critical { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.status-warning { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.status-resolved { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table-hover tbody tr {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 10;
+  position: relative;
+}
+
+.status-critical:hover {
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3) !important;
+}
+
+.status-warning:hover {
+  box-shadow: 0 4px 12px rgba(255, 160, 0, 0.3) !important;
+}
+
+.status-resolved:hover {
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3) !important;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.filter-row select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.filter-row th {
+    padding-bottom: 15px;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 1rem;
+}
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: none;
+}
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+            <div>同期エラーデータを取得中...お待ちください</div>
+        </div>
+    </div>
+
+    <h1 class="text-center mb-4">
+      <i class="fas fa-exclamation-triangle me-3 text-danger"></i>
+      OneDrive同期エラーレポート
+      <i class="fas fa-bug ms-3 text-warning"></i>
+    </h1>
+    
+    <div class="filter-container">
+        <div class="row mb-2">
+            <div class="col-md-8">
+                <div class="input-group" style="width: 100%;">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="検索..." style="width: 20%; min-width: 120px;">
+                    
+                    <select class="form-select" id="statusFilter" style="width: 25%; min-width: 150px;">
+                        <option value="">すべてのステータス</option>
+                        <option value="未対応">未対応</option>
+                        <option value="調査中">調査中</option>
+                        <option value="解決済">解決済</option>
+                    </select>
+                    
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="pageSize" style="min-width: 90px;">
+                        <option value="10">10件表示</option>
+                        <option value="25">25件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                        <option value="0">全件数</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-danger me-2" id="exportCsvBtn">
+                    <i class="fas fa-file-export me-1"></i>CSVエクスポート
+                </button>
+                <button class="btn btn-primary me-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>印刷
+                </button>
+                <button class="btn btn-warning" id="reloadBtn">
+                    <i class="fas fa-sync-alt me-1"></i>更新
+                </button>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-12 d-flex align-items-center gap-3">
+                <span id="rowCount" class="text-muted fs-5">0件中 1～0件を表示</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
+                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
+                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="dataTable">
+            <thead>
+                <tr>
+                    <th class="column-user">
+                      <i class="fas fa-user-circle me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー名</span>
+                    </th>
+                    <th class="column-email">
+                      <i class="fas fa-envelope-open-text me-2"></i>
+                      <span class="badge bg-white text-dark">メールアドレス</span>
+                    </th>
+                    <th class="column-error">
+                      <i class="fas fa-bug me-2"></i>
+                      <span class="badge bg-white text-dark">エラー内容</span>
+                    </th>
+                    <th class="column-date">
+                      <i class="fas fa-clock me-2"></i>
+                      <span class="badge bg-white text-dark">発生日時</span>
+                    </th>
+                    <th class="column-status">
+                      <i class="fas fa-clipboard-check me-2"></i>
+                      <span class="badge bg-white text-dark">ステータス</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i> 同期エラーデータを取得中...
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ページネーション設定
+const itemsPerPage = 10;
+let currentPage = 1;
+
+// データ取得
+function loadData() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    document.getElementById('errorContainer').style.display = 'none';
+    
+    // 実際にはここでAPI呼び出しやCSV読み込みを行う
+    setTimeout(() => {
+        try {
+            // サンプルデータ（実際にはCSVから読み込まれる）
+            window.errorData = [
+                {
+                    "ユーザー名": "山田 太郎",
+                    "メールアドレス": "t-yamada@example.com",
+                    "エラー内容": "ファイル名が長すぎます (256文字以上)",
+                    "発生日時": "2025/04/15 10:23",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "佐藤 花子",
+                    "メールアドレス": "h-sato@example.com",
+                    "エラー内容": "ネットワーク接続が不安定",
+                    "発生日時": "2025/04/14 15:42",
+                    "ステータス": "調査中"
+                },
+                {
+                    "ユーザー名": "鈴木 一郎",
+                    "メールアドレス": "i-suzuki@example.com",
+                    "エラー内容": "ストレージクォータ不足",
+                    "発生日時": "2025/04/10 09:15",
+                    "ステータス": "解決済"
+                },
+                {
+                    "ユーザー名": "田中 健太",
+                    "メールアドレス": "k-tanaka@example.com",
+                    "エラー内容": "ファイルサイズ制限超過 (15GB以上)",
+                    "発生日時": "2025/04/12 11:30",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "高橋 裕子",
+                    "メールアドレス": "y-takahashi@example.com",
+                    "エラー内容": "同期遅延 (30分以上)",
+                    "発生日時": "2025/04/11 14:15",
+                    "ステータス": "調査中"
+                },
+                {
+                    "ユーザー名": "伊藤 正",
+                    "メールアドレス": "t-ito@example.com",
+                    "エラー内容": "一時的なサーバーエラー",
+                    "発生日時": "2025/04/09 08:45",
+                    "ステータス": "解決済"
+                },
+                {
+                    "ユーザー名": "渡辺 美咲",
+                    "メールアドレス": "m-watanabe@example.com",
+                    "エラー内容": "不正なファイル名文字",
+                    "発生日時": "2025/04/08 16:20",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "中村 隆",
+                    "メールアドレス": "t-nakamura@example.com",
+                    "エラー内容": "認証トークン切れ",
+                    "発生日時": "2025/04/07 09:30",
+                    "ステータス": "対応中"
+                },
+                {
+                    "ユーザー名": "小林 翔子",
+                    "メールアドレス": "s-kobayashi@example.com",
+                    "エラー内容": "一時的なネットワーク障害",
+                    "発生日時": "2025/04/05 13:10",
+                    "ステータス": "解決済"
+                },
+                {
+                    "ユーザー名": "加藤 大輔",
+                    "メールアドレス": "d-kato@example.com",
+                    "エラー内容": "ファイルロック競合",
+                    "発生日時": "2025/04/03 10:45",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "吉田 翔",
+                    "メールアドレス": "s-yoshida@example.com",
+                    "エラー内容": "バージョン競合",
+                    "発生日時": "2025/04/16 14:20",
+                    "ステータス": "調査中"
+                },
+                {
+                    "ユーザー名": "山本 美咲",
+                    "メールアドレス": "m-yamamoto@example.com",
+                    "エラー内容": "アクセス権限不足",
+                    "発生日時": "2025/04/13 11:10",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "中島 健",
+                    "メールアドレス": "k-nakajima@example.com",
+                    "エラー内容": "サーバー混雑",
+                    "発生日時": "2025/04/10 16:45",
+                    "ステータス": "対応中"
+                },
+                {
+                    "ユーザー名": "佐々木 良子",
+                    "メールアドレス": "r-sasaki@example.com",
+                    "エラー内容": "ファイル破損",
+                    "発生日時": "2025/04/09 09:30",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "井上 拓也",
+                    "メールアドレス": "t-inoue@example.com",
+                    "エラー内容": "タイムアウト",
+                    "発生日時": "2025/04/08 14:15",
+                    "ステータス": "調査中"
+                },
+                {
+                    "ユーザー名": "斎藤 めぐみ",
+                    "メールアドレス": "m-saito@example.com",
+                    "エラー内容": "ディスク容量不足",
+                    "発生日時": "2025/04/07 10:20",
+                    "ステータス": "解決済"
+                },
+                {
+                    "ユーザー名": "松本 大輔",
+                    "メールアドレス": "d-matsumoto@example.com",
+                    "エラー内容": "ネットワーク切断",
+                    "発生日時": "2025/04/06 13:40",
+                    "ステータス": "未対応"
+                },
+                {
+                    "ユーザー名": "林 直人",
+                    "メールアドレス": "n-hayashi@example.com",
+                    "エラー内容": "同期衝突",
+                    "発生日時": "2025/04/05 15:30",
+                    "ステータス": "調査中"
+                },
+                {
+                    "ユーザー名": "清水 香織",
+                    "メールアドレス": "k-shimizu@example.com",
+                    "エラー内容": "API制限超過",
+                    "発生日時": "2025/04/04 11:20",
+                    "ステータス": "対応中"
+                },
+                {
+                    "ユーザー名": "田中 健太",
+                    "メールアドレス": "k-tanaka@example.com",
+                    "エラー内容": "ファイル名重複",
+                    "発生日時": "2025/04/03 09:10",
+                    "ステータス": "未対応"
+                }
+            ];
+            
+            initFilters();
+            renderTable();
+            setupPagination();
+            document.getElementById('loadingOverlay').style.display = 'none';
+        } catch (error) {
+            console.error('同期エラー取得エラー:', error);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+    }, 1500);
+}
+
+// データ表示更新
+function updateDisplay() {
+    const filteredData = applyFilters(window.errorData, ['ユーザー名', 'メールアドレス', 'エラー内容', 'ステータス']);
+    const currentPageSize = parseInt(document.getElementById('pageSize').value) || 10;
+    
+    // 行数表示更新
+    document.getElementById('rowCount').textContent =
+        `${filteredData.length}件中 1～${Math.min(filteredData.length, currentPageSize)}件を表示`;
+    
+    // テーブル表示
+    if (currentPageSize > 0) {
+        setupPagination(filteredData, currentPageSize, (data) => {
+            renderTable(data);
+        });
+    } else {
+        renderTable(filteredData);
+    }
+}
+
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.querySelector('#dataTable tbody');
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const statusClass = {
+            '未対応': 'status-critical',
+            '調査中': 'status-warning',
+            '対応中': 'status-warning',
+            '解決済': 'status-resolved'
+        }[item['ステータス']] || '';
+        
+        row.className = statusClass;
+        
+        row.innerHTML = `
+            <td>${item['ユーザー名']}</td>
+            <td>${item['メールアドレス']}</td>
+            <td>${item['エラー内容']}</td>
+            <td>${item['発生日時']}</td>
+            <td>${item['ステータス']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// 初期化処理
+window.onload = function() {
+    loadData();
+    
+    // イベントリスナー設定
+    document.getElementById('globalSearch').addEventListener('keyup', updateDisplay);
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        exportToCsv(window.errorData, 'SyncErrorReport.csv');
+    });
+    document.getElementById('reloadBtn').addEventListener('click', loadData);
+};
+// CSVエクスポート
+function exportToCsv() {
+    const headers = ['ユーザー名', 'メールアドレス', 'エラー内容', '発生日時', 'ステータス'].join(',') + '\n';
+    const csvContent = headers + window.errorData.map(item =>
+        ['ユーザー名', 'メールアドレス', 'エラー内容', '発生日時', 'ステータス']
+        .map(col => `"${item[col]}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'SyncErrorReport.csv');
+    link.click();
+}
+
+// 初期化処理
+window.onload = function() {
+    loadData();
+    
+    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+    document.querySelectorAll('.filter-row select').forEach(select => {
+        select.addEventListener('change', filterTable);
+    });
+};
+</script>
+
+<div class="container">
+    <div id="errorContainer" class="error-message" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>データ取得エラー:</strong> 同期エラーデータの取得中に問題が発生しました。詳細はシステム管理者に連絡してください。
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i>再読み込み
+                </button>
+                <button class="btn btn-sm btn-primary ms-2" id="retryBtn">
+                    <i class="fas fa-redo me-1"></i>再試行
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('retryBtn').addEventListener('click', loadData);
+</script>
+</body>
+</html>

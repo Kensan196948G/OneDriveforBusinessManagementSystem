@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>共有設定レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+/* ローディングオーバーレイ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --item-color: #ffd54f;
+  --permission-color: #ba68c8;
+  --sharedwith-color: #81c784;
+  --date-color: #4dd0e1;
+  --risk-color: #ef5350;
+}
+
+.column-user { 
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-item { 
+  background: linear-gradient(135deg, var(--item-color), #ffca28);
+  color: #333;
+}
+.column-permission { 
+  background: linear-gradient(135deg, var(--permission-color), #9c27b0);
+  color: white;
+}
+.column-sharedwith { 
+  background: linear-gradient(135deg, var(--sharedwith-color), #43a047);
+  color: white;
+}
+.column-date { 
+  background: linear-gradient(135deg, var(--date-color), #26c6da);
+  color: white;
+}
+.column-risk { 
+  background: linear-gradient(135deg, var(--risk-color), #e53935);
+  color: white;
+}
+
+.risk-high { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.risk-medium { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.risk-low { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.filter-row th {
+    vertical-align: bottom;
+    padding-bottom: 10px;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.column-date {
+    min-width: 120px;
+}
+
+.column-risk {
+    min-width: 80px;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>共有設定データを取得中...お待ちください</div>
+        </div>
+    </div>
+
+    <h1 class="text-center mb-4">
+      <i class="fas fa-share-alt me-3 text-primary"></i>
+      OneDrive共有設定レポート
+      <i class="fas fa-file-alt ms-3 text-primary"></i>
+    </h1>
+    
+    <div class="filter-container">
+        <div class="row mb-3 g-3 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはファイル名で検索...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="riskFilter">
+                    <option value="">すべてのリスクレベル</option>
+                    <option value="高">高リスクのみ</option>
+                    <option value="中">中リスクのみ</option>
+                    <option value="低">低リスクのみ</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="entriesPerPage">
+                        <option value="10">10件表示</option>
+                        <option value="25">25件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-outline-secondary py-2 px-3" onclick="exportToCsv()">
+                        <i class="fas fa-file-csv me-1"></i>CSVエクスポート
+                    </button>
+                    <button class="btn btn-outline-primary py-2 px-3" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>印刷
+                    </button>
+                    <button class="btn btn-outline-success py-2 px-3" onclick="fetchData()">
+                        <i class="fas fa-sync-alt me-1"></i>更新
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-12 d-flex align-items-center gap-3">
+                <span id="resultCount" class="text-muted fs-5">0件中 1～0件を表示</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
+                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
+                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="sharingTable">
+            <thead>
+                <tr>
+                    <th class="column-user">
+                      <i class="fas fa-user-tie me-2"></i>
+                      <span class="badge bg-white text-dark">所有者</span>
+                    </th>
+                    <th class="column-item">
+                      <i class="fas fa-file-alt me-2"></i>
+                      <span class="badge bg-white text-dark">共有アイテム</span>
+                    </th>
+                    <th class="column-permission">
+                      <i class="fas fa-user-lock me-2"></i>
+                      <span class="badge bg-white text-dark">権限</span>
+                    </th>
+                    <th class="column-sharedwith">
+                      <i class="fas fa-share-alt me-2"></i>
+                      <span class="badge bg-white text-dark">共有先</span>
+                    </th>
+                    <th class="column-date">
+                      <i class="fas fa-calendar-day me-2"></i>
+                      <span class="badge bg-white text-dark">共有日</span>
+                    </th>
+                    <th class="column-risk">
+                      <i class="fas fa-shield-virus me-2"></i>
+                      <span class="badge bg-white text-dark">リスクレベル</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select" id="userFilter"></select></th>
+                    <th><select class="form-select" id="itemFilter"></select></th>
+                    <th><select class="form-select" id="permissionFilter"></select></th>
+                    <th><select class="form-select" id="sharedWithFilter"></select></th>
+                    <th><select class="form-select" id="dateFilter" onchange="filterTable()">
+                        <option value="">すべての共有日</option>
+                    </select></th>
+                    <th><select class="form-select" id="riskFilter">
+                        <option value="">すべてのリスクレベル</option>
+                        <option value="高">高</option>
+                        <option value="中">中</option>
+                        <option value="低">低</option>
+                    </select></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- データはJavaScriptで動的に生成 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- データ取得エラーメッセージ -->
+    <div id="errorMessage" class="alert alert-danger mt-3 mb-3 mx-auto" style="display: none; border-left: 5px solid #dc3545; max-width: 1300px; width: 100%; padding: 1rem;">
+        <div class="d-flex align-items-start px-2 py-1">
+            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
+            <div>
+                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
+                <p class="mb-3 fs-5">共有設定データが取得できませんでした。以下の方法をお試しください:</p>
+                <ol class="mb-4 fs-5">
+                    <li class="mb-2">SharingCheck.ps1スクリプトを再実行してください<br>
+                        <code class="bg-light p-1 d-inline-block mt-1">.\SharingCheck.ps1</code>
+                    </li>
+                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br>
+                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
+                    </li>
+                </ol>
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-danger px-4 py-2" onclick="location.reload()">
+                        <i class="fas fa-sync-alt me-2"></i>再読み込み
+                    </button>
+                    <button class="btn btn-outline-danger px-4" onclick="fetchData()">
+                        <i class="fas fa-redo me-2"></i>再試行
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// 空のデータ配列
+window.sharingData = [];
+
+// 日付フォーマット関数
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    // YYYY/MM/DD形式に統一
+    return dateStr.replace(/-/g, '/');
+}
+
+// フィルターメニュー初期化
+function initFilters() {
+    const columns = ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル'];
+    
+    columns.forEach((col, index) => {
+        const select = document.querySelectorAll('.filter-row select')[index];
+        select.innerHTML = ''; // 既存のオプションをクリア
+        
+        // デフォルトオプション
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `すべての${col}`;
+        select.appendChild(defaultOption);
+        
+        // リスクレベルは固定値で初期化
+        if (col === 'リスクレベル') {
+            ['高', '中', '低'].forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+    });
+}
+
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    
+    if (data.length === 0) {
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+    }
+    
+    document.getElementById('errorMessage').style.display = 'none';
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const riskClass = {
+            '高': 'risk-high',
+            '中': 'risk-medium',
+            '低': 'risk-low'
+        }[item['リスクレベル']] || '';
+        
+        row.className = riskClass;
+        
+        row.innerHTML = `
+            <td>${item['ユーザー名']}</td>
+            <td>${item['共有アイテム']}</td>
+            <td>${item['権限']}</td>
+            <td>${item['共有先']}</td>
+            <td>${item['共有日']}</td>
+            <td>${item['リスクレベル']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// フィルター適用
+function filterTable() {
+    const filters = [];
+    document.querySelectorAll('.filter-row select').forEach((select, index) => {
+        filters[index] = select.value;
+    });
+    
+    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
+    const riskFilter = document.getElementById('riskFilter').value;
+    
+    const filteredData = window.sharingData.filter(item => {
+        // グローバル検索
+        if (globalSearch) {
+            const found = Object.values(item).some(val => 
+                String(val).toLowerCase().includes(globalSearch)
+            );
+            if (!found) return false;
+        }
+        
+        // リスクフィルター
+        if (riskFilter && item['リスクレベル'] !== riskFilter) {
+            return false;
+        }
+        
+        // カラムフィルター
+        return ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル']
+            .every((col, colIndex) => {
+                if (!filters[colIndex]) return true;
+                return String(item[col]) === filters[colIndex];
+            });
+    });
+    
+    renderTable(filteredData);
+}
+
+// CSVエクスポート
+function exportToCsv() {
+    if (window.sharingData.length === 0) {
+        alert('エクスポートするデータがありません');
+        return;
+    }
+    
+    const headers = ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル'].join(',') + '\n';
+    const csvContent = headers + window.sharingData.map(item => 
+        ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル']
+        .map(col => `"${item[col]}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'SharingReport.csv');
+    link.click();
+}
+
+// データ取得関数
+async function fetchData() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    try {
+        // 実際にはここでAPI呼び出しやCSV読み込みを行う
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 初期状態では空の配列を設定（APIからデータ取得後に更新）
+        window.sharingData = [];
+        
+        initFilters();
+        renderTable(window.sharingData);
+        document.getElementById('loadingOverlay').style.display = 'none';
+    } catch (error) {
+        console.error('共有設定データ取得エラー:', error);
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+    }
+}
+
+// 初期化
+window.onload = function() {
+    try {
+        fetchData();
+        
+        document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+        document.getElementById('riskFilter').addEventListener('change', filterTable);
+        document.querySelectorAll('.filter-row select').forEach(select => {
+            select.addEventListener('change', filterTable);
+        });
+    } catch (error) {
+        console.error('初期化エラー:', error);
+        document.getElementById('errorMessage').style.display = 'block';
+    }
+};
+</script>
+</body>
+</html>

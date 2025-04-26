@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ユーザー情報レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome CDN -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+/* ページネーションアイコン */
+.fa-chevron-left, .fa-chevron-right {
+  font-size: 1rem;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* ローディングオーバーレイ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+</style>
+<style>
+body {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+:root {
+  --user-color: #64b5f6;
+  --email-color: #ffd54f;
+  --login-color: #ba68c8;
+  --type-color: #81c784;
+  --status-color: #ffb74d;
+  --lastsync-color: #4dd0e1;
+}
+
+.column-user { 
+  background: linear-gradient(135deg, var(--user-color), #42a5f5);
+  color: white;
+}
+.column-email { 
+  background: linear-gradient(135deg, var(--email-color), #ffca28);
+  color: #333;
+}
+.column-login { 
+  background: linear-gradient(135deg, var(--login-color), #9c27b0);
+  color: white;
+}
+.column-type { 
+  background: linear-gradient(135deg, var(--type-color), #43a047);
+  color: white;
+}
+.column-status { 
+  background: linear-gradient(135deg, var(--status-color), #ff8a65);
+  color: white;
+}
+.column-lastsync { 
+  background: linear-gradient(135deg, var(--lastsync-color), #26c6da);
+  color: white;
+}
+
+.status-active { 
+  background: linear-gradient(135deg, #69f0ae, #00c853);
+  color: white;
+  font-weight: bold;
+}
+.status-inactive { 
+  background: linear-gradient(135deg, #ffd740, #ffa000);
+  color: #333;
+  font-weight: bold;
+}
+.status-disabled { 
+  background: linear-gradient(135deg, #ff5252, #c62828);
+  color: white;
+  font-weight: bold;
+}
+
+.table-hover tbody tr:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+.filter-row select {
+    width: 100%;
+    padding: 8px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.filter-container {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+</style>
+
+
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>ユーザー情報データを取得中...お待ちください</div>
+        </div>
+    </div>
+    <h1 class="text-center mb-4">
+      <i class="fas fa-users me-3 text-primary"></i>
+      ユーザー情報レポート
+      <i class="fas fa-id-card ms-3 text-primary"></i>
+    </h1>
+    
+
+
+
+    <div class="filter-container">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
+                </div>
+                <div id="resultCount" class="text-muted fs-5 ps-2 d-flex align-items-center">
+                    0件中 1～0件を表示
+                    <div class="ms-3 d-flex flex-row align-items-center gap-1">
+                        <button class="btn btn-outline-primary px-2 py-0" onclick="changePage(currentPage - 1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline-primary px-2 py-0" onclick="changePage(currentPage + 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="statusFilter">
+                    <option value="">すべてのステータス</option>
+                    <option value="active">有効のみ</option>
+                    <option value="inactive">無効のみ</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-export me-1"></i>CSVエクスポート
+                </button>
+                <button class="btn btn-secondary me-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>印刷
+                </button>
+                <button id="refreshBtn" class="btn btn-warning" onclick="fetchUserData()">
+                    <span id="refreshIcon"><i class="fas fa-sync-alt me-1"></i></span>
+                    <span id="refreshText">更新</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 表示件数情報 -->
+        <div class="row align-items-center mb-2">
+            <div class="col-md-6">
+                <span id="tableInfo" class="text-muted"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="userTable">
+            <thead>
+                <tr>
+                    <th class="column-user">
+                      <i class="fas fa-user-circle me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー名</span>
+                    </th>
+                    <th class="column-email">
+                      <i class="fas fa-envelope me-2"></i>
+                      <span class="badge bg-white text-dark">メールアドレス</span>
+                    </th>
+                    <th class="column-login">
+                      <i class="fas fa-sign-in-alt me-2"></i>
+                      <span class="badge bg-white text-dark">ログイン名</span>
+                    </th>
+                    <th class="column-type">
+                      <i class="fas fa-user-tag me-2"></i>
+                      <span class="badge bg-white text-dark">ユーザー種別</span>
+                    </th>
+                    <th class="column-status">
+                      <i class="fas fa-power-off me-2"></i>
+                      <span class="badge bg-white text-dark">アカウント状態</span>
+                    </th>
+                    <th class="column-lastsync">
+                      <i class="fas fa-sync-alt me-2"></i>
+                      <span class="badge bg-white text-dark">最終同期日時</span>
+                    </th>
+                </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select" id="syncDateFilter" onchange="filterTable()">
+                        <option value="">すべての同期日時</option>
+                    </select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                    <th><select class="form-select" onchange="filterTable()"></select></th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- データはJavaScriptで動的に生成 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- エラーメッセージコンテナ (テスト表示用) -->
+    <div id="errorContainer" class="alert alert-danger mt-3 mb-5 mx-auto" style="border-left: 5px solid #dc3545; max-width: 100%; width: 100%;">
+        <div class="d-flex align-items-start px-3 py-2">
+            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
+            <div>
+                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
+                <p class="mb-3 fs-5">ユーザーデータが取得できませんでした。以下の方法をお試しください:</p>
+                <ol class="mb-4 fs-5">
+                    <li class="mb-2">GetUserInfo.ps1スクリプトを再実行してください<br>
+                        <code class="bg-light p-1 d-inline-block mt-1">.\GetUserInfo.ps1</code>
+                    </li>
+                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br>
+                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
+                    </li>
+                </ol>
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
+                        <i class="fas fa-sync-alt me-2"></i>再読み込み
+                    </button>
+                    <button class="btn btn-outline-danger px-4 py-2" onclick="handleRetry()">
+                        <i class="fas fa-redo me-2"></i>再試行
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./common.js" async></script>
+<script>
+  // Font Awesomeアイコン表示の強制
+  function enforceIconDisplay() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .fa, [class^="fa-"], [class*=" fa-"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: inline-block !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // DOM変更監視
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      if (mutation.addedNodes.length) {
+        enforceIconDisplay();
+      }
+    });
+  });
+
+  // 初期化処理
+  window.addEventListener('DOMContentLoaded', function() {
+    // 共通スクリプトのエラーチェック
+    document.querySelector('script[src="./common.js"]').onerror = function() {
+      console.error('common.jsの読み込みに失敗しました');
+      document.getElementById('errorContainer').innerHTML = `
+        <div class="alert alert-danger">
+          <h4>スクリプトファイルエラー</h4>
+          <p>common.jsファイルが見つかりません。以下の方法をお試しください:</p>
+          <ol>
+            <li>PowerShellスクリプトを再実行 (.\\GetUserInfo.ps1)</li>
+            <li>ITサポートデスクに連絡 (内線: 1234)</li>
+          </ol>
+        </div>
+      `;
+    };
+
+    // アイコン表示の強制
+    enforceIconDisplay();
+    
+    // DOM変更を監視
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  });
+
+  // クリーンアップ
+  window.addEventListener('beforeunload', function() {
+    observer.disconnect();
+  });
+</script>
+
+<style>
+  /* アイコン表示の強制 */
+  i.fas {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* ナビゲーションアイコンの間隔調整 */
+  .nav-icons {
+    display: flex;
+    gap: 8px; /* 適切な間隔 */
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .nav-icons {
+      gap: 4px;
+    }
+  }
+</style>
+<script>
+// ページ再読み込みと再試行の処理
+async function handleReload() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.opacity = '1';
+    
+    const loadingStartTime = Date.now();
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const loadingEndTime = Date.now();
+    const loadingDuration = loadingEndTime - loadingStartTime;
+    const minDisplayTime = 1500;
+    
+    if (loadingDuration < minDisplayTime) {
+        await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+    }
+    
+    location.reload();
+}
+
+async function handleRetry() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.opacity = '1';
+    
+    const loadingStartTime = Date.now();
+    await fetchUserData();
+    
+    const loadingEndTime = Date.now();
+    const loadingDuration = loadingEndTime - loadingStartTime;
+    const minDisplayTime = 1500;
+    
+    if (loadingDuration < minDisplayTime) {
+        await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+    }
+}
+
+// ページネーション関連変数
+let currentPage = 1;
+let entriesPerPage = 10;
+let filteredData = [];
+
+// API呼び出し関数
+async function callApi(endpoint) {
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error('API呼び出し失敗:', error);
+        throw error;
+    }
+}
+
+// エラーハンドリング
+function handleError(error, message) {
+    console.error(message, error);
+    const errorContainer = document.getElementById('errorContainer');
+    if (errorContainer) {
+        errorContainer.querySelector('.alert-heading').textContent = 'データ取得エラー';
+        errorContainer.querySelector('p').textContent = message;
+        errorContainer.classList.remove('d-none');
+        errorContainer.style.display = 'block';
+        // エラーメッセージを表示する際にスクロール
+        errorContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// ページネーション状態更新
+function updatePaginationControls(totalPages) {
+    const prevBtn = document.querySelector('button[onclick*="currentPage - 1"]');
+    const nextBtn = document.querySelector('button[onclick*="currentPage + 1"]');
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+}
+
+// ページ変更
+function changePage(page) {
+    currentPage = page;
+    renderTable(filteredData.length ? filteredData : window.userData);
+}
+
+// ユーザーデータ取得
+async function fetchUserData() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const errorContainer = document.getElementById('errorContainer');
+    
+    try {
+        if (!loadingOverlay || !errorContainer) {
+            throw new Error('必要なDOM要素が見つかりません');
+        }
+        
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.opacity = '1';
+        errorContainer.classList.add('d-none');
+
+        const loadingStartTime = Date.now();
+        
+        try {
+            // Graph APIからユーザー情報を取得
+            fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,mail,accountEnabled,lastLoginDateTime,assignedLicenses', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // データ処理
+                const users = data.value;
+                users.forEach(user => {
+                    // テーブルに行を追加
+                    addUserToTable(user);
+                });
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // エラーメッセージ表示
+                showErrorMessage('ユーザー情報の取得に失敗しました');
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            });
+            await new Promise(resolve => setTimeout(resolve, 1500)); // 最低1.5秒表示を保証
+            
+            if (window.userData?.length) {
+                renderTable(window.userData);
+            }
+        } catch (error) {
+            console.error('データ取得エラー:', error);
+            throw error;
+        } finally {
+            const loadingEndTime = Date.now();
+            const loadingDuration = loadingEndTime - loadingStartTime;
+            const minDisplayTime = 1500;
+            
+            if (loadingDuration < minDisplayTime) {
+                await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+            }
+            
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => loadingOverlay.style.display = 'none', 300);
+        }
+    } catch (error) {
+        console.error('API呼び出しエラー:', error);
+        handleError(error, `データ取得に失敗: ${error.message}`);
+    }
+}
+
+// フィルターメニュー初期化
+function initFilters(data) {
+    const columns = ['ユーザー名', 'メールアドレス', 'ログイン名', 'ユーザー種別', 'アカウント状態', '最終同期日時'];
+    
+    columns.forEach((col, index) => {
+        const select = document.querySelectorAll('.filter-row select')[index];
+        const uniqueValues = [...new Set(data.map(item => item[col]))];
+        
+        // デフォルトオプション
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = `すべての${col}`;
+        select.appendChild(defaultOption);
+        
+        // ユニークな値を追加
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+    });
+}
+
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.querySelector('#userTable tbody');
+    tbody.innerHTML = '';
+    filteredData = data || [];
+    
+    // 表示件数の情報を更新
+    let infoText = '0件中 1～0件を表示';
+    if (data && data.length > 0) {
+        // ページネーション処理
+        const startIndex = (currentPage - 1) * entriesPerPage;
+        const endIndex = startIndex + entriesPerPage;
+        const paginatedData = data.slice(startIndex, endIndex);
+        infoText = `${data.length}件中 ${startIndex + 1}～${Math.min(endIndex, data.length)}件を表示`;
+        
+        // データ表示
+        paginatedData.forEach(item => {
+            const row = document.createElement('tr');
+            const statusClass = {
+                '有効': 'status-active',
+                '無効': 'status-inactive',
+                '停止中': 'status-disabled'
+            }[item['アカウント状態']] || '';
+            
+            row.className = statusClass;
+            row.innerHTML = `
+                <td>${item['ユーザー名']}</td>
+                <td>${item['メールアドレス']}</td>
+                <td>${item['ログイン名']}</td>
+                <td>${item['ユーザー種別']}</td>
+                <td>${item['アカウント状態']}</td>
+                <td>${item['最終同期日時']}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    } else {
+        // データなし/エラー時の表示
+        document.getElementById('errorContainer').style.display = 'block';
+    }
+    
+    // 件数表示を更新
+    document.getElementById('resultCount').textContent = infoText;
+    
+    // ページネーションコントロールの状態更新
+    const totalPages = Math.ceil((data?.length || 0) / entriesPerPage);
+    updatePaginationControls(totalPages);
+}
+
+// フィルター適用
+function filterTable(data) {
+    const filters = [];
+    document.querySelectorAll('.filter-row select').forEach((select, index) => {
+        filters[index] = select.value;
+    });
+    
+    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const filteredData = data.filter(item => {
+        // グローバル検索
+        if (globalSearch) {
+            const found = Object.values(item).some(val => 
+                String(val).toLowerCase().includes(globalSearch)
+            );
+            if (!found) return false;
+        }
+        
+        // ステータスフィルター
+        if (statusFilter && item['アカウント状態'] !== statusFilter) {
+            return false;
+        }
+        
+        // カラムフィルター
+        return ['ユーザー名', 'メールアドレス', 'ログイン名', 'ユーザー種別', 'アカウント状態', '最終同期日時']
+            .every((col, colIndex) => {
+                if (!filters[colIndex]) return true;
+                return String(item[col]) === filters[colIndex];
+            });
+    });
+    
+    renderTable(filteredData);
+}
+
+// CSVエクスポート
+async function exportToCsv() {
+    try {
+        const users = await fetchUserData();
+        const columns = ['ユーザー名', 'メールアドレス', 'ログイン名', 'ユーザー種別', 'アカウント状態', '最終同期日時'];
+        exportToCsv(users, 'users_export.csv', columns);
+    } catch (error) {
+        handleError(error, 'CSVエクスポートに失敗しました');
+    }
+}
+
+// 初期化
+window.onload = async function() {
+    try {
+        window.userData = await fetchUserData();
+        if (!window.userData || window.userData.length === 0) {
+            throw new Error('データが0件です');
+        }
+        initFilters(userData);
+        renderTable(userData);
+    } catch (error) {
+        console.error('データ取得エラー:', error);
+        renderTable(null);
+    }
+    
+    document.getElementById('globalSearch').addEventListener('keyup', () => {
+        currentPage = 1;
+        filterTable(userData);
+    });
+    document.getElementById('statusFilter').addEventListener('change', () => {
+        currentPage = 1;
+        filterTable(userData);
+    });
+    document.querySelectorAll('.filter-row select').forEach(select => {
+        select.addEventListener('change', () => {
+            currentPage = 1;
+            filterTable(userData);
+        });
+    });
+};
+</script>
+</body>
+</html>
