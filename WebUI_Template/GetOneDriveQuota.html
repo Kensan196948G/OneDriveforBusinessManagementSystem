@@ -180,7 +180,7 @@ body {
                     <button class="btn btn-secondary py-2 px-3" onclick="window.print()" style="font-size: 0.9rem;">
                         <i class="fas fa-print me-1"></i>印刷
                     </button>
-                    <button id="refreshBtn" class="btn btn-warning py-2 px-3" onclick="fetchQuotaData()" style="font-size: 0.9rem;">
+                    <button id="refreshBtn" class="btn btn-warning py-2 px-3" onclick="handleRefresh()" style="font-size: 0.9rem;">
                         <span id="refreshIcon"><i class="fas fa-sync-alt me-1"></i></span>
                         <span id="refreshText">更新</span>
                     </button>
@@ -256,7 +256,7 @@ body {
 </div>
 
 <!-- エラーメッセージコンテナ -->
-<div id="errorContainer" class="alert alert-danger mt-3 mb-3 mx-auto" style="display: none; border-left: 5px solid #dc3545; max-width: 1300px; width: 100%; padding: 1rem;">
+<div id="errorContainer" class="alert alert-danger mt-3 mb-3 mx-auto" style="display: block; border-left: 5px solid #dc3545; max-width: 1300px; width: 100%; padding: 1rem;">
     <div class="d-flex align-items-start px-2 py-1">
         <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
         <div>
@@ -274,7 +274,7 @@ body {
                 <button class="btn btn-danger px-4 py-2" onclick="location.reload()">
                     <i class="fas fa-sync-alt me-2"></i>再読み込み
                 </button>
-                <button class="btn btn-outline-danger px-4" onclick="fetchQuotaData()">
+                <button class="btn btn-outline-danger px-4" onclick="handleRetry()">
                     <i class="fas fa-redo me-2"></i>再試行
                 </button>
             </div>
@@ -299,37 +299,151 @@ PowerShellスクリプト連携例:
 2. fetchQuotaData()内でfetch APIを使用してJSONを取得
 例:
 async function fetchQuotaData() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const errorContainer = document.getElementById('errorContainer');
+    
     try {
-        const response = await fetch('data/quota.json'); // PowerShellが生成したJSON
-        return await response.json();
+        if (!loadingOverlay || !errorContainer) {
+            throw new Error('必要なDOM要素が見つかりません');
+        }
+        
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.opacity = '1';
+        errorContainer.style.display = 'none';
+
+        const loadingStartTime = Date.now();
+        
+        // デモ用: 意図的にエラーを発生させる
+        throw new Error('デモ用エラー: データ取得に失敗しました');
+        
+        // PowerShellが生成したJSONを取得
+        const response = await fetch('data/quota.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        await new Promise(resolve => setTimeout(resolve, 1500)); // 最低1.5秒表示を保証
+        
+        return data;
     } catch (error) {
         console.error('クォータデータ取得エラー:', error);
         handleError(error, "クォータ情報の取得に失敗しました。スクリプトを再実行してください。");
-        return null;
+        throw error;
+    } finally {
+        const loadingEndTime = Date.now();
+        const loadingDuration = loadingEndTime - loadingStartTime;
+        const minDisplayTime = 1500;
+        
+        if (loadingDuration < minDisplayTime) {
+            await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+        }
+        
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => loadingOverlay.style.display = 'none', 300);
     }
 }
 */
 // データ取得関数
+// ローディング表示管理関数
+async function showLoading(minDuration = 1500) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (!loadingOverlay) throw new Error('ローディング要素が見つかりません');
+    
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.opacity = '1';
+    const startTime = Date.now();
+    
+    return {
+        hide: async () => {
+            const elapsed = Date.now() - startTime;
+            const remaining = Math.max(0, minDuration - elapsed);
+            await new Promise(resolve => setTimeout(resolve, remaining));
+            
+            loadingOverlay.style.opacity = '0';
+            await new Promise(resolve => setTimeout(resolve, 300));
+            loadingOverlay.style.display = 'none';
+        }
+    };
+}
+
 async function fetchQuotaData() {
+    const errorContainer = document.getElementById('errorContainer');
+    if (!errorContainer) throw new Error('エラーコンテナが見つかりません');
+    
+    const loading = await showLoading();
+    
     try {
-        document.getElementById('loadingOverlay').style.display = 'flex';
+        // デモ用: 意図的にエラーを発生させる
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        throw new Error('デモ用エラー: データ取得に失敗しました');
         
-        // サンプルデータ（実際にはAPIやファイルから取得）
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        window.quotaData = [];
+        // 実際の実装では以下を使用
+        // const response = await fetch('data/quota.json');
+        // if (!response.ok) throw new Error(`HTTPエラー! status: ${response.status}`);
+        // return await response.json();
         
-        document.getElementById('loadingOverlay').style.display = 'none';
-        return window.quotaData;
     } catch (error) {
-        console.error('クォータデータ取得エラー:', error);
-        document.getElementById('loadingOverlay').style.display = 'none';
-        document.getElementById('errorContainer').style.display = 'block';
-        return [];
+        console.error('データ取得エラー:', error);
+        errorContainer.style.display = 'block';
+        throw error;
+    } finally {
+        await loading.hide();
+    }
+}
+
+// リロードボタン処理
+async function handleRefresh() {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.style.display = 'none';
+    
+    try {
+        const loading = await showLoading();
+        window.quotaData = await fetchQuotaData();
+        renderTable(window.quotaData);
+        initFilters();
+    } catch (error) {
+        console.error('更新処理エラー:', error);
+        errorContainer.style.display = 'block';
+    }
+}
+
+// 再試行ボタン処理
+async function handleRetry() {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.style.display = 'none';
+    
+    try {
+        const loading = await showLoading();
+        window.quotaData = await fetchQuotaData();
+        renderTable(window.quotaData);
+        initFilters();
+    } catch (error) {
+        console.error('再試行処理エラー:', error);
+        errorContainer.style.display = 'block';
     }
 }
 
 // 初期データ取得
-window.quotaData = [];
+window.addEventListener('load', async function() {
+    try {
+        window.quotaData = await fetchQuotaData();
+        renderTable(window.quotaData);
+        initFilters();
+        
+        // 更新ボタンイベント設定
+        document.getElementById('refreshBtn').addEventListener('click', async () => {
+            try {
+                window.quotaData = await fetchQuotaData();
+                renderTable(window.quotaData);
+                initFilters();
+            } catch (error) {
+                console.error('更新処理エラー:', error);
+            }
+        });
+    } catch (error) {
+        console.error('初期化エラー:', error);
+        handleError(error, "初期データの取得に失敗しました。");
+    }
+});
 
 // データ取得失敗時のデフォルトメッセージ
 if (window.quotaData.length === 0) {
@@ -538,37 +652,37 @@ function handleError(error, message) {
 }
 
 // 初期化
-window.onload = function() {
-    // データ取得後にフィルターとテーブルを初期化
-    Promise.resolve()
-        .then(() => {
-            window.quotaData = fetchQuotaData();
-            if (!window.quotaData || window.quotaData.length === 0) {
-                throw new Error('クォータデータが取得できませんでした');
-            }
-            return window.quotaData;
-        })
-        .then(data => {
-            initFilters();
-            renderTable(data);
-        })
-        .catch(error => {
-            handleError(error, "クォータデータ取得エラー");
-            // データが空の場合もエラーとして扱う
-            if (!window.quotaData || window.quotaData.length === 0) {
-                throw new Error('クォータデータが0件です');
-            }
-        });
+window.onload = async function() {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.style.display = 'block';
     
-    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-    document.getElementById('statusFilter').addEventListener('change', filterTable);
-    document.getElementById('entriesPerPage').addEventListener('change', function() {
-        currentPage = 1;
-        renderTable();
-    });
-    document.querySelectorAll('.filter-row select').forEach(select => {
-        select.addEventListener('change', filterTable);
-    });
+    try {
+        const loading = await showLoading();
+        window.quotaData = await fetchQuotaData();
+        
+        if (!window.quotaData || window.quotaData.length === 0) {
+            throw new Error('クォータデータが0件です');
+        }
+        
+        errorContainer.style.display = 'none';
+        initFilters();
+        renderTable(window.quotaData);
+        
+    } catch (error) {
+        console.error('初期化エラー:', error);
+        errorContainer.style.display = 'block';
+    } finally {
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('entriesPerPage').addEventListener('change', function() {
+            currentPage = 1;
+            renderTable(window.quotaData);
+        });
+        document.querySelectorAll('.filter-row select').forEach(select => {
+            select.addEventListener('change', filterTable);
+        });
+    }
 };
 </script>
 </body>

@@ -284,8 +284,34 @@ function loadData() {
     // 実際にはここでAPI呼び出しやCSV読み込みを行う
     setTimeout(() => {
         try {
-            // 初期状態では空の配列を設定（APIからデータ取得後に更新）
-            window.shareData = [];
+            // Graph APIから外部共有情報を取得
+            fetch('https://graph.microsoft.com/v1.0/drives/' + driveId + '/items/' + itemId + '/permissions', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 外部共有データ処理
+                const permissions = data.value;
+                permissions.forEach(perm => {
+                    if (perm.grantedToIdentities) {
+                        // 外部共有としてテーブルに追加
+                        addExternalShareToTable(perm);
+                    }
+                });
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // エラーメッセージ表示
+                showErrorMessage('外部共有情報の取得に失敗しました');
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            });
             
             initFilters();
             renderTable();

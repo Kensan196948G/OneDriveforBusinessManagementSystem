@@ -29,6 +29,35 @@ OneDrive for Businessの管理ツールで使用するWebUIの仕様書です。
      - Sites.Read.All
    - config.jsonに認証情報を設定
    - 非対話型認証(client_credentials grant)を使用
+   
+### 2.2 ローディングオーバーレイ仕様（追加）
+- データ取得中、データ読み込み中は**ローディングオーバーレイ**を表示する。
+- 仕様詳細:
+  - 全画面に半透明の背景（例：rgba(255, 255, 255, 0.7)）を表示
+  - 中央にスピナーアニメーション（FontAwesomeまたはBootstrap Spinnerを使用）を表示
+  - 読み込み完了後、自動的にフェードアウト
+  - APIエラーや読み込み失敗時は、エラーメッセージと共にオーバーレイを閉じる
+  - スピナーには「読み込み中...」のテキストを併記
+
+例：
+```html
+<div id="loading-overlay" style="display:none;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p>読み込み中...</p>
+</div>
+```
+
+制御例：
+```javascript
+function showLoading() {
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+```
 
 ## 3. 各レポート仕様
 

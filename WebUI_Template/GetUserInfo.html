@@ -29,6 +29,7 @@
     justify-content: center;
     align-items: center;
 }
+
 .loading-spinner {
     text-align: center;
     padding: 20px;
@@ -36,6 +37,7 @@
     background: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
 .loading-spinner i {
     font-size: 2rem;
     color: #007bff;
@@ -142,11 +144,7 @@ body {
     </h1>
     
 
-    <!-- エラー表示領域 -->
-    <div id="errorContainer" class="alert alert-danger d-none mb-3">
-        <h4 class="alert-heading"></h4>
-        <p></p>
-    </div>
+
 
     <div class="filter-container">
         <div class="row mb-3">
@@ -258,10 +256,10 @@ body {
                     </li>
                 </ol>
                 <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-danger px-4 py-2" onclick="location.reload()">
+                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
                         <i class="fas fa-sync-alt me-2"></i>再読み込み
                     </button>
-                    <button class="btn btn-outline-danger px-4 py-2" onclick="fetchUserData()">
+                    <button class="btn btn-outline-danger px-4 py-2" onclick="handleRetry()">
                         <i class="fas fa-redo me-2"></i>再試行
                     </button>
                 </div>
@@ -351,6 +349,43 @@ body {
   }
 </style>
 <script>
+// ページ再読み込みと再試行の処理
+async function handleReload() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.opacity = '1';
+    
+    const loadingStartTime = Date.now();
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const loadingEndTime = Date.now();
+    const loadingDuration = loadingEndTime - loadingStartTime;
+    const minDisplayTime = 1500;
+    
+    if (loadingDuration < minDisplayTime) {
+        await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+    }
+    
+    location.reload();
+}
+
+async function handleRetry() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.opacity = '1';
+    
+    const loadingStartTime = Date.now();
+    await fetchUserData();
+    
+    const loadingEndTime = Date.now();
+    const loadingDuration = loadingEndTime - loadingStartTime;
+    const minDisplayTime = 1500;
+    
+    if (loadingDuration < minDisplayTime) {
+        await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+    }
+}
+
 // ページネーション関連変数
 let currentPage = 1;
 let entriesPerPage = 10;
@@ -375,7 +410,10 @@ function handleError(error, message) {
     if (errorContainer) {
         errorContainer.querySelector('.alert-heading').textContent = 'データ取得エラー';
         errorContainer.querySelector('p').textContent = message;
+        errorContainer.classList.remove('d-none');
         errorContainer.style.display = 'block';
+        // エラーメッセージを表示する際にスクロール
+        errorContainer.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -395,27 +433,70 @@ function changePage(page) {
 
 // ユーザーデータ取得
 async function fetchUserData() {
-    // ローディングオーバーレイを表示
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const errorContainer = document.getElementById('errorContainer');
     
     try {
-        const users = await callApi('/api/users');
-        // ローディングオーバーレイを非表示
-        document.getElementById('loadingOverlay').style.display = 'none';
-        return users.map(user => ({
-            "ユーザー名": user.displayName,
-            "メールアドレス": user.mail,
-            "ログイン名": user.userPrincipalName,
-            "ユーザー種別": user.userType || "一般ユーザー",
-            "アカウント状態": user.accountEnabled ? "有効" : "無効",
-            "最終同期日時": user.lastLoginDateTime || "未同期"
-        }));
+        if (!loadingOverlay || !errorContainer) {
+            throw new Error('必要なDOM要素が見つかりません');
+        }
+        
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.opacity = '1';
+        errorContainer.classList.add('d-none');
+
+        const loadingStartTime = Date.now();
+        
+        try {
+            // Graph APIからユーザー情報を取得
+            fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,mail,accountEnabled,lastLoginDateTime,assignedLicenses', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // データ処理
+                const users = data.value;
+                users.forEach(user => {
+                    // テーブルに行を追加
+                    addUserToTable(user);
+                });
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // エラーメッセージ表示
+                showErrorMessage('ユーザー情報の取得に失敗しました');
+                // ローディングオーバーレイを非表示
+                hideLoadingOverlay();
+            });
+            await new Promise(resolve => setTimeout(resolve, 1500)); // 最低1.5秒表示を保証
+            
+            if (window.userData?.length) {
+                renderTable(window.userData);
+            }
+        } catch (error) {
+            console.error('データ取得エラー:', error);
+            throw error;
+        } finally {
+            const loadingEndTime = Date.now();
+            const loadingDuration = loadingEndTime - loadingStartTime;
+            const minDisplayTime = 1500;
+            
+            if (loadingDuration < minDisplayTime) {
+                await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
+            }
+            
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => loadingOverlay.style.display = 'none', 300);
+        }
     } catch (error) {
         console.error('API呼び出しエラー:', error);
-        // ローディングオーバーレイを非表示
-        document.getElementById('loadingOverlay').style.display = 'none';
-        handleError(error, "ユーザー情報の取得に失敗しました。スクリプトを再実行してください。");
-        return null; // 明示的にnullを返してエラー状態を示す
+        handleError(error, `データ取得に失敗: ${error.message}`);
     }
 }
 
