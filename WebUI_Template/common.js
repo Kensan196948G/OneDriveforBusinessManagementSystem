@@ -79,6 +79,31 @@ async function callApi(endpoint, method = 'GET', body = null) {
         }
     };
     
+    // SharingCheck.html用ページネーション関数
+    window.changePage = function(newPage) {
+        const itemsPerPage = 10;
+        const resultCount = document.getElementById('resultCount');
+        const data = window.currentData || [];
+        const totalItems = data.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+        // ページ範囲チェック
+        if (newPage < 1) newPage = 1;
+        if (newPage > totalPages) newPage = totalPages;
+    
+        window.currentPage = newPage;
+        
+        // 表示件数更新
+        const startItem = (newPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(newPage * itemsPerPage, totalItems);
+        resultCount.textContent = `${totalItems}件中 ${startItem}～${endItem}件を表示`;
+        
+        // テーブル更新 (各ページで実装が必要)
+        if (typeof window.updateTable === 'function') {
+            window.updateTable();
+        }
+    };
+    
     if (body) options.body = JSON.stringify(body);
     
     const response = await fetch(endpoint, options);
@@ -275,6 +300,43 @@ function initTooltips() {
     });
 }
 
+// 簡易ページネーション制御 (SharingCheck.html用)
+window.setupSimplePagination = function(totalItems, itemsPerPage = 10) {
+    let currentPage = 1;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    function updatePagination() {
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+        
+        // 表示件数更新
+        document.getElementById('paginationInfo').textContent =
+            `${totalItems}件中 ${startItem}～${endItem}件を表示`;
+        
+        // ボタン状態更新
+        document.getElementById('prevPage').disabled = currentPage <= 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    }
+
+    window.prevPage = function() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePagination();
+            updateTable(); // 各ページで実装が必要
+        }
+    };
+
+    window.nextPage = function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePagination();
+            updateTable(); // 各ページで実装が必要
+        }
+    };
+
+    updatePagination();
+}
+
 module.exports = {
     riskStyles,
     riskDescriptions,
@@ -287,5 +349,6 @@ module.exports = {
     setupPagination,
     exportToCsv,
     initFilters,
-    initTooltips
+    initTooltips,
+    setupSimplePagination
 };

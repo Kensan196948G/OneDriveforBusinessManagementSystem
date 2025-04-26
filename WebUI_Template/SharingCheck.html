@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>OneDrive共有設定レポート</title>
+<title>共有設定レポート</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
+/* ローディングオーバーレイ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
 body {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -107,107 +135,84 @@ body {
     border-radius: 5px;
     margin-bottom: 15px;
 }
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    display: none;
-}
-.loading-spinner {
-    color: white;
-    font-size: 2rem;
-}
+
 .error-message {
-    color: #dc3545;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
+    margin: 15px 0;
     padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    display: none;
-}
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-.tooltip-inner {
-    max-width: 300px;
-    text-align: left;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
 }
 </style>
 </head>
 <body>
 <div class="container">
-    <h1 class="text-center mb-4">
-      <i class="fas fa-share-alt me-3 text-primary"></i>
-      OneDrive共有設定レポート
-      <i class="fas fa-exclamation-triangle ms-3 text-danger"></i>
-    </h1>
-    
-    <div id="errorContainer" class="alert alert-danger mt-3" style="display: none; border-left: 5px solid #dc3545;">
-        <div class="d-flex align-items-start">
-            <i class="fas fa-exclamation-triangle fa-3x me-3 mt-1"></i>
-            <div>
-                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
-                <p class="mb-3 fs-5">データが取得できませんでした。以下の方法をお試しください:</p>
-                <ol class="mb-4 fs-5">
-                    <li class="mb-2">PowerShellスクリプトを再実行してください<br>
-                        <code class="bg-light p-1 d-inline-block mt-1">.\SharingCheck.ps1</code>
-                    </li>
-                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br>
-                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
-                    </li>
-                </ol>
-                <div class="d-flex gap-3">
-                    <button class="btn btn-danger px-4" onclick="location.reload()">
-                        <i class="fas fa-sync-alt me-2"></i>再読み込み
-                    </button>
-                    <button class="btn btn-outline-danger px-4" onclick="loadData()">
-                        <i class="fas fa-redo me-2"></i>再試行
-                    </button>
-                </div>
-            </div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>共有設定データを取得中...お待ちください</div>
         </div>
     </div>
 
-    <div class="filter-container" style="padding: 5px; margin-bottom: 5px">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="input-group mb-2">
+    <h1 class="text-center mb-4">
+      <i class="fas fa-share-alt me-3 text-primary"></i>
+      OneDrive共有設定レポート
+      <i class="fas fa-file-alt ms-3 text-primary"></i>
+    </h1>
+    
+    <div class="filter-container">
+        <div class="row mb-3 g-3 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはファイル名で検索..." onkeyup="filterTable()">
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはファイル名で検索...">
                 </div>
-                <div id="resultCount" class="text-muted fs-5 ps-2">0件中 1～0件を表示 <i class="fas fa-arrows-alt-h ms-2"></i></div>
-                <div class="text-muted small ps-2">最終更新: <span id="lastUpdated">-</span></div>
             </div>
-            <div class="col-md-6 text-end">
-                <div class="d-flex align-items-center justify-content-end">
-                    <button class="btn btn-danger me-2" onclick="exportToCsv()">
-                        <i class="fas fa-file-export me-1"></i>CSVエクスポート
+            <div class="col-md-3">
+                <select class="form-select" id="riskFilter">
+                    <option value="">すべてのリスクレベル</option>
+                    <option value="高">高リスクのみ</option>
+                    <option value="中">中リスクのみ</option>
+                    <option value="低">低リスクのみ</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="entriesPerPage">
+                        <option value="10">10件表示</option>
+                        <option value="25">25件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-outline-secondary py-2 px-3" onclick="exportToCsv()">
+                        <i class="fas fa-file-csv me-1"></i>CSVエクスポート
                     </button>
-                    <button class="btn btn-primary me-2" onclick="window.print()">
+                    <button class="btn btn-outline-primary py-2 px-3" onclick="window.print()">
                         <i class="fas fa-print me-1"></i>印刷
                     </button>
-                    <button id="refreshBtn" class="btn btn-warning" onclick="loadData()">
-                        <span id="refreshIcon"><i class="fas fa-sync-alt me-1"></i></span>
-                        <span id="refreshText">更新</span>
+                    <button class="btn btn-outline-success py-2 px-3" onclick="fetchData()">
+                        <i class="fas fa-sync-alt me-1"></i>更新
                     </button>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <nav aria-label="Page navigation">
-                    <ul id="pagination" class="pagination justify-content-center"></ul>
-                </nav>
+        <div class="row mb-2">
+            <div class="col-md-12 d-flex align-items-center gap-3">
+                <span id="resultCount" class="text-muted fs-5">0件中 1～0件を表示</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
+                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
+                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -238,12 +243,7 @@ body {
                     </th>
                     <th class="column-risk">
                       <i class="fas fa-shield-virus me-2"></i>
-                      <span class="badge bg-white text-dark" 
-                            data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            title="<strong>リスクレベル説明</strong><br>高: 外部共有 + 編集権限<br>中: 外部共有 or 社内広範囲共有<br>低: 社内限定の限定共有">
-                        リスクレベル
-                      </span>
+                      <span class="badge bg-white text-dark">リスクレベル</span>
                     </th>
                 </tr>
                 <tr class="filter-row">
@@ -251,7 +251,9 @@ body {
                     <th><select class="form-select" id="itemFilter"></select></th>
                     <th><select class="form-select" id="permissionFilter"></select></th>
                     <th><select class="form-select" id="sharedWithFilter"></select></th>
-                    <th><select class="form-select" id="dateFilter"></select></th>
+                    <th><select class="form-select" id="dateFilter" onchange="filterTable()">
+                        <option value="">すべての共有日</option>
+                    </select></th>
                     <th><select class="form-select" id="riskFilter">
                         <option value="">すべてのリスクレベル</option>
                         <option value="高">高</option>
@@ -260,135 +262,59 @@ body {
                     </select></th>
                 </tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="tableBody">
+                <!-- データはJavaScriptで動的に生成 -->
+            </tbody>
         </table>
     </div>
 
-</div>
-
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-        <i class="fas fa-spinner fa-spin"></i> 共有設定データを取得中...
+    <!-- データ取得エラーメッセージ -->
+    <div id="errorMessage" class="alert alert-danger mt-3 mb-3 mx-auto" style="display: none; border-left: 5px solid #dc3545; max-width: 1300px; width: 100%; padding: 1rem;">
+        <div class="d-flex align-items-start px-2 py-1">
+            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
+            <div>
+                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
+                <p class="mb-3 fs-5">共有設定データが取得できませんでした。以下の方法をお試しください:</p>
+                <ol class="mb-4 fs-5">
+                    <li class="mb-2">SharingCheck.ps1スクリプトを再実行してください<br>
+                        <code class="bg-light p-1 d-inline-block mt-1">.\SharingCheck.ps1</code>
+                    </li>
+                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br>
+                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
+                    </li>
+                </ol>
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-danger px-4 py-2" onclick="location.reload()">
+                        <i class="fas fa-sync-alt me-2"></i>再読み込み
+                    </button>
+                    <button class="btn btn-outline-danger px-4" onclick="fetchData()">
+                        <i class="fas fa-redo me-2"></i>再試行
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="common.js"></script>
 <script>
-// グローバル変数
-let sharingData = [];
-const riskStyles = {
-    "高": "risk-high",
-    "中": "risk-medium",
-    "低": "risk-low"
-};
+// 空のデータ配列
+window.sharingData = [];
 
-function showLoading(show) {
-    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-}
-
-function showError(title, message) {
-    const errorContainer = document.getElementById('errorContainer');
-    errorContainer.querySelector('h4').innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${title}`;
-    errorContainer.querySelector('p').textContent = message;
-    errorContainer.style.display = 'block';
-}
-
-// データ取得
-async function loadData() {
-    const refreshBtn = document.getElementById('refreshBtn');
-    const refreshIcon = document.getElementById('refreshIcon');
-    const refreshText = document.getElementById('refreshText');
-    
-    // ボタン状態を更新中に変更
-    refreshBtn.disabled = true;
-    refreshIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    refreshText.textContent = '更新中';
-    
-    showLoading(true);
-    document.getElementById('errorContainer').style.display = 'none';
-    
-    try {
-        // 実際のデータ取得処理
-        const response = await fetch('/api/sharing-data');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        window.sharingData = await response.json();
-        
-        if (!window.sharingData || window.sharingData.length === 0) {
-            throw new Error('データが0件です');
-        }
-        
-        // 最終更新日時を記録
-        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-        
-        initFilters(window.sharingData, ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日']);
-        renderTable();
-        
-        // 成功通知
-        showToast('データを最新の状態に更新しました', 'success');
-    } catch (error) {
-        console.error('データ取得エラー:', error);
-        showError('データ取得エラー',
-            `データが取得できませんでした。エラー: ${error.message}\n\n` +
-            `1. PowerShellスクリプトを再実行してください\n` +
-            `2. 問題が解決しない場合は管理者に連絡してください`);
-    } finally {
-        showLoading(false);
-        // ボタン状態を元に戻す
-        refreshBtn.disabled = false;
-        refreshIcon.innerHTML = '<i class="fas fa-sync-alt"></i>';
-        refreshText.textContent = '更新';
-    }
-}
-
-// トースト通知表示
-function showToast(message, type = 'info') {
-    const toastContainer = document.createElement('div');
-    toastContainer.className = `toast align-items-center text-white bg-${type} border-0`;
-    toastContainer.setAttribute('role', 'alert');
-    toastContainer.setAttribute('aria-live', 'assertive');
-    toastContainer.setAttribute('aria-atomic', 'true');
-    
-    toastContainer.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} me-2"></i>
-                ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-    
-    document.body.appendChild(toastContainer);
-    const toast = new bootstrap.Toast(toastContainer, {
-        autohide: true,
-        delay: 3000
-    });
-    toast.show();
-    
-    setTimeout(() => {
-        toastContainer.remove();
-    }, 3500);
-}
-
-// ツールチップ初期化
-function initTooltips() {
-    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(el => {
-        new bootstrap.Tooltip(el, { html: true });
-    });
+// 日付フォーマット関数
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    // YYYY/MM/DD形式に統一
+    return dateStr.replace(/-/g, '/');
 }
 
 // フィルターメニュー初期化
 function initFilters() {
-    const columns = ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日'];
+    const columns = ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル'];
     
     columns.forEach((col, index) => {
         const select = document.querySelectorAll('.filter-row select')[index];
-        const uniqueValues = [...new Set(window.sharingData.map(item => item[col]))];
+        select.innerHTML = ''; // 既存のオプションをクリア
         
         // デフォルトオプション
         const defaultOption = document.createElement('option');
@@ -396,44 +322,95 @@ function initFilters() {
         defaultOption.textContent = `すべての${col}`;
         select.appendChild(defaultOption);
         
-        // ユニークな値を追加
-        uniqueValues.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
-        });
+        // リスクレベルは固定値で初期化
+        if (col === 'リスクレベル') {
+            ['高', '中', '低'].forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
     });
 }
 
-// テーブル更新処理
-function renderTable() {
-    const filteredData = applyFilters(window.sharingData, ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル']);
-    renderTableData(filteredData, 'tableBody',
-        ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル'],
-        'リスクレベル'
-    );
+// テーブルデータ表示
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
     
-    // 件数表示更新
-    const countElement = document.getElementById('resultCount');
-    if (countElement) {
-        const currentPage = 1;
-        const itemsPerPage = 50;
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredData.length);
-        countElement.textContent = `${filteredData.length}件中 ${start}～${end}件を表示`;
+    if (data.length === 0) {
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
     }
+    
+    document.getElementById('errorMessage').style.display = 'none';
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const riskClass = {
+            '高': 'risk-high',
+            '中': 'risk-medium',
+            '低': 'risk-low'
+        }[item['リスクレベル']] || '';
+        
+        row.className = riskClass;
+        
+        row.innerHTML = `
+            <td>${item['ユーザー名']}</td>
+            <td>${item['共有アイテム']}</td>
+            <td>${item['権限']}</td>
+            <td>${item['共有先']}</td>
+            <td>${item['共有日']}</td>
+            <td>${item['リスクレベル']}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
 }
 
-// ページ変更
-function changePage(page) {
-    currentPage = page;
-    renderTable();
-    setupPagination();
+// フィルター適用
+function filterTable() {
+    const filters = [];
+    document.querySelectorAll('.filter-row select').forEach((select, index) => {
+        filters[index] = select.value;
+    });
+    
+    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
+    const riskFilter = document.getElementById('riskFilter').value;
+    
+    const filteredData = window.sharingData.filter(item => {
+        // グローバル検索
+        if (globalSearch) {
+            const found = Object.values(item).some(val => 
+                String(val).toLowerCase().includes(globalSearch)
+            );
+            if (!found) return false;
+        }
+        
+        // リスクフィルター
+        if (riskFilter && item['リスクレベル'] !== riskFilter) {
+            return false;
+        }
+        
+        // カラムフィルター
+        return ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル']
+            .every((col, colIndex) => {
+                if (!filters[colIndex]) return true;
+                return String(item[col]) === filters[colIndex];
+            });
+    });
+    
+    renderTable(filteredData);
 }
 
 // CSVエクスポート
 function exportToCsv() {
+    if (window.sharingData.length === 0) {
+        alert('エクスポートするデータがありません');
+        return;
+    }
+    
     const headers = ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル'].join(',') + '\n';
     const csvContent = headers + window.sharingData.map(item => 
         ['ユーザー名', '共有アイテム', '権限', '共有先', '共有日', 'リスクレベル']
@@ -448,19 +425,41 @@ function exportToCsv() {
     link.click();
 }
 
-// フィルター適用
-function filterTable() {
-    renderTable();
+// データ取得関数
+async function fetchData() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    try {
+        // 実際にはここでAPI呼び出しやCSV読み込みを行う
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 初期状態では空の配列を設定（APIからデータ取得後に更新）
+        window.sharingData = [];
+        
+        initFilters();
+        renderTable(window.sharingData);
+        document.getElementById('loadingOverlay').style.display = 'none';
+    } catch (error) {
+        console.error('共有設定データ取得エラー:', error);
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+    }
 }
 
 // 初期化
 window.onload = function() {
-    loadData();
-    
-    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-    document.querySelectorAll('.filter-row select').forEach(select => {
-        select.addEventListener('change', filterTable);
-    });
+    try {
+        fetchData();
+        
+        document.getElementById('globalSearch').addEventListener('keyup', filterTable);
+        document.getElementById('riskFilter').addEventListener('change', filterTable);
+        document.querySelectorAll('.filter-row select').forEach(select => {
+            select.addEventListener('change', filterTable);
+        });
+    } catch (error) {
+        console.error('初期化エラー:', error);
+        document.getElementById('errorMessage').style.display = 'block';
+    }
 };
 </script>
 </body>

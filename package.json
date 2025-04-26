@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
-    "@upstash/context7-mcp": "^1.0.6"
-  }
-}

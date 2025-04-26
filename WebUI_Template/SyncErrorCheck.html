@@ -7,6 +7,34 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
+/* ローディングオーバーレイ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
 body {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -117,16 +145,19 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    display: none;
+    z-index: 9999;
 }
 .loading-spinner {
-    color: white;
-    font-size: 2rem;
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 1rem;
 }
 .error-message {
     color: #dc3545;
@@ -146,39 +177,67 @@ body {
 </head>
 <body>
 <div class="container">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+            <div>同期エラーデータを取得中...お待ちください</div>
+        </div>
+    </div>
+
     <h1 class="text-center mb-4">
       <i class="fas fa-exclamation-triangle me-3 text-danger"></i>
       OneDrive同期エラーレポート
       <i class="fas fa-bug ms-3 text-warning"></i>
     </h1>
     
-    <div id="errorContainer" class="error-message" style="display: none;">
-        <!-- エラー内容はcommon.jsのshowError()で動的に生成 -->
-    </div>
-
     <div class="filter-container">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="input-group">
+        <div class="row mb-2">
+            <div class="col-md-8">
+                <div class="input-group" style="width: 100%;">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはエラー内容で検索...">
-                </div>
-                <div class="row-count-display mt-2">
-                    <span id="rowCount">0件中 1～0件を表示</span>
-                    <i class="fas fa-arrow-left ms-3 text-muted"></i>
-                    <i class="fas fa-arrow-right ms-2 text-muted"></i>
+                    <input type="text" class="form-control" id="globalSearch" placeholder="検索..." style="width: 20%; min-width: 120px;">
+                    
+                    <select class="form-select" id="statusFilter" style="width: 25%; min-width: 150px;">
+                        <option value="">すべてのステータス</option>
+                        <option value="未対応">未対応</option>
+                        <option value="調査中">調査中</option>
+                        <option value="解決済">解決済</option>
+                    </select>
+                    
+                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                    <select class="form-select" id="pageSize" style="min-width: 90px;">
+                        <option value="10">10件表示</option>
+                        <option value="25">25件表示</option>
+                        <option value="50">50件表示</option>
+                        <option value="100">100件表示</option>
+                        <option value="0">全件数</option>
+                    </select>
                 </div>
             </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-4 text-end">
                 <button class="btn btn-danger me-2" id="exportCsvBtn">
                     <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
-                <button class="btn btn-primary" onclick="window.print()">
+                <button class="btn btn-primary me-2" onclick="window.print()">
                     <i class="fas fa-print me-1"></i>印刷
                 </button>
                 <button class="btn btn-warning" id="reloadBtn">
                     <i class="fas fa-sync-alt me-1"></i>更新
                 </button>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-12 d-flex align-items-center gap-3">
+                <span id="rowCount" class="text-muted fs-5">0件中 1～0件を表示</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
+                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
+                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -480,6 +539,29 @@ window.onload = function() {
         select.addEventListener('change', filterTable);
     });
 };
+</script>
+
+<div class="container">
+    <div id="errorContainer" class="error-message" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>データ取得エラー:</strong> 同期エラーデータの取得中に問題が発生しました。詳細はシステム管理者に連絡してください。
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i>再読み込み
+                </button>
+                <button class="btn btn-sm btn-primary ms-2" id="retryBtn">
+                    <i class="fas fa-redo me-1"></i>再試行
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('retryBtn').addEventListener('click', loadData);
 </script>
 </body>
 </html>
