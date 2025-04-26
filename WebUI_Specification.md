@@ -30,14 +30,19 @@ OneDrive for Businessの管理ツールで使用するWebUIの仕様書です。
    - config.jsonに認証情報を設定
    - 非対話型認証(client_credentials grant)を使用
    
-### 2.2 ローディングオーバーレイ仕様（追加）
-- データ取得中、データ読み込み中は**ローディングオーバーレイ**を表示する。
+### 2.2 ローディングオーバーレイ仕様
+- 以下の操作時に表示:
+  - ページ初期表示
+  - データ再取得
+  - リロード操作
+  - 手動更新操作
+  
 - 仕様詳細:
-  - 全画面に半透明の背景（例：rgba(255, 255, 255, 0.7)）を表示
-  - 中央にスピナーアニメーション（FontAwesomeまたはBootstrap Spinnerを使用）を表示
-  - 読み込み完了後、自動的にフェードアウト
-  - APIエラーや読み込み失敗時は、エラーメッセージと共にオーバーレイを閉じる
-  - スピナーには「読み込み中...」のテキストを併記
+  - 全画面に半透明の背景（rgba(255, 255, 255, 0.9)）を表示
+  - 中央にスピナーアニメーションとメッセージを表示
+  - 最低1.5秒間表示を保証（高速なデータ取得時も）
+  - エラー時はオーバーレイを閉じてからエラー表示
+  - ユーザー操作をブロックする仕様
 
 例：
 ```html
@@ -49,13 +54,43 @@ OneDrive for Businessの管理ツールで使用するWebUIの仕様書です。
 </div>
 ```
 
+### 2.3 エラー表示仕様
+- 初期状態: 表示（"データ読み込み中"メッセージ）
+- 成功時: 非表示
+- 失敗時:
+  - エラーメッセージ表示
+  - 再試行/再読み込みボタン表示
+  - ITサポート連絡先表示
+
+### 2.4 操作ボタン標準仕様
+- **再読み込みボタン**:
+  - ページ全体をリロード
+  - ローディング表示をトリガー
+- **再試行ボタン**:
+  - データ取得のみ再実行
+  - ローディング表示をトリガー
+
 制御例：
 ```javascript
+// ローディング表示（最低1.5秒保証）
 function showLoading() {
-  document.getElementById('loading-overlay').style.display = 'flex';
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.display = 'flex';
+  return Date.now(); // 開始時刻記録
 }
-function hideLoading() {
-  document.getElementById('loading-overlay').style.display = 'none';
+
+function hideLoading(startTime) {
+  const elapsed = Date.now() - startTime;
+  const remaining = Math.max(0, 1500 - elapsed);
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }, remaining);
+}
+
+// エラー表示
+function showError(message) {
+  document.getElementById('errorContainer').style.display = 'block';
+  document.getElementById('errorMessage').textContent = message;
 }
 ```
 
