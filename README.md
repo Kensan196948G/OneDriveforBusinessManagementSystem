@@ -78,16 +78,11 @@ OneDrive運用ツール/
 ```
 OneDrive運用ツール/
 │   .gitignore                  # GitHub用除外設定
-│   config.json                  # MicrosoftGraph_API認証情報
 │   GenerateReport.ps1           # 総合レポート生成
 │   Main.ps1                     # メインスクリプト
 │   README.md                    # ユーザー向けガイド
 │   README_ADMIN.md              # 管理者向け設定ガイド
 │   WebUI_Specification.md       # WebUI作成仕様書
-│
-├───.trae                        # Trae設定管理
-│
-├───.vscode                      # Visual Studio Code設定
 │
 ├───Basic_Data_Collection        # 基本データ収集
 │       GetAllBasicData.ps1       # 全て一括収集
@@ -110,6 +105,24 @@ OneDrive運用ツール/
 ├───WebUI_Sample                  # WebUIサンプル
 │
 └───WebUI_Template                # WebUIテンプレート
+        common.js                  # 共通JavaScript
+        ExternalShareCheck.html    # 外部共有チェックUI
+        GenerateReport.html        # レポート生成UI
+        GetAllBasicData.html       # 基本データ収集UI
+        GetOneDriveQuota.html      # ストレージ情報UI
+        GetOneDriveQuota.ps1       # ストレージ情報スクリプト
+        GetUserInfo.html           # ユーザー情報UI
+        GetUserInfo.ps1            # ユーザー情報スクリプト
+        SharingCheck.html          # 共有設定UI
+        SyncErrorCheck.html        # 同期エラーUI
+        HTMLコピー/                # HTMLテンプレートバックアップ
+            ExternalShareCheck.html
+            GenerateReport.html
+            GetAllBasicData.html
+            GetOneDriveQuota.html
+            GetUserInfo.html
+            SharingCheck.html
+            SyncErrorCheck.html
 ```
 
 ---
