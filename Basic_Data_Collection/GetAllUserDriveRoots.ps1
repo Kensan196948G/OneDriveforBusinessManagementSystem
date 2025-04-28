@@ -1,5 +1,5 @@
 # OneDrive for Business 運用ツール - ITSM準拠
-# GetOneDriveQuota.ps1 - ストレージクォータ取得スクリプト
+# GetAllUserDriveRoots.ps1 - ユーザーごとのOneDriveルート情報取得スクリプト
 
 param (
     [string]$OutputDir = "$(Get-Location)",
@@ -7,6 +7,7 @@ param (
 )
 
 $executionTime = Get-Date
+
 # Main.ps1からログ関数をインポート
 . "$PSScriptRoot\..\Main.ps1"
 
@@ -21,7 +22,7 @@ function Generate-HtmlReport {
     )
     
     try {
-        $templatePath = Join-Path $PSScriptRoot "..\WebUI_Template\GetOneDriveQuota.html"
+        $templatePath = Join-Path $PSScriptRoot "..\WebUI_Template\GetAllUserDriveRoots.html"
         if (!(Test-Path $templatePath)) {
             throw "HTMLテンプレートが見つかりません: $templatePath"
         }
@@ -34,10 +35,8 @@ function Generate-HtmlReport {
         # テンプレートにデータを埋め込む
         $htmlContent = $htmlContent -replace '// DATA_PLACEHOLDER', "const reportData = $jsonData;"
         
-        # 出力ディレクトリはMain.ps1で作成済み
-        
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $outputPath = Join-Path $OutputDir "GetOneDriveQuota_$timestamp.html"
+        $outputPath = Join-Path $OutputDir "GetAllUserDriveRoots_$timestamp.html"
         $htmlContent | Out-File -FilePath $outputPath -Encoding UTF8
         
         return $outputPath
@@ -71,42 +70,32 @@ try {
 # データ収集
 $userList = @()
 try {
-    $allUsers = Get-MgUser -All -Property DisplayName,Mail,onPremisesSamAccountName,AccountEnabled,onPremisesLastSyncDateTime,UserType,UserPrincipalName,Id -ConsistencyLevel eventual -CountVariable totalCount
+    $allUsers = Get-MgUser -All -Property DisplayName,Mail,UserPrincipalName,Id -ConsistencyLevel eventual -CountVariable totalCount
     $totalUsers = $allUsers.Count
     $processedUsers = 0
 
     foreach ($user in $allUsers) {
         $processedUsers++
         $percentComplete = [math]::Round(($processedUsers / $totalUsers) * 100, 2)
-        Write-Progress -Activity "OneDriveクォータ情報を取得中" -Status "$processedUsers / $totalUsers ユーザー処理中 ($percentComplete%)" -PercentComplete $percentComplete
+        Write-Progress -Activity "OneDriveルート情報を取得中" -Status "$processedUsers / $totalUsers ユーザー処理中 ($percentComplete%)" -PercentComplete $percentComplete
         
         try {
-            $drive = Get-MgUserDrive -UserId $user.UserPrincipalName -ErrorAction Stop
-            $totalGB = [math]::Round($drive.Quota.Total / 1GB, 2)
-            $usedGB = [math]::Round($drive.Quota.Used / 1GB, 2)
-            $remainingGB = [math]::Round(($drive.Quota.Remaining) / 1GB, 2)
-            $usagePercent = [math]::Round(($drive.Quota.Used / $drive.Quota.Total) * 100, 2)
-            
-            $status = if ($usagePercent -ge 90) { "危険" } elseif ($usagePercent -ge 70) { "警告" } else { "正常" }
-            $onedriveStatus = "対応"
+            $drive = Get-MgUserDriveRoot -UserId $user.UserPrincipalName -ErrorAction Stop
+            $driveInfo = [PSCustomObject]@{
+                "ユーザー名" = $user.DisplayName
+                "メールアドレス" = $user.Mail
+                "OneDrive URL" = $drive.WebUrl
+                "作成日時" = $drive.CreatedDateTime
+                "最終更新日" = $drive.LastModifiedDateTime
+                "所有者" = $drive.Owner.User.DisplayName
+            }
+            $userList += $driveInfo
         } catch {
-            $totalGB = $usedGB = $remainingGB = $usagePercent = "取得不可"
-            $status = "不明"
-            $onedriveStatus = "未対応"
-        }
-
-        $userList += [PSCustomObject]@{
-            "ユーザー名" = $user.DisplayName
-            "メールアドレス" = $user.Mail
-            "総容量(GB)" = $totalGB
-            "使用容量(GB)" = $usedGB
-            "残り容量(GB)" = $remainingGB
-            "使用率(%)" = $usagePercent
-            "状態" = $status
+            Write-Log "$($user.UserPrincipalName) のOneDriveルート情報取得に失敗: $_" "WARNING"
         }
     }
 } catch {
-    Write-Log "OneDriveクォータ情報の取得中にエラーが発生しました: $_" "ERROR"
+    Write-ErrorLog $_ "OneDriveルート情報の取得中にエラーが発生しました"
     exit
 }
 
@@ -119,9 +108,15 @@ try {
 }
 
 # CSV出力
-$csvFile = "OneDriveQuota.$timestamp.csv"
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+$csvFile = "AllUserDriveRoots.$timestamp.csv"
 $csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
 
-# CSV生成
-$userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
-Write-Log "CSVファイルが生成されました: $csvPath" "SUCCESS"
+try {
+    $userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
+    Write-Log "CSVファイルが生成されました: $csvPath" "SUCCESS"
+} catch {
+    Write-ErrorLog $_ "CSVファイルの生成中にエラーが発生しました"
+}
+
+Write-Log "すべてのOneDriveルート情報収集が完了しました" "SUCCESS"

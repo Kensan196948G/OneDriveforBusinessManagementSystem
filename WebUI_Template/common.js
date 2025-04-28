@@ -1,6 +1,6 @@
 /**
  * OneDrive管理ツール共通JavaScriptライブラリ
- * 非対話型認証対応版
+ * 非対話型認証対応版 + PSスクリプト連携機能
  */
 
 // リスクレベルスタイル定義
@@ -17,12 +17,15 @@ const riskDescriptions = {
     '低': '社内限定の限定共有'
 };
 
-// config.jsonから認証情報を取得
+// 設定ファイルキャッシュ
+let configCache = null;
+
+// config.jsonから認証情報を取得（キャッシュ付き）
 async function fetchConfig() {
+    if (configCache) return configCache;
+    
     try {
-        // 相対パスで直接インポート
-        const configPath = './config.json';
-        const response = await fetch(configPath, {
+        const response = await fetch('./config.json', {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
@@ -36,10 +39,14 @@ async function fetchConfig() {
         const config = await response.json();
         
         // 必須フィールドの検証
-        if (!config.tenantId || !config.clientId || !config.clientSecret) {
-            throw new Error('設定ファイルに必要な認証情報が不足しています');
+        const requiredFields = ['tenantId', 'clientId', 'clientSecret'];
+        const missingFields = requiredFields.filter(field => !config[field]);
+        
+        if (missingFields.length > 0) {
+            throw new Error(`設定ファイルに必要な認証情報が不足しています: ${missingFields.join(', ')}`);
         }
         
+        configCache = config;
         return config;
     } catch (error) {
         console.error('認証情報取得エラー:', error);
@@ -53,78 +60,92 @@ async function fetchConfig() {
     }
 }
 
-// エラーメッセージ表示関数
-function showError(title, message) {
-    const errorContainer = document.getElementById('errorContainer');
-    if (errorContainer) {
-        errorContainer.querySelector('.alert-heading').textContent = title;
-        errorContainer.querySelector('p').innerHTML = message;
-        errorContainer.style.display = 'block';
+// データ取得方法の切り替え（API or PSスクリプト出力）
+async function fetchData(source, endpoint, dataFile) {
+    try {
+        showLoading(true);
+        
+        if (source === 'api') {
+            // API経由でデータ取得
+            return await callApi(endpoint);
+        } else {
+            // PSスクリプトの出力を直接取得
+            const response = await fetch(dataFile);
+            if (!response.ok) throw new Error(`データファイル読み込み失敗: ${response.status}`);
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('データ取得エラー:', error);
+        showError('データ取得エラー', error.message);
+        throw error;
+    } finally {
+        showLoading(false);
     }
 }
 
-// MSALを使用した非対話型認証
-async function getAuthToken() {
-    const config = await fetchConfig();
-    const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            tenantId: config.tenantId,
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            scopes: config.scopes
-        })
-    });
+// 認証トークン取得（リトライ付き）
+async function getAuthToken(maxRetries = 3) {
+    let lastError;
     
-    if (!response.ok) throw new Error(`認証失敗: ${response.status}`);
-    return await response.json();
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const config = await fetchConfig();
+            const response = await fetch('/api/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tenantId: config.tenantId,
+                    clientId: config.clientId,
+                    clientSecret: config.clientSecret,
+                    scopes: config.scopes || ['https://graph.microsoft.com/.default']
+                })
+            });
+            
+            if (!response.ok) throw new Error(`認証失敗: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            lastError = error;
+            if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+    }
+    
+    throw lastError;
 }
 
-// API呼び出し共通関数
-async function callApi(endpoint, method = 'GET', body = null) {
-    const { token } = await getAuthToken();
+// API呼び出し共通関数（リトライ付き）
+async function callApi(endpoint, method = 'GET', body = null, maxRetries = 2) {
+    let lastError;
     
-    const options = {
-        method,
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const { token } = await getAuthToken();
+            
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (body) options.body = JSON.stringify(body);
+            
+            const response = await fetch(endpoint, options);
+            if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            lastError = error;
+            if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
         }
-    };
+    }
     
-    // SharingCheck.html用ページネーション関数
-    window.changePage = function(newPage) {
-        const itemsPerPage = 10;
-        const resultCount = document.getElementById('resultCount');
-        const data = window.currentData || [];
-        const totalItems = data.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
-        // ページ範囲チェック
-        if (newPage < 1) newPage = 1;
-        if (newPage > totalPages) newPage = totalPages;
-    
-        window.currentPage = newPage;
-        
-        // 表示件数更新
-        const startItem = (newPage - 1) * itemsPerPage + 1;
-        const endItem = Math.min(newPage * itemsPerPage, totalItems);
-        resultCount.textContent = `${totalItems}件中 ${startItem}～${endItem}件を表示`;
-        
-        // テーブル更新 (各ページで実装が必要)
-        if (typeof window.updateTable === 'function') {
-            window.updateTable();
-        }
-    };
-    
-    if (body) options.body = JSON.stringify(body);
-    
-    const response = await fetch(endpoint, options);
-    if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
-    return await response.json();
+    throw lastError;
 }
 
 // ローディング表示制御
@@ -135,22 +156,33 @@ function showLoading(show = true) {
     }
 }
 
-// エラーメッセージ表示
-function showError(message, details = '') {
+// エラーメッセージ表示（詳細モード対応）
+function showError(title, message, details = '') {
     const errorContainer = document.getElementById('errorContainer');
-    if (errorContainer) {
-        errorContainer.innerHTML = `
-            <h4><i class="fas fa-exclamation-triangle me-2"></i>${message}</h4>
-            <p>${details}</p>
-            <button class="btn btn-danger mt-2" onclick="location.reload()">
-                <i class="fas fa-sync-alt me-1"></i>再試行
-            </button>
-        `;
-        errorContainer.style.display = 'block';
-    }
+    if (!errorContainer) return;
+    
+    errorContainer.innerHTML = `
+        <div class="d-flex align-items-start">
+            <i class="fas fa-exclamation-triangle fa-2x me-3 mt-1"></i>
+            <div>
+                <h4 class="mb-2">${title}</h4>
+                <p class="mb-2">${message}</p>
+                ${details ? `<details class="mb-2"><summary>詳細</summary><pre>${details}</pre></details>` : ''}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger btn-sm" onclick="location.reload()">
+                        <i class="fas fa-sync-alt me-1"></i>再読み込み
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('errorContainer').style.display='none'">
+                        <i class="fas fa-times me-1"></i>閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    errorContainer.style.display = 'block';
 }
 
-// テーブルデータ表示共通関数 (リスクレベル対応版)
+// テーブルデータ表示共通関数（リスクレベル対応版）
 function renderTable(data, tableId, columns, riskColumn = '') {
     const tbody = document.getElementById(tableId);
     if (!tbody) return;
@@ -161,6 +193,7 @@ function renderTable(data, tableId, columns, riskColumn = '') {
         const row = document.createElement('tr');
         if (riskColumn && item[riskColumn]) {
             row.className = riskStyles[item[riskColumn]] || '';
+            row.title = riskDescriptions[item[riskColumn]] || '';
         }
         
         columns.forEach(col => {
@@ -173,90 +206,35 @@ function renderTable(data, tableId, columns, riskColumn = '') {
     });
 }
 
-// 検索結果表示更新
-function updateResultCount(data, filteredData, currentPage, itemsPerPage) {
-    const resultCount = document.getElementById('resultCount');
-    if (resultCount) {
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredData.length);
-        resultCount.textContent = `${filteredData.length}件中 ${start}～${end}件を表示`;
-    }
-}
-
-// ページネーション設定
-function setupPagination(data, itemsPerPage, renderCallback) {
-    let currentPage = 1;
-    const pageCount = Math.ceil(data.length / itemsPerPage);
-    const pagination = document.getElementById('pagination');
-    if (!pagination) return;
-    
-    // 検索結果表示を更新
-    updateResultCount(data, data, currentPage, itemsPerPage);
-    
-    function updatePagination() {
-        pagination.innerHTML = '';
-        
-        // 前へボタン
-        const prevItem = document.createElement('li');
-        prevItem.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        prevItem.innerHTML = `<a class="page-link" href="#">前へ</a>`;
-        prevItem.addEventListener('click', () => {
-            if (currentPage > 1) changePage(currentPage - 1);
-        });
-        pagination.appendChild(prevItem);
-
-        // ページ番号
-        for (let i = 1; i <= pageCount; i++) {
-            const pageItem = document.createElement('li');
-            pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageItem.addEventListener('click', () => changePage(i));
-            pagination.appendChild(pageItem);
-        }
-
-        // 次へボタン
-        const nextItem = document.createElement('li');
-        nextItem.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
-        nextItem.innerHTML = `<a class="page-link" href="#">次へ</a>`;
-        nextItem.addEventListener('click', () => {
-            if (currentPage < pageCount) changePage(currentPage + 1);
-        });
-        pagination.appendChild(nextItem);
-    }
-    
-    function changePage(page) {
-        currentPage = page;
-        const start = (page - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        renderCallback(data.slice(start, end));
-        updateResultCount(data, data, currentPage, itemsPerPage);
-        updatePagination();
-    }
-    
-    updatePagination();
-    changePage(1);
-}
-
-// CSVエクスポート共通関数
+// CSVエクスポート共通関数（エスケープ処理強化）
 function exportToCsv(data, filename, columns) {
-    const headers = columns.join(',');
-    const rows = data.map(item => 
-        columns.map(col => 
-            `"${String(item[col] || '').replace(/"/g, '""')}"`
-        ).join(',')
-    );
-    
-    const csvContent = [headers, ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
+    try {
+        const escapeCsv = (str) => {
+            if (str == null) return '';
+            return `"${String(str).replace(/"/g, '""')}"`;
+        };
+        
+        const headers = columns.map(escapeCsv).join(',');
+        const rows = data.map(item => 
+            columns.map(col => escapeCsv(item[col])).join(',')
+        );
+        
+        const csvContent = [headers, ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+        showError('CSVエクスポートエラー', 'CSVファイルの生成に失敗しました', error.message);
+    }
 }
 
-// フィルタリング処理
+// フィルタリング処理（パフォーマンス改善版）
 function applyFilters(data, columns) {
     const filters = {};
     document.querySelectorAll('.filter-row select').forEach((select, index) => {
@@ -281,12 +259,14 @@ function applyFilters(data, columns) {
     });
 }
 
-// フィルターメニュー初期化
+// フィルターメニュー初期化（パフォーマンス改善版）
 function initFilters(data, columns) {
     columns.forEach((col, index) => {
         const select = document.querySelectorAll('.filter-row select')[index];
         if (!select) return;
         
+        // 既存のオプションを保持（選択値を維持）
+        const currentValue = select.value;
         select.innerHTML = '';
         
         // デフォルトオプション
@@ -296,61 +276,73 @@ function initFilters(data, columns) {
         select.appendChild(defaultOption);
         
         // ユニークな値を取得してオプション追加
-        const uniqueValues = [...new Set(data.map(item => item[col]))];
-        uniqueValues.forEach(value => {
+        const uniqueValues = [...new Set(data.map(item => item[col]).filter(v => v != null))];
+        uniqueValues.sort().forEach(value => {
             const option = document.createElement('option');
             option.value = value;
             option.textContent = value;
+            option.selected = value === currentValue;
             select.appendChild(option);
         });
     });
 }
 
-// ツールチップ初期化
-function initTooltips() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(tooltipTriggerEl => {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            html: true
-        });
-    });
-}
-
-// 簡易ページネーション制御 (SharingCheck.html用)
-window.setupSimplePagination = function(totalItems, itemsPerPage = 10) {
+// ページネーション設定（改良版）
+function setupPagination(data, itemsPerPage = 10, renderCallback) {
     let currentPage = 1;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const pagination = document.getElementById('pagination');
+    if (!pagination) return;
+    
     function updatePagination() {
-        const startItem = (currentPage - 1) * itemsPerPage + 1;
-        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+        pagination.innerHTML = '';
         
-        // 表示件数更新
-        document.getElementById('paginationInfo').textContent =
-            `${totalItems}件中 ${startItem}～${endItem}件を表示`;
+        // 前へボタン
+        const prevItem = document.createElement('li');
+        prevItem.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevItem.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+        prevItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) changePage(currentPage - 1);
+        });
+        pagination.appendChild(prevItem);
         
-        // ボタン状態更新
-        document.getElementById('prevPage').disabled = currentPage <= 1;
-        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        // ページ番号（最大10ページ表示）
+        const startPage = Math.max(1, Math.min(currentPage - 5, totalPages - 9));
+        const endPage = Math.min(totalPages, startPage + 9);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            pageItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                changePage(i);
+            });
+            pagination.appendChild(pageItem);
+        }
+        
+        // 次へボタン
+        const nextItem = document.createElement('li');
+        nextItem.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextItem.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+        nextItem.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) changePage(currentPage + 1);
+        });
+        pagination.appendChild(nextItem);
     }
-
-    window.prevPage = function() {
-        if (currentPage > 1) {
-            currentPage--;
-            updatePagination();
-            updateTable(); // 各ページで実装が必要
-        }
-    };
-
-    window.nextPage = function() {
-        if (currentPage < totalPages) {
-            currentPage++;
-            updatePagination();
-            updateTable(); // 各ページで実装が必要
-        }
-    };
-
+    
+    function changePage(page) {
+        currentPage = page;
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        renderCallback(data.slice(start, end));
+        updatePagination();
+    }
+    
     updatePagination();
+    changePage(1);
 }
 
 // ブラウザで使用するためmodule.exportsは不要

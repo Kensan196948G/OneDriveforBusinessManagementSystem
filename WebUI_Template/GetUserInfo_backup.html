@@ -1,0 +1,12 @@
+// 前略（ファイル全体の内容をここに記述）
+// HTMLエスケープ関数
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.toString()
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/"/g, """)
+        .replace(/'/g, "&#039;");
+}
+// 後略（ファイル全体の内容をここに記述）

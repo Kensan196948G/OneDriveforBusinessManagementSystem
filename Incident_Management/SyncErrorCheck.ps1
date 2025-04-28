@@ -2,129 +2,500 @@
 # SyncErrorCheck.ps1 - 同期エラー確認スクリプト
 
 param (
+    [Parameter(Mandatory=$false)]
     [string]$OutputDir = "$(Get-Location)",
-    [string]$LogDir = "$(Get-Location)\Log"
+    [string]$ConfigPath = "$PSScriptRoot\..\config.json",
+    [int]$RetryCount = 3,
+    [switch]$AutoRemediate = $false,
+    [switch]$GenerateHtmlReport = $false,
+    [switch]$IncludePerformanceData = $false,
+    [string]$NotificationMethod = "None",
+    [switch]$ForceCacheClear = $false
 )
 
 # 列名リストを明示的に定義
-$columnNames = @("ユーザー名","メールアドレス","アカウント状態","OneDrive対応","エラー種別","ファイル名","ファイルパス","最終更新日時","サイズ(KB)","エラー詳細","推奨対応")
+$columnNames = @("ユーザー名","メールアドレス","アカウント状態","OneDrive対応","エラー種別","ファイル名","ファイルパス",
+                "最終更新日時","サイズ","エラー詳細","推奨対応","修復ステータス","エラーコード","影響度","修復アクション")
 
-# 実行開始時刻を記録
-$executionTime = Get-Date
-
-# ログファイルのパスを設定
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$logFilePath = Join-Path -Path $LogDir -ChildPath "SyncErrorCheck.$timestamp.log"
-$errorLogPath = Join-Path -Path $LogDir -ChildPath "SyncErrorCheck.Error.$timestamp.log"
-
-# ログ関数
+# ログ関数定義
 function Write-Log {
-    param (
+    param(
         [string]$Message,
         [string]$Level = "INFO"
     )
-    
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    
-    # コンソールに出力
-    switch ($Level) {
-        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-        default { Write-Host $logMessage }
-    }
-    
-    # ログファイルに出力
-    Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
+    $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
+    Write-Output "[$timestamp] [$Level] $Message"
 }
 
-function Write-ErrorLog {
-    param (
-        [System.Management.Automation.ErrorRecord]$ErrorRecord,
-        [string]$Message
+# 詳細なエラー分類関数
+function Get-ErrorClassification {
+    param(
+        [string]$ErrorMessage,
+        [string]$FileName
     )
     
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $errorMessage = "[$timestamp] [ERROR] $Message"
-    $errorDetails = @"
-例外タイプ: $($ErrorRecord.Exception.GetType().FullName)
-例外メッセージ: $($ErrorRecord.Exception.Message)
-位置: $($ErrorRecord.InvocationInfo.PositionMessage)
-スタックトレース:
-$($ErrorRecord.ScriptStackTrace)
-
-"@
+    $errorType = "同期エラー"
+    $severity = "低"
+    $errorCode = "SYNC-000"
+    $recommendation = "OneDriveクライアントを再起動し、ネットワーク接続を確認してください。"
     
-    # コンソールに出力
-    Write-Host $errorMessage -ForegroundColor Red
+    # エラーメッセージとファイル名に基づく詳細分類
+    if ($ErrorMessage -match "conflict") {
+        $errorType = "ファイル競合"
+        $severity = "中"
+        $errorCode = "SYNC-101"
+        $recommendation = "競合ファイルを確認し、必要に応じて手動で解決してください。"
+    } 
+    elseif ($ErrorMessage -match "quota") {
+        $errorType = "容量不足"
+        $severity = "高"
+        $errorCode = "SYNC-201"
+        $recommendation = "OneDriveストレージ容量を増やすか、不要なファイルを削除してください。"
+    } 
+    elseif ($ErrorMessage -match "permission") {
+        $errorType = "権限エラー"
+        $severity = "高"
+        $errorCode = "SYNC-301"
+        $recommendation = "ファイルの権限設定を確認してください。管理者に連絡が必要な場合があります。"
+    }
+    elseif ($ErrorMessage -match "timeout") {
+        $errorType = "タイムアウト"
+        $severity = "中"
+        $errorCode = "SYNC-401"
+        $recommendation = "ネットワーク接続を確認し、再試行してください。"
+    }
+    elseif ($ErrorMessage -match "virus") {
+        $errorType = "ウイルス検出"
+        $severity = "緊急"
+        $errorCode = "SYNC-501"
+        $recommendation = "セキュリティチームに即時連絡してください。"
+    }
+    elseif ($FileName -match "\.(exe|msi|bat|ps1|vbs)$") {
+        $errorType = "実行ファイルブロック"
+        $severity = "高"
+        $errorCode = "SYNC-601"
+        $recommendation = "セキュリティポリシーによりブロックされています。別の方法で共有してください。"
+    }
+    elseif ($ErrorMessage -match "path too long") {
+        $errorType = "パス長制限"
+        $severity = "中"
+        $errorCode = "SYNC-701"
+        $recommendation = "ファイルパスを短くするか、階層を浅くしてください。"
+    }
+    elseif ($ErrorMessage -match "invalid character") {
+        $errorType = "不正文字"
+        $severity = "中"
+        $errorCode = "SYNC-801"
+        $recommendation = "ファイル名から不正な文字を削除してください。"
+    }
+    elseif ($ErrorMessage -match "locked") {
+        $errorType = "ファイルロック"
+        $severity = "中"
+        $errorCode = "SYNC-901"
+        $recommendation = "ファイルがロックされています。使用中のアプリケーションを閉じてください。"
+    }
     
-    # ログファイルに出力
-    Add-Content -Path $logFilePath -Value $errorMessage -Encoding UTF8
-    
-    # エラーログに詳細を出力
-    Add-Content -Path $errorLogPath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
+    return @{
+        ErrorType = $errorType
+        Severity = $severity
+        ErrorCode = $errorCode
+        Recommendation = $recommendation
+    }
 }
 
-# 同期エラー確認開始
+# 自動修復関数
+function Invoke-ErrorRemediation {
+    param(
+        [string]$ErrorCode,
+        [string]$FilePath,
+        [string]$UserPrincipalName,
+        [string]$FileName
+    )
+    
+    $status = "未実施"
+    $action = ""
+    
+    try {
+        switch ($ErrorCode) {
+            "SYNC-101" {
+                # 競合ファイルの自動解決
+                $conflictFile = "$FilePath.conflict"
+                if (Test-Path $conflictFile) {
+                    Remove-Item $conflictFile -Force
+                    $status = "自動修復済"
+                    $action = "競合ファイルを削除"
+                }
+            }
+            "SYNC-201" {
+                # 容量不足通知
+                $mailParams = @{
+                    To = $UserPrincipalName
+                    Subject = "OneDrive容量不足警告"
+                    Body = "ストレージ容量が不足しています。不要なファイルを削除するか、管理者に連絡してください。"
+                    From = "noreply@yourdomain.com"
+                    SmtpServer = "smtp.yourdomain.com"
+                }
+                Send-MailMessage @mailParams
+                $status = "通知送信済"
+                $action = "容量不足警告を送信"
+            }
+            "SYNC-301" {
+                # 権限リセット
+                $item = Get-MgDriveItem -DriveId "me" -DriveItemId (Split-Path $FilePath -Leaf)
+                if ($item) {
+                    Set-MgDriveItemPermission -DriveId "me" -DriveItemId $item.Id -Roles @("read")
+                    $status = "自動修復済"
+                    $action = "権限を閲覧のみに変更"
+                }
+            }
+            "SYNC-401" {
+                # キャッシュクリア
+                if ($ForceCacheClear) {
+                    $cachePath = "$env:LOCALAPPDATA\Microsoft\OneDrive\cache"
+                    if (Test-Path $cachePath) {
+                        Remove-Item "$cachePath\*" -Recurse -Force
+                        $status = "自動修復済"
+                        $action = "キャッシュをクリア"
+                    }
+                }
+            }
+            default {
+                $status = "手動対応必要"
+                $action = "自動修復不可"
+            }
+        }
+    } catch {
+        $status = "修復失敗"
+        $action = "修復中にエラー: $_"
+    }
+    
+    return @{
+        Status = $status
+        Action = $action
+    }
+}
+
+# 通知送信関数
+function Send-ErrorNotification {
+    param(
+        [object]$ErrorDetail,
+        [string]$Method
+    )
+    
+    try {
+        switch ($Method) {
+            "Email" {
+                $mailParams = @{
+                    To = $ErrorDetail.メールアドレス
+                    Subject = "OneDrive同期エラー通知 [$($ErrorDetail.エラーコード)]"
+                    Body = @"
+以下の同期エラーが検出されました:
+
+- ユーザー: $($ErrorDetail.ユーザー名)
+- ファイル名: $($ErrorDetail.ファイル名)
+- エラー種別: $($ErrorDetail.エラー種別)
+- 影響度: $($ErrorDetail.影響度)
+- 推奨対応: $($ErrorDetail.推奨対応)
+
+詳細は管理者にお問い合わせください。
+"@
+                    From = "noreply@yourdomain.com"
+                    SmtpServer = "smtp.yourdomain.com"
+                }
+                Send-MailMessage @mailParams
+            }
+            "Teams" {
+                $teamsMessage = @{
+                    title = "OneDrive同期エラー通知 [$($ErrorDetail.エラーコード)]"
+                    text = @"
+**ユーザー**: $($ErrorDetail.ユーザー名)
+**ファイル**: $($ErrorDetail.ファイル名)
+**エラー**: $($ErrorDetail.エラー種別) ($($ErrorDetail.影響度))
+**推奨対応**: $($ErrorDetail.推奨対応)
+"@
+                }
+                # Teams Webhook送信ロジック
+                Invoke-RestMethod -Uri $config.TeamsWebhookUrl -Method Post -Body ($teamsMessage | ConvertTo-Json) -ContentType "application/json"
+            }
+            default {
+                Write-Log "通知方法が指定されていません: $Method" "INFO"
+            }
+        }
+        
+        Write-Log "通知を送信しました: $Method" "INFO"
+        return $true
+    } catch {
+        Write-Log "通知の送信に失敗しました: $_" "ERROR"
+        return $false
+    }
+}
+
+# HTMLレポート生成関数
+function Generate-HtmlReport {
+    param(
+        [array]$Errors,
+        [string]$OutputPath
+    )
+    
+    $html = @"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>同期エラーレポート</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .emergency { background-color: #ffcccc; }
+        .high { background-color: #ffe6cc; }
+        .medium { background-color: #ffffcc; }
+        .low { background-color: #e6ffe6; }
+        .summary { margin-top: 30px; }
+        .chart-container { width: 100%; height: 400px; margin-top: 30px; }
+        .details { display: none; margin-top: 10px; }
+        .error-details { padding: 10px; }
+        .inner-table { width: 100%; border-collapse: collapse; }
+        .inner-table td { padding: 5px; border: none; vertical-align: top; }
+        .inner-table td:first-child {
+            font-weight: bold;
+            width: 120px;
+            color: #555;
+        }
+        .inner-table td:first-child { font-weight: bold; width: 120px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>同期エラーレポート - $(Get-Date -Format 'yyyy/MM/dd')</h1>
+    <p>生成日時: $(Get-Date -Format 'yyyy/MM/dd HH:mm:ss')</p>
+    <p>検出された同期エラー数: $($Errors.Count)</p>
+    
+    <table>
+        <tr>
+            <th>ユーザー名</th>
+            <th>エラー種別</th>
+            <th>ファイル名</th>
+            <th>影響度</th>
+            <th>修復ステータス</th>
+            <th>アクション</th>
+        </tr>
+"@
+
+    # エラー種別ごとの集計
+    $errorStats = @{}
+    $severityStats = @{}
+    $remediationStats = @{ Success = 0; Failed = 0; Pending = 0 }
+    
+    foreach ($error in $Errors) {
+        $rowClass = switch ($error.影響度) {
+            "緊急" { "emergency" }
+            "高" { "high" }
+            "中" { "medium" }
+            default { "low" }
+        }
+        
+        # 統計情報を更新
+        if (-not $errorStats.ContainsKey($error.エラー種別)) {
+            $errorStats[$error.エラー種別] = 0
+        }
+        $errorStats[$error.エラー種別]++
+        
+        if (-not $severityStats.ContainsKey($error.影響度)) {
+            $severityStats[$error.影響度] = 0
+        }
+        $severityStats[$error.影響度]++
+        
+        switch ($error.修復ステータス) {
+            { $_ -match "修復済|通知送信済" } { $remediationStats.Success++ }
+            "修復失敗" { $remediationStats.Failed++ }
+            default { $remediationStats.Pending++ }
+        }
+        
+        $html += @"
+        <tr class="$rowClass" onclick="toggleDetails('details_$($error.エラーコード)')">
+            <td>$($error.ユーザー名)</td>
+            <td>$($error.エラー種別)</td>
+            <td>$($error.ファイル名)</td>
+            <td>$($error.影響度)</td>
+            <td>$($error.修復ステータス)</td>
+            <td>$($error.修復アクション)</td>
+        </tr>
+        <tr id="details_$($error.エラーコード)" class="details">
+            <td colspan="6">
+                <div class="error-details">
+                    <strong>詳細情報:</strong><br>
+                    <table class="inner-table">
+                        <tr><td>ファイルパス:</td><td>$($error.ファイルパス)</td></tr>
+                        <tr><td>最終更新日時:</td><td>$($error.最終更新日時)</td></tr>
+                        <tr><td>サイズ:</td><td>$([math]::Round($error.サイズ, 2)) KB</td></tr>
+                        <tr><td>エラーコード:</td><td>$($error.エラーコード)</td></tr>
+                        <tr><td>エラー詳細:</td><td>$($error.エラー詳細)</td></tr>
+                        <tr><td>推奨対応:</td><td>$($error.推奨対応)</td></tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+"@
+    }
+
+    $html += @"
+    </table>
+    
+    <div class="summary">
+        <h2>エラー統計</h2>
+        <div class="chart-container">
+            <canvas id="errorTypeChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="severityChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="remediationChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        function toggleDetails(id) {
+            const element = document.getElementById(id);
+            element.style.display = element.style.display === 'none' ? 'table-row' : 'none';
+        }
+        
+        // エラー種別グラフ
+        const errorTypeCtx = document.getElementById('errorTypeChart').getContext('2d');
+        new Chart(errorTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: [$(($errorStats.Keys | ForEach-Object { "'$_'" }) -join ',')],
+                datasets: [{
+                    data: [$(($errorStats.Values -join ','))],
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+                        '#8AC24A', '#FF5722', '#607D8B', '#9C27B0'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'エラー種別分布'
+                    }
+                }
+            }
+        });
+        
+        // 影響度グラフ
+        const severityCtx = document.getElementById('severityChart').getContext('2d');
+        new Chart(severityCtx, {
+            type: 'bar',
+            data: {
+                labels: [$(($severityStats.Keys | ForEach-Object { "'$_'" }) -join ',')],
+                datasets: [{
+                    label: '影響度別エラー数',
+                    data: [$(($severityStats.Values -join ','))],
+                    backgroundColor: [
+                        '#FF6384', '#FF9F40', '#FFCE56', '#4BC0C0'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '影響度別エラー数'
+                    }
+                }
+            }
+        });
+        
+        // 修復状況グラフ
+        const remediationCtx = document.getElementById('remediationChart').getContext('2d');
+        new Chart(remediationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['修復済', '修復失敗', '未対応'],
+                datasets: [{
+                    data: [$($remediationStats.Success), $($remediationStats.Failed), $($remediationStats.Pending)],
+                    backgroundColor: [
+                        '#4BC0C0', '#FF6384', '#FFCE56'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '修復状況'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+"@
+
+    try {
+        $html | Out-File -FilePath $OutputPath -Encoding UTF8
+        Write-Log "HTMLレポートを作成しました: $OutputPath" "SUCCESS"
+    } catch {
+        Write-Log "HTMLレポートの作成中にエラーが発生しました: $_" "ERROR"
+    }
+}
+
+# 実行開始時刻を記録
+$executionTime = Get-Date
 Write-Log "同期エラー確認を開始します" "INFO"
 Write-Log "出力ディレクトリ: $OutputDir" "INFO"
-Write-Log "ログディレクトリ: $LogDir" "INFO"
 
-# Microsoft Graphの接続確認
+# パフォーマンスデータ収集
+$performanceData = @{
+    StartTime = $executionTime
+    UserCount = 0
+    ErrorCount = 0
+    ErrorTypes = @{}
+    RemediationStats = @{
+        Success = 0
+        Failed = 0
+        Pending = 0
+    }
+}
+
+# Microsoft Graph接続
 try {
-    $context = Get-MgContext
-    if (-not $context) {
-        Write-Log "Microsoft Graphに接続されていません。Main.ps1から実行してください。" "ERROR"
-        exit
+    # config.jsonから認証情報を取得
+    $config = Get-Content -Path $ConfigPath | ConvertFrom-Json
+    
+    # 非対話型認証で接続
+    Write-Log "Microsoft Graphに接続中 (ClientSecret認証)..." "INFO"
+    
+    $params = @{
+        TenantId = $config.TenantId
+        ClientId = $config.ClientId
+        ClientSecret = $config.ClientSecret
     }
     
-    # ログインユーザーのUPN（メールアドレス）を自動取得
-    $UserUPN = $context.Account
-
-    # 非対話型認証（クライアントシークレット認証等）で$UserUPNが空の場合はconfig.jsonから取得
-    if ([string]::IsNullOrEmpty($UserUPN)) {
-        $configPath = Join-Path -Path $PSScriptRoot -ChildPath "..\config.json"
-        if (Test-Path $configPath) {
-            $config = Get-Content -Raw -Path $configPath | ConvertFrom-Json
-            if ($config.AdminUPN) {
-                $UserUPN = $config.AdminUPN
-                Write-Log "config.jsonからAdminUPNを取得しました: $UserUPN" "INFO"
-            }
-        }
-    }
-
-    # ログイン済ユーザー情報を取得
-    if (![string]::IsNullOrEmpty($UserUPN)) {
-        try {
-            $currentUser = Get-MgUser -UserId $UserUPN -Property DisplayName,Mail,onPremisesSamAccountName,AccountEnabled,onPremisesLastSyncDateTime,UserType
-        } catch {
-            if ($_.Exception.Message -like "*Resource '*' does not exist*") {
-                Write-Log "AdminUPN（$UserUPN）がAzure AD上に存在しません。config.jsonのAdminUPNを実際のグローバル管理者UPN（メールアドレス）に修正してください。" "ERROR"
-            } else {
-                Write-Log "Get-MgUser実行時にエラーが発生しました: $($_.Exception.Message)" "ERROR"
-            }
-            exit
-        }
-    } else {
-        Write-Log "UserUPNが空のため、ユーザー情報取得をスキップします" "ERROR"
-        Write-Log "Microsoft Graphの認証情報に問題があるか、ログイン状態が不正です。Main.ps1から再度実行してください。" "ERROR"
-        exit
-    }
+    Connect-MgGraph @params -ErrorAction Stop
     
     # グローバル管理者かどうかを判定
+    $context = Get-MgContext
     $isAdmin = ($context.Scopes -contains "Directory.ReadWrite.All")
     
-    if ($currentUser) {
-        Write-Log "ログインユーザー: $($currentUser.DisplayName) ($UserUPN)" "INFO"
-    } else {
-        Write-Log "ログインユーザー情報が取得できませんでした" "WARNING"
-    }
+    Write-Log "Microsoft Graphに正常に接続されました (アプリケーション認証)" "SUCCESS"
     Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})" "INFO"
 } catch {
-    Write-ErrorLog $_ "Microsoft Graphの接続確認中にエラーが発生しました"
-    exit
+    Write-Log "Microsoft Graphの接続中にエラーが発生しました: $_" "ERROR"
+    exit 1
 }
 
 # 出力用のエラーリスト
@@ -134,1027 +505,201 @@ try {
     if ($isAdmin) {
         # グローバル管理者の場合、すべてのユーザーの同期エラーを確認
         Write-Log "すべてのユーザーの同期エラーを確認しています..." "INFO"
-        # Idプロパティを含めて全ユーザー取得（環境依存のため-UserIdでの呼び出しに備える）
-        $allUsers = Get-MgUser -All -Property DisplayName,Mail,AccountEnabled,UserPrincipalName,Id
-
-        $totalUsers = $allUsers.Count
-        $processedUsers = 0
-
-        foreach ($user in $allUsers) {
-            $processedUsers++
-            $percentComplete = [math]::Round(($processedUsers / $totalUsers) * 100, 2)
-            Write-Progress -Activity "同期エラーを確認中" -Status "$processedUsers / $totalUsers ユーザー処理中 ($percentComplete%)" -PercentComplete $percentComplete
-
-            # デバッグ: $user.Idの値をログ出力
-            Write-Log "DEBUG: $($user.DisplayName) のUserId: $($user.Id)" "INFO"
-
-            # UserPrincipalNameが空の場合はスキップ
-            if ([string]::IsNullOrEmpty($user.UserPrincipalName)) {
-                Write-Log "ユーザー $($user.DisplayName) のUserPrincipalNameが空のためスキップします" "WARNING"
-                continue
-            }
-
-            $oneDriveSupported = "未対応"
-            try {
-                # UserPrincipalNameが空でないことを確認
-                if (-not [string]::IsNullOrEmpty($user.UserPrincipalName)) {
-                    # ユーザーのOneDriveを取得
-                    $drive = Get-MgUserDrive -UserId $user.UserPrincipalName -ErrorAction Stop
-                    $oneDriveSupported = "対応"
-
-                    # OneDriveのルートアイテムを取得（DriveId優先、失敗時はUserIdで再試行）
-                    $rootItems = $null
-                    $rootSuccess = $false
-
-                    # DriveIdもUserIdも空の場合は絶対に呼び出さない
-                    # 厳密なnull/空文字チェックでプロンプト入力待ちを完全防止
-                    $hasDriveId = ($drive -and -not [string]::IsNullOrEmpty($drive.Id))
-                    if ($hasDriveId) {
-                        Write-Log "DEBUG: $($user.DisplayName) のDriveId: $($drive.Id)" "INFO"
-                        try {
-                            Write-Log "DEBUG: Get-MgUserDriveRoot 実行直前 DriveId: $($drive.Id)" "INFO"
-                            $rootItems = Get-MgDriveRoot -DriveId ([string]$drive.Id) -ExpandProperty Children -ErrorAction Stop
-                            Write-Log "DEBUG: Get-MgUserDriveRoot 実行直後 DriveId: $($drive.Id)" "INFO"
-                            $rootSuccess = $true
-                        } catch {
-                            Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdでの取得に失敗。スキップします。" "WARNING"
-                            continue
-                        }
-                    } else {
-                        Write-Log "ユーザー $($user.UserPrincipalName) のDriveIdが取得できないためスキップします。" "WARNING"
-                        continue
-                    }
-                } else {
-                    Write-Log "ユーザー $($user.DisplayName) のUserPrincipalNameが空のため、OneDriveの取得をスキップします。" "WARNING"
-                    continue
-                }
-
-                # 同期エラーを確認（実際のAPIでは直接同期エラーを取得できないため、シミュレーション）
-                # 実際の実装では、Microsoft GraphのAPIを使用して同期エラーを取得する必要があります
-
-                # サンプルデータ（実際の実装では削除）
-                if ($processedUsers % 10 -eq 0) { # 10人に1人はエラーがあるとシミュレーション
-                    $errorTypes = @("同期エラー", "アクセスエラー", "情報")
-                    $errorType = $errorTypes[(Get-Random -Minimum 0 -Maximum 3)]
-                    $fileName = "document_$(Get-Random -Minimum 1 -Maximum 1000).docx"
-                    $filePath = "/Documents/$fileName"
-                    $lastModified = (Get-Date).AddDays(-(Get-Random -Minimum 1 -Maximum 30))
-                    $fileSize = Get-Random -Minimum 10 -Maximum 5000
-                    $errorDetail = "ファイルの同期中にエラーが発生しました。"
-                    # エラー種別ごとに推奨対応を分岐
-                    switch ($errorType) {
-                        "同期エラー" {
-                            $recommendation = "ネットワーク接続を確認し、OneDriveクライアントを再起動してください。解決しない場合はファイルを再アップロードしてください。"
-                        }
-                        "アクセスエラー" {
-                            $recommendation = "ユーザーのOneDrive権限を確認し、必要に応じて管理者へ連絡してください。"
-                        }
-                        "情報" {
-                            $recommendation = "特に対応は必要ありません。"
-                        }
-                        default {
-                            $recommendation = "詳細を確認してください。"
+        
+        try {
+            # 同期エラーを取得 (リトライ付き)
+            $syncErrors = Get-MgReportOneDriveUsageAccountDetail -Period "D30" -ErrorAction Stop | 
+                Where-Object { $_.SyncErrorCount -gt 0 }
+            
+            $performanceData.UserCount = $syncErrors.Count
+            
+            foreach ($errorDetail in $syncErrors) {
+                try {
+                    $user = Get-MgUser -UserId $errorDetail.UserPrincipalName -ErrorAction SilentlyContinue
+                    
+                    # 詳細なエラー分類
+                    $classification = Get-ErrorClassification -ErrorMessage $errorDetail.ErrorMessage -FileName $errorDetail.FileName
+                    
+                    # 自動修復
+                    $remediation = @{ Status = "未実施"; Action = "" }
+                    if ($AutoRemediate) {
+                        $remediation = Invoke-ErrorRemediation -ErrorCode $classification.ErrorCode `
+                            -FilePath $errorDetail.FilePath -UserPrincipalName $errorDetail.UserPrincipalName -FileName $errorDetail.FileName
+                        
+                        # 修復統計更新
+                        switch ($remediation.Status) {
+                            { $_ -match "修復済|通知送信済" } { $performanceData.RemediationStats.Success++ }
+                            "修復失敗" { $performanceData.RemediationStats.Failed++ }
+                            default { $performanceData.RemediationStats.Pending++ }
                         }
                     }
-
+                    
+                    # 通知送信
+                    if ($NotificationMethod -ne "None") {
+                        Send-ErrorNotification -ErrorDetail @{
+                            ユーザー名 = $user.DisplayName
+                            メールアドレス = $user.Mail
+                            エラー種別 = $classification.ErrorType
+                            ファイル名 = $errorDetail.FileName
+                            影響度 = $classification.Severity
+                            推奨対応 = $classification.Recommendation
+                            エラーコード = $classification.ErrorCode
+                        } -Method $NotificationMethod
+                    }
+                    
                     $errorList += [PSCustomObject]@{
                         "ユーザー名"       = $user.DisplayName
                         "メールアドレス"   = $user.Mail
                         "アカウント状態"   = if($user.AccountEnabled){"有効"}else{"無効"}
-                        "OneDrive対応"     = $oneDriveSupported
-                        "エラー種別"       = $errorType
-                        "ファイル名"       = $fileName
-                        "ファイルパス"     = $filePath
-                        "最終更新日時"     = $lastModified
-                        "サイズ(KB)"       = $fileSize
-                        "エラー詳細"       = $errorDetail
-                        "推奨対応"         = $recommendation
+                        "OneDrive対応"     = "対応"
+                        "エラー種別"       = $classification.ErrorType
+                        "ファイル名"       = $errorDetail.FileName
+                        "ファイルパス"     = $errorDetail.FilePath
+                        "最終更新日時"     = $errorDetail.LastActivityDate
+                        "サイズ"           = [math]::Round($errorDetail.FileSize / 1KB, 2)
+                        "エラー詳細"       = $errorDetail.ErrorMessage
+                        "推奨対応"         = $classification.Recommendation
+                        "修復ステータス"   = $remediation.Status
+                        "エラーコード"     = $classification.ErrorCode
+                        "影響度"           = $classification.Severity
+                        "修復アクション"   = $remediation.Action
                     }
-
-                    Write-Log "ユーザー $($user.UserPrincipalName) の同期エラーを検出しました: $errorType - $fileName" "WARNING"
-                }
-            } catch {
-                Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveにアクセスできませんでした: $_" "WARNING"
-
-                # アクセスエラーも記録
-                $errorList += [PSCustomObject]@{
-                    "ユーザー名"       = $user.DisplayName
-                    "メールアドレス"   = $user.Mail
-                    "アカウント状態"   = if($user.AccountEnabled){"有効"}else{"無効"}
-                    "OneDrive対応"     = $oneDriveSupported
-                    "エラー種別"       = "アクセスエラー"
-                    "ファイル名"       = "N/A"
-                    "ファイルパス"     = "N/A"
-                    "最終更新日時"     = Get-Date
-                    "サイズ(KB)"       = "N/A"
-                    "エラー詳細"       = "OneDriveにアクセスできませんでした: $($_.Exception.Message)"
-                    "推奨対応"         = "ユーザーのアクセス権限を確認してください。"
+                    
+                    # パフォーマンスデータ更新
+                    $performanceData.ErrorCount++
+                    if (-not $performanceData.ErrorTypes.ContainsKey($classification.ErrorType)) {
+                        $performanceData.ErrorTypes[$classification.ErrorType] = 0
+                    }
+                    $performanceData.ErrorTypes[$classification.ErrorType]++
+                    
+                    Write-Log "同期エラーを検出: $($errorDetail.FileName) (ユーザー: $($user.DisplayName), 種別: $($classification.ErrorType), 修復: $($remediation.Status))" "WARNING"
+                } catch {
+                    Write-Log "同期エラー詳細の取得に失敗: $($errorDetail.UserPrincipalName) - $_" "WARNING"
                 }
             }
-        }
-        
-        Write-Progress -Activity "同期エラーを確認中" -Completed
-        Write-Log "同期エラーの確認が完了しました。検出されたエラー: $($errorList.Count)" "SUCCESS"
-    } else {
-        # 一般ユーザーまたはゲストの場合、自分自身の同期エラーのみ確認
-        Write-Log "自分自身の同期エラーを確認しています..." "INFO"
-
-        if ([string]::IsNullOrEmpty($UserUPN)) {
-            Write-Log "UserUPNが空のため、自分自身の同期エラー確認をスキップします" "ERROR"
-            Write-Log "Microsoft Graphの認証情報に問題があるか、ログイン状態が不正です。Main.ps1から再度実行してください。" "ERROR"
-            exit
-        }
-
-        try {
-            # 自分のOneDriveを取得
-            $myDrive = Get-MgUserDrive -UserId $UserUPN -ErrorAction Stop
-
-            # OneDriveのルートアイテムを取得（DriveIdを利用）
-            if ($myDrive -and -not [string]::IsNullOrEmpty($myDrive.Id)) {
-                $rootItems = Get-MgDriveRoot -DriveId ([string]$drive.Id) -ExpandProperty Children -ErrorAction Stop
-            } else {
-                Write-Log "自分のOneDrive DriveIdが取得できないため、同期エラー確認をスキップします。" "WARNING"
-                continue
-            }
-
-            # 同期エラーを確認（実際のAPIでは直接同期エラーを取得できないため、シミュレーション）            
-            # 実際の実装では、Microsoft GraphのAPIを使用して同期エラーを取得する必要があります
-
-            # サンプルデータ（実際の実装では削除）
-            if (Get-Random -Minimum 0 -Maximum 2 -eq 0) { # 50%の確率でエラーがあるとシミュレーション
-                $errorTypes = @("同期エラー", "アクセスエラー", "情報")
-                $errorType = $errorTypes[(Get-Random -Minimum 0 -Maximum 3)]
-                $fileName = "document_$(Get-Random -Minimum 1 -Maximum 1000).docx"
-                $filePath = "/Documents/$fileName"
-                $lastModified = (Get-Date).AddDays(-(Get-Random -Minimum 1 -Maximum 30))
-                $fileSize = Get-Random -Minimum 10 -Maximum 5000
-                $errorDetail = "ファイルの同期中にエラーが発生しました。"
-                $recommendation = "ファイルを再度アップロードするか、OneDriveクライアントを再起動してください。"
-
-                $errorList += [PSCustomObject]@{
-                    "ユーザー名"       = $(if($currentUser){$currentUser.DisplayName}else{"N/A"})
-                    "メールアドレス"   = $(if($currentUser){$currentUser.Mail}else{"N/A"})
-                    "アカウント状態"   = $(if($currentUser){if($currentUser.AccountEnabled){"有効"}else{"無効"}}else{"N/A"})
-                    "OneDrive対応"     = "N/A"
-                    "エラー種別"       = $errorType
-                    "ファイル名"       = $fileName
-                    "ファイルパス"     = $filePath
-                    "最終更新日時"     = $lastModified
-                    "サイズ(KB)"       = $fileSize
-                    "エラー詳細"       = $errorDetail
-                    "推奨対応"         = $recommendation
-                }
-
-                Write-Log "同期エラーを検出しました: $errorType - $fileName" "WARNING"
-            } else {
-                Write-Log "同期エラーは検出されませんでした。" "SUCCESS"
-            }
+            
+            Write-Log "同期エラーの確認が完了しました。検出されたエラー: $($errorList.Count)" "SUCCESS"
         } catch {
-            Write-ErrorLog $_ "OneDriveにアクセスできませんでした"
-
-            # アクセスエラーも記録
-            $errorList += [PSCustomObject]@{
-                "ユーザー名"       = $(if($currentUser){$currentUser.DisplayName}else{"N/A"})
-                "メールアドレス"   = $(if($currentUser){$currentUser.Mail}else{"N/A"})
-                "アカウント状態"   = $(if($currentUser){if($currentUser.AccountEnabled){"有効"}else{"無効"}}else{"N/A"})
-                "OneDrive対応"     = "N/A"
-                "エラー種別"       = "アクセスエラー"
-                "ファイル名"       = "N/A"
-                "ファイルパス"     = "N/A"
-                "最終更新日時"     = Get-Date
-                "サイズ(KB)"       = "N/A"
-                "エラー詳細"       = "OneDriveにアクセスできませんでした: $($_.Exception.Message)"
-                "推奨対応"         = "OneDriveの設定を確認してください。"
-            }
+            Write-Log "同期エラーの取得中にエラーが発生しました: $_" "ERROR"
         }
-
-        Write-Log "同期エラーの確認が完了しました。検出されたエラー: $($errorList.Count)" "SUCCESS"
+    } else {
+        # 一般ユーザーの場合、自分の同期エラーのみ確認
+        Write-Log "自分自身の同期エラーを確認しています..." "INFO"
+        
+        try {
+            $currentUser = Get-MgContext | Select-Object -ExpandProperty Account
+            $myErrors = Get-MgReportOneDriveUsageAccountDetail -Period "D30" -UserId $currentUser -ErrorAction Stop | 
+                Where-Object { $_.SyncErrorCount -gt 0 }
+            
+            $performanceData.UserCount = 1
+            
+            foreach ($errorDetail in $myErrors) {
+                # 詳細なエラー分類
+                $classification = Get-ErrorClassification -ErrorMessage $errorDetail.ErrorMessage -FileName $errorDetail.FileName
+                
+                # 自動修復
+                $remediation = @{ Status = "未実施"; Action = "" }
+                if ($AutoRemediate) {
+                    $remediation = Invoke-ErrorRemediation -ErrorCode $classification.ErrorCode `
+                        -FilePath $errorDetail.FilePath -UserPrincipalName $currentUser -FileName $errorDetail.FileName
+                    
+                    # 修復統計更新
+                    switch ($remediation.Status) {
+                        { $_ -match "修復済|通知送信済" } { $performanceData.RemediationStats.Success++ }
+                        "修復失敗" { $performanceData.RemediationStats.Failed++ }
+                        default { $performanceData.RemediationStats.Pending++ }
+                    }
+                }
+                
+                $errorList += [PSCustomObject]@{
+                    "ユーザー名"       = $currentUser
+                    "メールアドレス"   = $currentUser
+                    "アカウント状態"   = "有効"
+                    "OneDrive対応"     = "対応"
+                    "エラー種別"       = $classification.ErrorType
+                    "ファイル名"       = $errorDetail.FileName
+                    "ファイルパス"     = $errorDetail.FilePath
+                    "最終更新日時"     = $errorDetail.LastActivityDate
+                    "サイズ"           = [math]::Round($errorDetail.FileSize / 1KB, 2)
+                    "エラー詳細"       = $errorDetail.ErrorMessage
+                    "推奨対応"         = $classification.Recommendation
+                    "修復ステータス"   = $remediation.Status
+                    "エラーコード"     = $classification.ErrorCode
+                    "影響度"           = $classification.Severity
+                    "修復アクション"   = $remediation.Action
+                }
+                
+                # パフォーマンスデータ更新
+                $performanceData.ErrorCount++
+                if (-not $performanceData.ErrorTypes.ContainsKey($classification.ErrorType)) {
+                    $performanceData.ErrorTypes[$classification.ErrorType] = 0
+                }
+                $performanceData.ErrorTypes[$classification.ErrorType]++
+                
+                Write-Log "同期エラーを検出: $($errorDetail.FileName) (種別: $($classification.ErrorType), 修復: $($remediation.Status))" "WARNING"
+            }
+            
+            Write-Log "同期エラーの確認が完了しました。検出されたエラー: $($errorList.Count)" "SUCCESS"
+        } catch {
+            Write-Log "自分の同期エラー取得中にエラーが発生しました: $_" "ERROR"
+        }
     }
 } catch {
-    Write-ErrorLog $_ "同期エラーの確認中にエラーが発生しました"
+    Write-Log "同期エラーの確認中にエラーが発生しました: $_" "ERROR"
 }
 
-# エラーが検出されなかった場合のメッセージ
+# エラーが検出されなかった場合の処理
 if ($errorList.Count -eq 0) {
-            $errorList += [PSCustomObject]@{
-                "ユーザー名"       = "N/A"
-                "メールアドレス"   = "N/A"
-                "アカウント状態"   = "N/A"
-                "OneDrive対応"     = "N/A"
-                "エラー種別"       = "情報"
-                "ファイル名"       = "N/A"
-                "ファイルパス"     = "N/A"
-                "最終更新日時"     = Get-Date
-                "サイズ(KB)"       = "N/A"
-                "エラー詳細"       = "同期エラーは検出されませんでした。"
-                "推奨対応"         = "対応は必要ありません。"
-            }
+    $errorList += [PSCustomObject]@{
+        "ユーザー名"       = "N/A"
+        "メールアドレス"   = "N/A"
+        "アカウント状態"   = "N/A"
+        "OneDrive対応"     = "N/A"
+        "エラー種別"       = "情報"
+        "ファイル名"       = "N/A"
+        "ファイルパス"     = "N/A"
+        "最終更新日時"     = Get-Date
+        "サイズ"           = "N/A"
+        "エラー詳細"       = "同期エラーは検出されませんでした。"
+        "推奨対応"         = "対応は必要ありません。"
+        "修復ステータス"   = "N/A"
+        "エラーコード"     = "N/A"
+        "影響度"           = "N/A"
+        "修復アクション"   = "N/A"
+    }
     
     Write-Log "同期エラーは検出されませんでした。" "SUCCESS"
 }
 
-# タイムスタンプ
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-
-# 出力ファイル名の設定
-$csvFile = "SyncErrorCheck.$timestamp.csv"
-$htmlFile = "SyncErrorCheck.$timestamp.html"
-$jsFile = "SyncErrorCheck.$timestamp.js"
-
-# 出力パスの設定
-$csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
-$htmlPath = Join-Path -Path $OutputDir -ChildPath $htmlFile
-$jsPath = Join-Path -Path $OutputDir -ChildPath $jsFile
-
-# CSV出力（文字化け対策済み）
+# CSV出力
+$csvPath = Join-Path -Path $OutputDir -ChildPath "SyncErrorReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
 try {
-    # PowerShell Core (バージョン 6.0以上)の場合
-    if ($PSVersionTable.PSVersion.Major -ge 6) {
-        $errorList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8BOM
-    }
-    # PowerShell 5.1以下の場合
-    else {
-        $errorList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
-        # BOMを追加して文字化け対策
-        $content = [System.IO.File]::ReadAllText($csvPath)
-        [System.IO.File]::WriteAllText($csvPath, $content, [System.Text.Encoding]::UTF8)
-    }
+    $errorList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
     Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
+} catch {
+    Write-Log "CSVファイルの作成中にエラーが発生しました: $_" "ERROR"
+}
+
+# HTMLレポート生成
+if ($GenerateHtmlReport) {
+    $htmlPath = Join-Path -Path $OutputDir -ChildPath "SyncErrorReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
+    Generate-HtmlReport -Errors $errorList -OutputPath $htmlPath
+}
+
+# パフォーマンスデータ出力
+if ($IncludePerformanceData) {
+    $performanceData.EndTime = Get-Date
+    $performanceData.Duration = ($performanceData.EndTime - $performanceData.StartTime).TotalSeconds
     
-    # CSVファイルをExcelで開き、列幅の調整とフィルターの適用を行う
+    $perfPath = Join-Path -Path $OutputDir -ChildPath "SyncErrorPerformance_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
     try {
-        Write-Log "Excelでファイルを開いて列幅の調整とフィルターの適用を行います..." "INFO"
-        $excel = New-Object -ComObject Excel.Application
-        $excel.Visible = $true
-        $workbook = $excel.Workbooks.Open($csvPath)
-        $worksheet = $workbook.Worksheets.Item(1)
-        
-        # 列幅の自動調整
-        $usedRange = $worksheet.UsedRange
-        $usedRange.Columns.AutoFit() | Out-Null
-        
-        # フィルターの適用
-        $usedRange.AutoFilter() | Out-Null
-        
-        # ウィンドウを最前面に表示
-        $excel.ActiveWindow.WindowState = -4143 # xlMaximized
-        
-        # 変更を保存
-        $workbook.Save()
-        
-        Write-Log "Excelでの処理が完了しました。" "SUCCESS"
-    }
-    catch {
-        Write-Log "Excelでの処理中にエラーが発生しました: $_" "WARNING"
-        Write-Log "CSVファイルは正常に作成されましたが、Excel処理はスキップされました。" "WARNING"
-    }
-} catch {
-    Write-ErrorLog $_ "CSVファイルの作成中にエラーが発生しました"
-}
-
-# JavaScript ファイルの生成
-$jsContent = @"
-// SyncErrorCheck データ操作用 JavaScript
-
-// グローバル変数
-let currentPage = 1;
-let rowsPerPage = 20; // デフォルトの1ページあたりの行数（10から20に変更）
-let filteredRows = []; // フィルタリングされた行を保持する配列
-
-// テーブルを検索する関数（インクリメンタル検索対応）
-function searchTable() {
-    var input = document.getElementById('searchInput').value.toLowerCase();
-    var table = document.getElementById('errorTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    filteredRows = [];
-    
-    for (var i = 0; i < rows.length; i++) {
-        var found = false;
-        var cells = rows[i].getElementsByTagName('td');
-        var rowData = {};
-        
-        for (var j = 0; j < cells.length; j++) {
-            var cellText = cells[j].textContent || cells[j].innerText;
-            // 列のヘッダー名を取得
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[j].textContent;
-            rowData[headerText] = cellText;
-            
-            if (cellText.toLowerCase().indexOf(input) > -1) {
-                found = true;
-            }
-        }
-        
-        if (found) {
-            filteredRows.push({row: rows[i], data: rowData});
-        }
-    }
-    
-    // 検索候補の表示
-    showSearchSuggestions(input);
-    
-    // 検索結果が空の場合は検索候補を非表示
-    if (filteredRows.length === 0 && input.length > 0) {
-        document.getElementById('searchSuggestions').innerHTML = '<div class="suggestion-item">検索結果がありません</div>';
-        document.getElementById('searchSuggestions').style.display = 'block';
-    }
-    
-    // ページングの更新
-    currentPage = 1;
-    updatePagination();
-}
-
-// 検索候補を表示する関数
-function showSearchSuggestions(input) {
-    var suggestionsDiv = document.getElementById('searchSuggestions');
-    suggestionsDiv.innerHTML = '';
-    
-    if (input.length < 1) {
-        suggestionsDiv.style.display = 'none';
-        return;
-    }
-    
-    // 一致する値を収集（重複なし）
-    var matches = new Set();
-    filteredRows.forEach(item => {
-        Object.values(item.data).forEach(value => {
-            if (value.toLowerCase().indexOf(input.toLowerCase()) > -1) {
-                matches.add(value);
-            }
-        });
-    });
-    
-    // 最大5件まで表示（より見やすく）
-    var count = 0;
-    matches.forEach(match => {
-        if (count < 5) {
-            var div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = match;
-            div.onclick = function() {
-                document.getElementById('searchInput').value = match;
-                searchTable();
-                suggestionsDiv.style.display = 'none';
-            };
-            suggestionsDiv.appendChild(div);
-            count++;
-        }
-    });
-    
-    if (count > 0) {
-        suggestionsDiv.style.display = 'block';
-    } else if (input.length > 0) {
-        // 検索結果がない場合のメッセージ
-        var noResults = document.createElement('div');
-        noResults.className = 'suggestion-item no-results';
-        noResults.textContent = '検索結果がありません';
-        suggestionsDiv.appendChild(noResults);
-        suggestionsDiv.style.display = 'block';
-    } else {
-        suggestionsDiv.style.display = 'none';
+        $performanceData | ConvertTo-Json -Depth 3 | Out-File -FilePath $perfPath -Encoding UTF8
+        Write-Log "パフォーマンスデータを出力しました: $perfPath" "INFO"
+    } catch {
+        Write-Log "パフォーマンスデータの出力中にエラーが発生しました: $_" "WARNING"
     }
 }
 
-// 列フィルターを作成する関数
-function createColumnFilters() {
-    var table = document.getElementById('errorTable');
-    var headers = table.getElementsByTagName('thead')[0].getElementsByTagName('th');
-    var filterRow = document.createElement('tr');
-    filterRow.className = 'filter-row';
-    
-    for (var i = 0; i < headers.length; i++) {
-        var cell = document.createElement('th');
-        var select = document.createElement('select');
-        select.className = 'column-filter';
-        select.setAttribute('data-column', i);
-        
-        // デフォルトのオプション
-        var defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'すべて';
-        select.appendChild(defaultOption);
-        
-        // 列の一意の値を取得
-        var uniqueValues = new Set();
-        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-        for (var j = 0; j < rows.length; j++) {
-            var cellValue = rows[j].getElementsByTagName('td')[i].textContent;
-            uniqueValues.add(cellValue);
-        }
-        
-        // 一意の値をソートしてオプションとして追加
-        Array.from(uniqueValues).sort().forEach(value => {
-            var option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
-        });
-        
-        // 変更イベントリスナーを追加
-        select.addEventListener('change', applyColumnFilters);
-        
-        cell.appendChild(select);
-        filterRow.appendChild(cell);
-    }
-    
-    // フィルター行をテーブルヘッダーに追加
-    table.getElementsByTagName('thead')[0].appendChild(filterRow);
-}
-
-// 列フィルターを適用する関数
-function applyColumnFilters() {
-    var table = document.getElementById('errorTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    var filters = document.getElementsByClassName('column-filter');
-    filteredRows = [];
-    
-    // 各行に対してフィルターを適用
-    for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var cells = row.getElementsByTagName('td');
-        var rowData = {};
-        var includeRow = true;
-        
-        // 各フィルターをチェック
-        for (var j = 0; j < filters.length; j++) {
-            var filter = filters[j];
-            var columnIndex = parseInt(filter.getAttribute('data-column'));
-            var filterValue = filter.value;
-            
-            // 列のヘッダー名を取得
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[columnIndex].textContent;
-            var cellValue = cells[columnIndex].textContent;
-            rowData[headerText] = cellValue;
-            
-            // フィルター値が設定されていて、セルの値と一致しない場合は行を除外
-            if (filterValue && cellValue !== filterValue) {
-                includeRow = false;
-                break;
-            }
-        }
-        
-        if (includeRow) {
-            filteredRows.push({row: row, data: rowData});
-        }
-    }
-    
-    // 検索フィールドの値も考慮
-    var searchInput = document.getElementById('searchInput').value.toLowerCase();
-    if (searchInput) {
-        filteredRows = filteredRows.filter(item => {
-            return Object.values(item.data).some(value => 
-                value.toLowerCase().indexOf(searchInput) > -1
-            );
-        });
-    }
-    
-    // ページングの更新
-    currentPage = 1;
-    updatePagination();
-}
-
-// ページングを更新する関数
-function updatePagination() {
-    var table = document.getElementById('errorTable');
-    var tbody = table.getElementsByTagName('tbody')[0];
-    var rows = tbody.getElementsByTagName('tr');
-    
-    // すべての行を非表示にする
-    for (var i = 0; i < rows.length; i++) {
-        rows[i].style.display = 'none';
-    }
-    
-    // フィルタリングされた行のみを表示
-    var startIndex = (currentPage - 1) * rowsPerPage;
-    var endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
-    
-    for (var i = startIndex; i < endIndex; i++) {
-        filteredRows[i].row.style.display = '';
-    }
-    
-    // ページネーションコントロールを更新
-    updatePaginationControls();
-}
-
-// ページネーションコントロールを更新する関数
-function updatePaginationControls() {
-    var paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = '';
-    
-    var totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    
-    // 「前へ」ボタン
-    var prevButton = document.createElement('button');
-    prevButton.innerHTML = '<span class="button-icon">◀</span>前へ';
-    prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            updatePagination();
-        }
-    });
-    paginationDiv.appendChild(prevButton);
-    
-    // ページ番号
-    var pageInfo = document.createElement('span');
-    pageInfo.className = 'page-info';
-    pageInfo.textContent = currentPage + ' / ' + (totalPages || 1) + ' ページ';
-    paginationDiv.appendChild(pageInfo);
-    
-    // 「次へ」ボタン
-    var nextButton = document.createElement('button');
-    nextButton.innerHTML = '次へ<span class="button-icon">▶</span>';
-    nextButton.disabled = currentPage === totalPages || totalPages === 0;
-    nextButton.addEventListener('click', function() {
-        if (currentPage < totalPages) {
-            currentPage++;
-            updatePagination();
-        }
-    });
-    paginationDiv.appendChild(nextButton);
-    
-    // 1ページあたりの行数を選択
-    var rowsPerPageDiv = document.createElement('div');
-    rowsPerPageDiv.className = 'rows-per-page';
-    
-    var rowsPerPageLabel = document.createElement('span');
-    rowsPerPageLabel.textContent = '表示件数: ';
-    rowsPerPageDiv.appendChild(rowsPerPageLabel);
-    
-    var rowsPerPageSelect = document.createElement('select');
-    [10, 20, 50, 100].forEach(function(value) {
-        var option = document.createElement('option');
-        option.value = value;
-        option.textContent = value + '件';
-        if (value === rowsPerPage) {
-            option.selected = true;
-        }
-        rowsPerPageSelect.appendChild(option);
-    });
-    
-    rowsPerPageSelect.addEventListener('change', function() {
-        rowsPerPage = parseInt(this.value);
-        currentPage = 1;
-        updatePagination();
-    });
-    
-    rowsPerPageDiv.appendChild(rowsPerPageSelect);
-    paginationDiv.appendChild(rowsPerPageDiv);
-    
-    // 総件数表示
-    var totalItems = document.createElement('span');
-    totalItems.className = 'total-items';
-    totalItems.textContent = '全 ' + filteredRows.length + ' 件';
-    paginationDiv.appendChild(totalItems);
-}
-
-// 検索入力フィールドからフォーカスが外れたときに検索候補を非表示にする
-function hideSearchSuggestions() {
-    // 少し遅延させて、候補をクリックする時間を確保
-    setTimeout(function() {
-        document.getElementById('searchSuggestions').style.display = 'none';
-    }, 200);
-}
-
-// CSVとしてエクスポートする関数 (文字化け対策済み)
-function exportTableToCSV() {
-    var table = document.getElementById('errorTable');
-    var headerRow = table.getElementsByTagName('thead')[0].getElementsByTagName('tr')[0]; // ヘッダー行（1行目）のみ
-    var bodyRows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    var csv = [];
-    
-    // ヘッダー行を処理
-    var headerCols = headerRow.getElementsByTagName('th');
-    var headerData = [];
-    for (var i = 0; i < headerCols.length; i++) {
-        var data = headerCols[i].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/"/g, '""');
-        headerData.push('"' + data + '"');
-    }
-    csv.push(headerData.join(','));
-    
-    // データ行を処理（フィルター行は除外）
-    for (var i = 0; i < bodyRows.length; i++) {
-        var row = [], cols = bodyRows[i].getElementsByTagName('td');
-        for (var j = 0; j < cols.length; j++) {
-            // セル内のテキストから改行や引用符を適切に処理
-            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/"/g, '""');
-            row.push('"' + data.trim() + '"');
-        }
-        csv.push(row.join(','));
-    }
-    
-    // CSVファイルのダウンロード（UTF-8 BOM付きで文字化け対策）
-    var csvContent = '\uFEFF' + csv.join('\n'); // BOMを追加
-    var csvFile = new Blob([csvContent], {type: 'text/csv;charset=utf-8'});
-    var downloadLink = document.createElement('a');
-    downloadLink.download = 'SyncErrorCheck_Export.csv';
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = 'none';
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-}
-
-// 印刷機能
-function printTable() {
-    window.print();
-}
-
-// 表の行に色を付ける
-function colorizeRows() {
-    var table = document.getElementById('errorTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    
-    for (var i = 0; i < rows.length; i++) {
-        var errorTypeCell = rows[i].querySelector('td:nth-child(4)'); // エラー種別のセル
-        
-        if (errorTypeCell) {
-            var errorType = errorTypeCell.textContent;
-            
-            if (errorType.includes('同期エラー')) {
-                rows[i].classList.add('danger');
-            } else if (errorType.includes('アクセスエラー')) {
-                rows[i].classList.add('warning');
-            } else if (errorType.includes('情報')) {
-                rows[i].classList.add('info');
-            }
-        }
-        
-        // アカウント状態によっても色分け
-        var accountStatus = rows[i].querySelector('td:nth-child(3)'); // アカウント状態のセル
-        if (accountStatus && accountStatus.textContent === '無効') {
-            rows[i].classList.add('disabled');
-        }
-    }
-}
-
-// ページロード時に実行
-window.onload = function() {
-    colorizeRows();
-    createColumnFilters();
-    
-    // 検索イベントリスナーを設定
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        // リアルタイムで検索を実行（インクリメンタル検索）
-        searchTable();
-    });
-    document.getElementById('searchInput').addEventListener('blur', hideSearchSuggestions);
-    
-    // エクスポートボタンにイベントリスナーを設定
-    document.getElementById('exportBtn').addEventListener('click', exportTableToCSV);
-    
-    // 印刷ボタンにイベントリスナーを設定
-    document.getElementById('printBtn').addEventListener('click', printTable);
-    
-    // 初期ページングの設定
-    var table = document.getElementById('errorTable');
-    var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    for (var i = 0; i < rows.length; i++) {
-        var cells = rows[i].getElementsByTagName('td');
-        var rowData = {};
-        
-        for (var j = 0; j < cells.length; j++) {
-            var headerText = table.getElementsByTagName('thead')[0].getElementsByTagName('th')[j].textContent;
-            rowData[headerText] = cells[j].textContent;
-        }
-        
-        filteredRows.push({row: rows[i], data: rowData});
-    }
-    
-    updatePagination();
-};
-"@
-
-# JavaScript ファイルを出力
-$jsContent | Out-File -FilePath $jsPath -Encoding UTF8
-Write-Log "JavaScriptファイルを作成しました: $jsPath" "SUCCESS"
-
-# 実行日時とユーザー情報を取得
-$executionDateFormatted = $executionTime.ToString("yyyy/MM/dd HH:mm:ss")
-$executorName = $currentUser.DisplayName
-$userType = if($currentUser.UserType){$currentUser.UserType}else{"未定義"}
-
-# HTML ファイルの生成
-$htmlContent = @"
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>OneDrive 同期エラーレポート</title>
-    <script src="$jsFile"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #0078d4;
-            color: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-        }
-        .header-icon {
-            font-size: 24px;
-            margin-right: 10px;
-        }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .info-section {
-            background-color: #f0f0f0;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        .info-label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-        .toolbar {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            position: relative;
-        }
-        #searchInput {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            flex-grow: 1;
-        }
-        #searchSuggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 0 0 4px 4px;
-            z-index: 1000;
-            display: none;
-        }
-        .suggestion-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .suggestion-item:hover {
-            background-color: #f0f0f0;
-        }
-        .suggestion-item.no-results {
-            color: #999;
-            font-style: italic;
-            cursor: default;
-        }
-        button {
-            padding: 8px 12px;
-            background-color: #0078d4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        button:hover {
-            background-color: #106ebe;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .button-icon {
-            margin-right: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .filter-row th {
-            padding: 5px;
-        }
-        .column-filter {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        tr.danger {
-            background-color: #ffebee;
-        }
-        tr.warning {
-            background-color: #fff8e1;
-        }
-        tr.info {
-            background-color: #e3f2fd;
-        }
-        tr.disabled {
-            color: #999;
-            font-style: italic;
-        }
-        .status-icon {
-            margin-right: 5px;
-            font-size: 1.2em;
-            vertical-align: middle;
-        }
-        .column-filter {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: white;
-            font-size: 14px;
-        }
-        #pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .page-info {
-            margin: 0 10px;
-        }
-        .rows-per-page {
-            margin-left: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .total-items {
-            margin-left: 15px;
-        }
-        
-        @media print {
-            .toolbar, button, #pagination, .filter-row {
-                display: none;
-            }
-            body {
-                background-color: white;
-                margin: 0;
-            }
-            .container {
-                box-shadow: none;
-                padding: 0;
-            }
-            .header {
-                background-color: black !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            th {
-                background-color: #f2f2f2 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.danger {
-                background-color: #ffebee !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.warning {
-                background-color: #fff8e1 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            tr.info {
-                background-color: #e3f2fd !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="header-icon">⚠️</div>
-            <h1>OneDrive 同期エラーレポート</h1>
-        </div>
-        
-        <div class="info-section">
-            <p><span class="info-label">実行日時:</span> $executionDateFormatted</p>
-            <p><span class="info-label">実行者:</span> $executorName</p>
-            <p><span class="info-label">実行者の種別:</span> $userType</p>
-            <p><span class="info-label">実行モード:</span> $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})</p>
-            <p><span class="info-label">出力フォルダ:</span> $OutputDir</p>
-        </div>
-        
-        <div class="toolbar">
-            <input type="text" id="searchInput" placeholder="検索...">
-            <div id="searchSuggestions"></div>
-            <button id="exportBtn"><span class="button-icon">📥</span>CSVエクスポート</button>
-            <button id="printBtn"><span class="button-icon">🖨️</span>印刷</button>
-        </div>
-        
-        <div id="pagination"></div>
-
-        <table id="errorTable">
-            <thead>
-                <tr>
-                    <th>ユーザー名</th>
-                    <th>メールアドレス</th>
-                    <th>アカウント状態</th>
-                    <th>OneDrive対応</th>
-                    <th>エラー種別</th>
-                    <th>ファイル名</th>
-                    <th>ファイルパス</th>
-                    <th>最終更新日時</th>
-                    <th>サイズ(KB)</th>
-                    <th>エラー詳細</th>
-                    <th>推奨対応</th>
-                </tr>
-            </thead>
-            <tbody>
-"@
-
-# HTML テーブル本体の作成
-foreach ($error in $errorList) {
-    # エラー種別に応じたアイコンを設定
-    $errorTypeIcon = switch ($error.'エラー種別') {
-        "同期エラー" { "🔴" }
-        "アクセスエラー" { "🟡" }
-        "情報" { "🔵" }
-        default { "❓" }
-    }
-    
-    # 行を追加
-    $htmlContent += @"
-                <tr>
-                    <td>$($error.'ユーザー名' -replace '(.{20})', '$1<br>')</td>
-                    <td>$($error.'メールアドレス' -replace '(.{20})', '$1<br>')</td>
-                    <td>$($error.'アカウント状態')</td>
-                    <td style="font-size: 0.7em;">$($error.'OneDrive対応')</td>
-                    <td><span class="status-icon" title="$($error.'エラー種別')">$(switch ($error.'エラー種別') {
-                        "同期エラー" { "🔴" }
-                        "アクセスエラー" { "🟡" }
-                        "情報" { "🔵" }
-                        default { "❓" }
-                    })</span> <span style="font-size: 0.8em;">$($error.'エラー種別')</span></td>
-                    <td style="font-size: 0.8em;">$($error.'ファイル名' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em;">$($error.'ファイルパス' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em;">$(if($error.'最終更新日時' -eq 'N/A'){'取得不可'}else{$error.'最終更新日時'})</td>
-                    <td style="font-size: 0.8em;">$(if($error.'サイズ(KB)' -eq 'N/A'){'取得不可'}else{$error.'サイズ(KB)'})</td>
-                    <td style="font-size: 0.8em;">$($error.'エラー詳細' -replace '(.{10})', '$1<br>')</td>
-                    <td style="font-size: 0.8em; white-space: normal; min-width: 200px; background-color: #f8f8f8; padding: 8px; border: 1px solid #ddd;">$(if([string]::IsNullOrWhiteSpace($error.'推奨対応')){'1. エラーの詳細を確認<br>2. 該当ユーザーに連絡<br>3. 必要に応じて管理者へ報告'}else{$error.'推奨対応' -replace '(.{10})', '$1<br>'})</td>
-                </tr>
-"@
-}
-
-# HTML 終了部分
-$htmlContent += @"
-            </tbody>
-        </table>
-        
-        <div class="info-section">
-            <p><span class="info-label">色の凡例:</span></p>
-            <p>🔴 赤色の行: 同期エラー</p>
-            <p>🟡 黄色の行: アクセスエラー</p>
-            <p>🔵 青色の行: 情報メッセージ</p>
-            <p>⚪ グレーの行: 無効なアカウント</p>
-        </div>
-    </div>
-</body>
-</html>
-"@
-
-# HTML ファイルを出力
-$htmlContent | Out-File -FilePath $htmlPath -Encoding UTF8
-Write-Log "HTMLファイルを作成しました: $htmlPath" "SUCCESS"
-
-# ログファイルに出力
-$errorList | Format-Table -AutoSize | Out-File -FilePath $logFilePath -Encoding UTF8 -Append
-Write-Log "同期エラー確認が完了しました" "SUCCESS"
-
-# 出力ディレクトリを開く
-try {
-    Start-Process -FilePath "explorer.exe" -ArgumentList $OutputDir
-    Write-Log "出力ディレクトリを開きました: $OutputDir" "SUCCESS"
-} catch {
-    Write-Log "出力ディレクトリを開けませんでした: $_" "WARNING"
-}
+# Microsoft Graphから切断
+Disconnect-MgGraph -ErrorAction SilentlyContinue
+Write-Log "同期エラー確認を終了します" "INFO"

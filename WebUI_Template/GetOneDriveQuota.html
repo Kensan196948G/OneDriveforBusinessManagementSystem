@@ -295,163 +295,66 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./common.js"></script>
 <script>
-/*
-PowerShellスクリプト連携例:
-1. GetOneDriveQuota.ps1を実行してJSONデータを生成
-2. fetchQuotaData()内でfetch APIを使用してJSONを取得
-例:
+// データ取得関数
 async function fetchQuotaData() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const errorContainer = document.getElementById('errorContainer');
-    
     try {
-        if (!loadingOverlay || !errorContainer) {
-            throw new Error('必要なDOM要素が見つかりません');
+        showLoading(true);
+        
+        // PSスクリプトが生成したJSONデータを取得
+        const data = await callApi('/api/quota');
+        
+        // データ構造を確認
+        if (!Array.isArray(data)) {
+            throw new Error('無効なデータ形式: 配列が返されませんでした');
         }
         
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-        errorContainer.style.display = 'none';
-
-        const loadingStartTime = Date.now();
-        
-        // デモ用: 意図的にエラーを発生させる
-        throw new Error('デモ用エラー: データ取得に失敗しました');
-        
-        // PowerShellが生成したJSONを取得
-        const response = await fetch('data/quota.json');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        await new Promise(resolve => setTimeout(resolve, 1500)); // 最低1.5秒表示を保証
+        // 必須フィールドを検証
+        const requiredFields = ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態'];
+        const firstItem = data[0];
+        if (firstItem) {
+            const missingFields = requiredFields.filter(field => !(field in firstItem));
+            if (missingFields.length > 0) {
+                throw new Error(`必須フィールドが不足しています: ${missingFields.join(', ')}`);
+            }
+        }
         
         return data;
     } catch (error) {
         console.error('クォータデータ取得エラー:', error);
-        handleError(error, "クォータ情報の取得に失敗しました。スクリプトを再実行してください。");
+        showError('データ取得エラー', `クォータ情報の取得に失敗しました:<br>${error.message}`);
         throw error;
     } finally {
-        const loadingEndTime = Date.now();
-        const loadingDuration = loadingEndTime - loadingStartTime;
-        const minDisplayTime = 1500;
-        
-        if (loadingDuration < minDisplayTime) {
-            await new Promise(resolve => setTimeout(resolve, minDisplayTime - loadingDuration));
-        }
-        
-        loadingOverlay.style.opacity = '0';
-        setTimeout(() => loadingOverlay.style.display = 'none', 300);
-    }
-}
-*/
-// データ取得関数
-// ローディング表示管理関数
-async function showLoading(minDuration = 1500) {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (!loadingOverlay) throw new Error('ローディング要素が見つかりません');
-    
-    loadingOverlay.style.display = 'flex';
-    loadingOverlay.style.opacity = '1';
-    const startTime = Date.now();
-    
-    return {
-        hide: async () => {
-            const elapsed = Date.now() - startTime;
-            const remaining = Math.max(0, minDuration - elapsed);
-            await new Promise(resolve => setTimeout(resolve, remaining));
-            
-            loadingOverlay.style.opacity = '0';
-            await new Promise(resolve => setTimeout(resolve, 300));
-            loadingOverlay.style.display = 'none';
-        }
-    };
-}
-
-async function fetchQuotaData() {
-    const errorContainer = document.getElementById('errorContainer');
-    if (!errorContainer) throw new Error('エラーコンテナが見つかりません');
-    
-    const loading = await showLoading();
-    
-    try {
-        // デモ用: 意図的にエラーを発生させる
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        throw new Error('デモ用エラー: データ取得に失敗しました');
-        
-        // 実際の実装では以下を使用
-        // const response = await fetch('data/quota.json');
-        // if (!response.ok) throw new Error(`HTTPエラー! status: ${response.status}`);
-        // return await response.json();
-        
-    } catch (error) {
-        console.error('データ取得エラー:', error);
-        errorContainer.style.display = 'block';
-        throw error;
-    } finally {
-        await loading.hide();
+        showLoading(false);
     }
 }
 
-// リロードボタン処理
-async function handleRefresh() {
-    const errorContainer = document.getElementById('errorContainer');
-    errorContainer.style.display = 'none';
-    
+// 初期化処理
+document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const loading = await showLoading();
+        showLoading(true);
         window.quotaData = await fetchQuotaData();
         renderTable(window.quotaData);
         initFilters();
-    } catch (error) {
-        console.error('更新処理エラー:', error);
-        errorContainer.style.display = 'block';
-    }
-}
-
-// 再試行ボタン処理
-async function handleRetry() {
-    const errorContainer = document.getElementById('errorContainer');
-    errorContainer.style.display = 'none';
-    
-    try {
-        const loading = await showLoading();
-        window.quotaData = await fetchQuotaData();
-        renderTable(window.quotaData);
-        initFilters();
-    } catch (error) {
-        console.error('再試行処理エラー:', error);
-        errorContainer.style.display = 'block';
-    }
-}
-
-// 初期データ取得
-window.addEventListener('load', async function() {
-    try {
-        window.quotaData = await fetchQuotaData();
-        renderTable(window.quotaData);
-        initFilters();
-        
-        // 更新ボタンイベント設定
-        document.getElementById('refreshBtn').addEventListener('click', async () => {
-            try {
-                window.quotaData = await fetchQuotaData();
-                renderTable(window.quotaData);
-                initFilters();
-            } catch (error) {
-                console.error('更新処理エラー:', error);
-            }
-        });
+        setupPagination(window.quotaData, entriesPerPage, renderTable);
     } catch (error) {
         console.error('初期化エラー:', error);
-        handleError(error, "初期データの取得に失敗しました。");
+    } finally {
+        showLoading(false);
     }
 });
 
-// データ取得失敗時のデフォルトメッセージ
-if (window.quotaData.length === 0) {
-    console.warn("データが取得できませんでした。fetchQuotaData()を実装してください");
+// ページネーション設定
+function setupPagination() {
+    const itemsPerPage = parseInt(document.getElementById('entriesPerPage').value);
+    setupPagination(window.quotaData, itemsPerPage, (pageData) => {
+        renderTable(pageData);
+    });
 }
+
+// エントリ数変更イベント
+document.getElementById('entriesPerPage').addEventListener('change', setupPagination);
 
 // フィルターメニュー初期化
 function initFilters() {
@@ -494,18 +397,11 @@ function renderTable(data) {
     const tbody = document.querySelector('#quotaTable tbody');
     tbody.innerHTML = '';
     
-    const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value);
-    const startIndex = (currentPage - 1) * entriesPerPage;
-    const endIndex = startIndex + entriesPerPage;
-    const pageData = data.slice(startIndex, endIndex);
+    const pageData = getCurrentPageData(data);
     
     pageData.forEach(item => {
         const row = document.createElement('tr');
-        const statusClass = {
-            '危険': 'status-danger',
-            '警告': 'status-warning',
-            '正常': 'status-normal'
-        }[item['状態']] || '';
+        const statusClass = getStatusClass(item['状態']);
         
         row.className = statusClass;
         
@@ -516,17 +412,15 @@ function renderTable(data) {
             <td>${item['使用容量(GB)']}</td>
             <td>${item['残り容量(GB)']}</td>
             <td>
-                <div class="progress">
-                    <div class="progress-bar ${statusClass.replace('status-', 'bg-')}" 
-                         role="progressbar" style="width: ${item['使用率(%)']}%">
-                    </div>
-                </div>
+                ${renderUsageBar(item['使用率(%)'], statusClass)}
             </td>
             <td>${item['状態']}</td>
         `;
         
         tbody.appendChild(row);
     });
+    
+    updatePaginationInfo(data.length);
     
     // ページネーション情報の表示
     updatePagination(Math.ceil(data.length / entriesPerPage));

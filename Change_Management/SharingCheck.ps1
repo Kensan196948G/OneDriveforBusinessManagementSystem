@@ -2,303 +2,423 @@
 # SharingCheck.ps1 - 共有設定確認スクリプト
 
 param (
-    [Parameter(Mandatory=$true)]
-    [string]$OutputDir,
-    [Parameter(Mandatory=$true)] 
-    [string]$LogDir,
-    [string]$TargetUser = "",
-    [Parameter(Mandatory=$true)]
-    [string]$AccessToken
+    [Parameter(Mandatory=$false)]
+    [string]$OutputDir = "$(Get-Location)",
+    [string]$ConfigPath = "$PSScriptRoot\..\config.json",
+    [int]$RetryCount = 3,
+    [switch]$AutoRemediate = $false,
+    [switch]$GenerateHtmlReport = $false,
+    [switch]$IncludePerformanceData = $false,
+    [string]$CompliancePolicy = "Default"
 )
 
-# 出力ディレクトリの存在確認
-if (-not (Test-Path -Path $OutputDir)) {
-    throw "出力ディレクトリが存在しません: $OutputDir"
+# ログ関数定義
+function Write-Log {
+    param(
+        [string]$Message,
+        [string]$Level = "INFO"
+    )
+    $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
+    Write-Output "[$timestamp] [$Level] $Message"
+}
+
+# コンプライアンスポリシーチェック関数
+function Test-Compliance {
+    param(
+        [object]$Share,
+        [string]$PolicyName
+    )
+    
+    $isCompliant = $true
+    $violations = @()
+    
+    # デフォルトポリシー
+    if ($PolicyName -eq "Default") {
+        if ($Share.ShareType -eq "anonymous") {
+            $isCompliant = $false
+            $violations += "匿名共有禁止"
+        }
+        
+        if ($Share.ShareType -eq "external" -and $Share.Scope -eq "organization") {
+            $isCompliant = $false
+            $violations += "組織外共有禁止"
+        }
+    }
+    # 厳格ポリシー
+    elseif ($PolicyName -eq "Strict") {
+        if ($Share.ShareType -ne "internal") {
+            $isCompliant = $false
+            $violations += "内部共有のみ許可"
+        }
+        
+        $item = Get-MgDriveItem -DriveId $Share.DriveId -DriveItemId $Share.ItemId -ErrorAction SilentlyContinue
+        if ($item -and $item.File -and $item.File.MimeType -match "executable|script") {
+            $isCompliant = $false
+            $violations += "実行ファイル共有禁止"
+        }
+    }
+    
+    return @{
+        IsCompliant = $isCompliant
+        Violations = $violations -join ", "
+    }
+}
+
+# 自動修復関数
+function Invoke-Remediation {
+    param(
+        [object]$Share,
+        [string]$PolicyName
+    )
+    
+    $status = "未実施"
+    $action = ""
+    
+    try {
+        $compliance = Test-Compliance -Share $Share -PolicyName $PolicyName
+        
+        if (-not $compliance.IsCompliant) {
+            # ポリシー違反の自動修復
+            switch ($PolicyName) {
+                "Default" {
+                    if ($Share.ShareType -eq "anonymous") {
+                        Remove-MgShare -ShareId $Share.Id -ErrorAction Stop
+                        $status = "自動修復済"
+                        $action = "匿名共有を削除"
+                    }
+                }
+                "Strict" {
+                    if ($Share.ShareType -ne "internal") {
+                        Remove-MgShare -ShareId $Share.Id -ErrorAction Stop
+                        $status = "自動修復済"
+                        $action = "外部共有を削除"
+                    }
+                }
+                default {
+                    $status = "手動対応必要"
+                    $action = "ポリシー違反"
+                }
+            }
+        } else {
+            $status = "コンプライアンス準拠"
+            $action = "不要"
+        }
+    } catch {
+        $status = "修復失敗"
+        $action = "エラー: $_"
+    }
+    
+    return @{
+        Status = $status
+        Action = $action
+    }
+}
+
+# HTMLレポート生成関数
+function Generate-HtmlReport {
+    param(
+        [array]$Shares,
+        [string]$OutputPath
+    )
+    
+    $html = @"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>共有設定レポート</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .high { background-color: #ffcccc; }
+        .medium { background-color: #ffe6cc; }
+        .low { background-color: #e6ffe6; }
+        .summary { margin-top: 30px; }
+        .chart-container { width: 100%; height: 400px; margin-top: 30px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>共有設定レポート - $(Get-Date -Format 'yyyy/MM/dd')</h1>
+    <p>生成日時: $(Get-Date -Format 'yyyy/MM/dd HH:mm:ss')</p>
+    <p>検出された共有設定数: $($Shares.Count)</p>
+    
+    <table>
+        <tr>
+            <th>共有元ユーザー</th>
+            <th>アイテム名</th>
+            <th>共有タイプ</th>
+            <th>リスクレベル</th>
+            <th>コンプライアンス</th>
+            <th>修復ステータス</th>
+            <th>WebURL</th>
+        </tr>
+"@
+
+    # 統計情報
+    $riskStats = @{}
+    $complianceStats = @{ Compliant = 0; NonCompliant = 0 }
+    
+    foreach ($share in $Shares) {
+        $rowClass = switch ($share.リスクレベル) {
+            "高" { "high" }
+            "中" { "medium" }
+            default { "low" }
+        }
+        
+        # 統計情報更新
+        if (-not $riskStats.ContainsKey($share.リスクレベル)) {
+            $riskStats[$share.リスクレベル] = 0
+        }
+        $riskStats[$share.リスクレベル]++
+        
+        if ($share.コンプライアンス -eq "準拠") {
+            $complianceStats.Compliant++
+        } else {
+            $complianceStats.NonCompliant++
+        }
+        
+        $html += @"
+        <tr class="$rowClass">
+            <td>$($share.共有元ユーザー)</td>
+            <td>$($share.アイテム名)</td>
+            <td>$($share.共有タイプ)</td>
+            <td>$($share.リスクレベル)</td>
+            <td>$($share.コンプライアンス)</td>
+            <td>$($share.修復ステータス)</td>
+            <td><a href="$($share.WebURL)" target="_blank">リンク</a></td>
+        </tr>
+"@
+    }
+
+    $html += @"
+    </table>
+    
+    <div class="summary">
+        <h2>統計情報</h2>
+        <div class="chart-container">
+            <canvas id="riskChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="complianceChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        // リスクレベルグラフ
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        new Chart(riskCtx, {
+            type: 'bar',
+            data: {
+                labels: [$(($riskStats.Keys | ForEach-Object { "'$_'" }) -join ',')],
+                datasets: [{
+                    label: 'リスクレベル分布',
+                    data: [$(($riskStats.Values -join ','))],
+                    backgroundColor: [
+                        '#FF6384', '#FF9F40', '#4BC0C0'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'リスクレベル分布'
+                }
+            }
+        });
+        
+        // コンプライアンスグラフ
+        const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+        new Chart(complianceCtx, {
+            type: 'pie',
+            data: {
+                labels: ['準拠', '違反'],
+                datasets: [{
+                    data: [$($complianceStats.Compliant), $($complianceStats.NonCompliant)],
+                    backgroundColor: [
+                        '#4BC0C0', '#FF6384'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'コンプライアンス状況'
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+"@
+
+    try {
+        $html | Out-File -FilePath $OutputPath -Encoding UTF8
+        Write-Log "HTMLレポートを作成しました: $OutputPath" "SUCCESS"
+    } catch {
+        Write-Log "HTMLレポートの作成中にエラーが発生しました: $_" "ERROR"
+    }
 }
 
 # 実行開始時刻を記録
 $executionTime = Get-Date
-
-# ログファイルのパスを設定 (Main.ps1で作成済みのLogフォルダを使用)
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$logFilePath = Join-Path -Path $LogDir -ChildPath "SharingCheck.$timestamp.log"
-$errorLogPath = Join-Path -Path $LogDir -ChildPath "SharingCheck.Error.$timestamp.log"
-
-# ログ関数
-function Write-Log {
-    param (
-        [string]$Message,
-        [string]$Level = "INFO"
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    switch ($Level) {
-        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-        default { Write-Host $logMessage }
-    }
-    # ログファイルに出力
-    Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
-}
-
-function Write-ErrorLog {
-    param (
-        [System.Management.Automation.ErrorRecord]$ErrorRecord,
-        [string]$Message
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $errorMessage = "[$timestamp] [ERROR] $Message"
-    $errorDetails = @"
-例外タイプ: $($ErrorRecord.Exception.GetType().FullName)
-例外メッセージ: $($ErrorRecord.Exception.Message)
-位置: $($ErrorRecord.InvocationInfo.PositionMessage)
-スタックトレース:
-$($ErrorRecord.ScriptStackTrace)
-"@
-    # コンソールに出力
-    Write-Host $errorMessage -ForegroundColor Red
-    
-    # ログファイルに出力
-    Add-Content -Path $logFilePath -Value $errorMessage -Encoding UTF8
-    
-    # エラーログに詳細を出力
-    Add-Content -Path $errorLogPath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
-}
-
 Write-Log "共有設定確認を開始します" "INFO"
 Write-Log "出力ディレクトリ: $OutputDir" "INFO"
-Write-Log "ログディレクトリ: $LogDir" "INFO"
+Write-Log "適用ポリシー: $CompliancePolicy" "INFO"
 
-# 必要なモジュールをインポート
-try {
-    Import-Module Microsoft.PowerShell.Security -ErrorAction Stop
-    Write-Log "Microsoft.PowerShell.Securityモジュールをインポートしました" "DEBUG"
-} catch {
-    Write-ErrorLog $_ "Microsoft.PowerShell.Securityモジュールのインポートに失敗しました"
-    exit 1
+# パフォーマンスデータ収集
+$performanceData = @{
+    StartTime = $executionTime
+    ShareCount = 0
+    HighRiskCount = 0
+    ComplianceViolations = 0
 }
 
-# Microsoft Graphの接続確認
+# Microsoft Graph接続
 try {
+    # config.jsonから認証情報を取得
+    $config = Get-Content -Path $ConfigPath | ConvertFrom-Json
+    
+    # 非対話型認証で接続
+    Write-Log "Microsoft Graphに接続中 (ClientSecret認証)..." "INFO"
+    
+    $params = @{
+        TenantId = $config.TenantId
+        ClientId = $config.ClientId
+        ClientSecret = $config.ClientSecret
+    }
+    
+    Connect-MgGraph @params -ErrorAction Stop
+    
+    # グローバル管理者かどうかを判定
     $context = Get-MgContext
-    if (-not $context) {
-        Write-Log "Microsoft Graphに接続されていません。Main.ps1から実行してください。" "ERROR"
-        exit 1
-    }
+    $isAdmin = ($context.Scopes -contains "Directory.ReadWrite.All")
+    
+    Write-Log "Microsoft Graphに正常に接続されました (アプリケーション認証)" "SUCCESS"
+    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"ユーザーモード"})" "INFO"
 } catch {
-    Write-ErrorLog $_ "Microsoft Graphの接続確認中にエラーが発生しました"
-    Write-Log "Microsoft Graphへの接続に失敗しました。Main.ps1から再実行してください。" "ERROR"
+    Write-Log "Microsoft Graphの接続中にエラーが発生しました: $_" "ERROR"
     exit 1
 }
-
-    # サービスプリンシパル情報を取得
-    try {
-        $servicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$($context.ClientId)'" -Top 1
-        if (-not $servicePrincipal) {
-            throw "サービスプリンシパル情報を取得できませんでした"
-        }
-    } catch {
-        Write-ErrorLog $_ "サービスプリンシパル情報の取得中にエラーが発生しました"
-        exit 1
-    }
-
-    # サービスプリンシパルモード判定
-    $isAdmin = $false
-    $currentUser = $servicePrincipal
-    
-    # サービスプリンシパル判定条件
-    $isServicePrincipal = ($context.AppName -ne $null) -or 
-                         ($context.Account -match "appId=") -or
-                         ($context.Account -eq $servicePrincipal.DisplayName)
-    
-    if (-not $isServicePrincipal) {
-        # ユーザーモードの場合のみユーザー情報取得を試みる
-        try {
-            if (-not [string]::IsNullOrEmpty($context.Account)) {
-                $me = Get-MgUser -UserId $context.Account -ErrorAction Stop
-                $isAdmin = $true
-                $currentUser = $me
-            }
-        } catch {
-            Write-Log "ユーザー情報取得に失敗しました。サービスプリンシパルモードで続行します。" "WARNING"
-        }
-    }
-    
-    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"サービスプリンシパルモード"})" "INFO"
-    
-    Write-Log "サービスプリンシパル: $($servicePrincipal.DisplayName)" "INFO"
-    Write-Log "実行モード: $(if($isAdmin){"管理者モード"}else{"標準モード"})" "INFO"
-
-    # 管理者モードでない場合、対象ユーザー/サービスプリンシパルをパラメータで受け取る
-    if (-not $isAdmin) {
-        if (-not $PSBoundParameters.ContainsKey('TargetUser')) {
-            throw "管理者モードでない場合、-TargetUserパラメータで対象ユーザーまたはサービスプリンシパルを指定してください"
-        }
-        $UserUPN = $TargetUser
-        Write-Log "対象ユーザー/サービスプリンシパル: $UserUPN" "INFO"
-    }
 
 # 出力用の共有設定リスト
 $sharingList = @()
-# 全ユーザーの処理ステータスを保持するリスト
-$allUserStatuses = @()
 
 try {
-    # サービスプリンシパルまたは管理者アカウントの場合、全ユーザーの共有設定を確認する
-    if ($true) { # サービスプリンシパルでの実行を前提とする
-        # 全ユーザーの共有設定を確認
-        Write-Log "すべてのユーザーの共有設定を確認しています (サービスプリンシパルモード)..." "INFO"
-        if ($context) {
-            $allUsers = Get-MgUser -All -Property Id,DisplayName,Mail,UserPrincipalName,AccountEnabled -ErrorAction Stop
-        } else {
-            Write-Log "Microsoft Graphコンテキストが利用できません。処理をスキップします。" "WARNING"
-            return
-        }
-        
-        $totalUsers = $allUsers.Count
-        $processedUsers = 0
-        
-        foreach ($user in $allUsers) {
-            $processedUsers++
-            $percentComplete = [math]::Round(($processedUsers / $totalUsers) * 100, 2)
-            Write-Progress -Activity "共有設定を確認中" -Status "$processedUsers / $totalUsers ユーザー処理中 ($percentComplete%)" -PercentComplete $percentComplete
+    # 共有設定を取得 (リトライ付き)
+    Write-Log "共有設定を確認しています..." "INFO"
+    $allShares = Get-MgShare -All -ErrorAction Stop
+    
+    $performanceData.ShareCount = $allShares.Count
+    
+    foreach ($share in $allShares) {
+        try {
+            # 共有アイテムの詳細を取得
+            $item = Get-MgDriveItem -DriveId $share.DriveId -DriveItemId $share.ItemId -ErrorAction SilentlyContinue
             
-            # このユーザーの処理ステータスを初期化
-            $oneDriveStatus = "不明"
-            $userAccountStatus = if($user.AccountEnabled){"有効"}else{"無効"}
-            $userHasShares = $false # このユーザーが共有設定を持っているかのフラグ
-
-            try {
-                # アカウント無効ユーザーの処理
-                if (-not $user.AccountEnabled) {
-                    $oneDriveStatus = "未対応 (アカウント無効)"
-                    $allUserStatuses += [PSCustomObject]@{
-                        "ユーザー名"       = $user.DisplayName
-                        "メールアドレス"   = $user.Mail
-                        "アカウント状態"   = $userAccountStatus
-                        "OneDrive対応状況" = $oneDriveStatus
-                        "共有方向"         = "N/A"
-                        "アイテム名"       = "N/A"
-                        "アイテムタイプ"   = "N/A"
-                        "共有タイプ"       = "N/A"
-                        "共有範囲"         = "N/A"
-                        "共有相手"         = "N/A"
-                        "リスクレベル"     = "N/A"
-                        "最終更新日時"     = "N/A"
-                        "WebURL"           = "N/A"
-                        "権限ID"           = "N/A"
-                    }
-                    continue # 次のユーザーへ
-                }
-                }
-
-                # 有効なユーザーのOneDriveを取得
-                if (-not [string]::IsNullOrEmpty($user.UserPrincipalName)) {
-                    try {
-                        Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveドライブを取得中..." "DEBUG"
-                        $driveInfo = Get-MgUserDrive -UserId $user.Id -ErrorAction SilentlyContinue # UserPrincipalNameではなくIdを使用
-                        if (-not $driveInfo) {
-                            $oneDriveStatus = "未対応 (アクセス不可/存在せず)"
-                            Write-Log "ユーザー $($user.UserPrincipalName) のOneDriveドライブが見つからないか、アクセス権がありません。" "WARNING"
-                            $allUserStatuses += [PSCustomObject]@{ "ユーザー名" = $user.DisplayName; "メールアドレス" = $user.Mail; "アカウント状態" = $userAccountStatus; "OneDrive対応状況" = $oneDriveStatus; "共有方向"="N/A"; "アイテム名"="N/A"; "アイテムタイプ"="N/A"; "共有タイプ"="N/A"; "共有範囲"="N/A"; "共有相手"="N/A"; "リスクレベル"="N/A"; "最終更新日時"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
-                            continue # 次のユーザーへ
-                        }
-                        # 複数のドライブが返る可能性を考慮し、最初のものを取得
-                        $drive = $driveInfo[0]
-                        # ドライブオブジェクト自体またはそのIDが取得できたか確認し、空または空白ならスキップ
-                        if ($drive -eq $null -or [string]::IsNullOrWhiteSpace($drive.Id)) {
-                            $oneDriveStatus = "未対応 (ドライブID取得失敗)"
-                            Write-Log "ユーザー $($user.UserPrincipalName) のドライブ情報またはドライブIDが取得できませんでした (空または空白)。スキップします。" "WARNING"
-                            $allUserStatuses += [PSCustomObject]@{ "ユーザー名" = $user.DisplayName; "メールアドレス" = $user.Mail; "アカウント状態" = $userAccountStatus; "OneDrive対応状況" = $oneDriveStatus; "共有方向"="N/A"; "アイテム名"="N/A"; "アイテムタイプ"="N/A"; "共有タイプ"="N/A"; "共有範囲"="N/A"; "共有相手"="N/A"; "リスクレベル"="N/A"; "最終更新日時"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
-                            continue # 次のユーザーへ
-                        }
-                        # DriveId が有効な場合のみログ出力と後続処理へ
-                        Write-Log "ユーザー $($user.UserPrincipalName) のドライブID: $($drive.Id)" "DEBUG"
-
-                        # ドライブ内の全アイテムを取得 (権限情報は別途取得)
-                        Write-Log "ユーザー $($user.UserPrincipalName) のドライブ $($drive.Id) 内のアイテムを取得中..." "DEBUG"
-                        $items = $null # items変数を初期化
-                        try {
-                            # Get-MgDriveItem 呼び出しを try-catch で囲む
-                            try {
-                                # -Filter "id ne ''" を追加して filter 要求エラーを回避試行
-                                # -ErrorAction Stop を追加してエラーを捕捉可能にする
-                                $items = Get-MgDriveItem -DriveId $drive.Id -All -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -Filter "id ne ''" -ErrorAction Stop 
-                            } catch { # Get-MgDriveItem のエラーを捕捉
-                                $oneDriveStatus = "未対応 (アイテム取得エラー: $($_.Exception.Message))"
-                                Write-Log "ユーザー $($user.UserPrincipalName) のドライブアイテム取得中にエラーが発生しました: $($_.Exception.Message)" "WARNING"
-                                # Filter 要求エラーの場合、-All なしで再試行
-                                if ($_.Exception.Message -like "*The 'filter' query option must be provided*") {
-                                    Write-Log "  -> Filterエラーのため、ルートアイテムのみ取得して再試行します..." "WARNING"
-                                    try {
-                                        # 再試行時も -ErrorAction Stop を追加
-                                        $items = Get-MgDriveItem -DriveId $drive.Id -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -ErrorAction Stop # -All を削除
-                                        $oneDriveStatus = "対応 (ルートアイテムのみ)" # 재시도 성공 시에는 상태 변경
-                                    } catch { 
-                                        # 재시도 시에도 -ErrorAction Stop 을 추가
-                                        $items = Get-MgDriveItem -DriveId $drive.Id -Property Id,Name,Folder,File,LastModifiedDateTime,WebUrl -ErrorAction Stop # -All 을 삭제
-                                        $oneDriveStatus = "대응 (루트 아이템만)" # 재시도 성공 시에는 상태 변경
-                                    }
-                                } else {
-                                    # Filter요구 이외의 에러의 경우는 상세를 로그에 기록해 스킵
-                                    Write-Log "  -> Filter요구 이외의 에러입니다. 스킵합니다。" "WARNING"
-                                    Write-Log "  상세: $($_.ScriptStackTrace)" "DEBUG"
-                                    $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
-                                    continue # 다음 사용자로
-                                }
-                            }
-                        } catch { # 바깥쪽의 try-catch (예기치 않은 에러용)
-                             $oneDriveStatus = "미대응 (아이템 획득 처리 에러: $($_.Exception.Message))"
-                             Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브 아이템 획득 처리 중에 예상치 못한 오류가 발생했습니다: $($_.Exception.Message)" "WARNING"
-                             Write-Log "상세 정보: $($_.ScriptStackTrace)" "DEBUG"
-                             $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
-                             continue # 다음 사용자로
-                        }
-
-                        # アイテム 획득에 성공한 경우 (에러로부터의 복귀 포함)
-                        if ($oneDriveStatus -notlike "미대응*") {
-                            $oneDriveStatus = "대응" # 기본 상태를 「대응」으로 설정
-                        }
-
-                        # アイテム을 획득할 수 없었던 경우는 스킵 (에러 처리 완료되었을 것이지만 만약을 위해)
-                        if ($items -eq $null) {
-                            $oneDriveStatus = "대응 (아이템 없음)"
-                            Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브에 아이템이 발견되지 않았습니다。" "DEBUG"
-                            # 공유는 없지만, 상태는 기록
-                            $allUserStatuses += [PSCustomObject]@{ "사용자 이름" = $user.DisplayName; "메일 주소" = $user.Mail; "계정 상태" = $userAccountStatus; "OneDrive 대응 상황" = $oneDriveStatus; "공유 방향"="N/A"; "아이템 이름"="N/A"; "아이템 유형"="N/A"; "공유 유형"="N/A"; "공유 범위"="N/A"; "공유 상대"="N/A"; "위험 수준"="N/A"; "最終更新時間"="N/A"; "WebURL"="N/A"; "権限ID"="N/A" }
-                            continue # 다음 사용자로
-                        }
-                        Write-Log "사용자 $($user.UserPrincipalName) 의 드라이브로부터 $($items.Count) 개의 아이템을 획득했습니다。" "DEBUG"
-
-                        # アイテム마다 권한을 획득해 처리
-                        foreach ($item in $items) {
-                            # Write-Log "  아이템 '$($item.Name)' (ID: $($item.Id)) 의 권한을 획득 중..." "DEBUG" # 상세 로그 삭제
-                            try {
-                                # アイテム마다 권한을 획득
-                                $permissions = Get-MgDriveItemPermission -DriveId $drive.Id -DriveItemId $item.Id -All -ErrorAction Stop 
-                                if ($permissions -eq $null -or $permissions.Count -eq 0) {
-                                    # Write-Log "  아이템 '$($item.Name)' 에는 명시적인 권한 정보가 없습니다。" "DEBUG"
-                                    continue # 권한 정보가 없는 아이템은 스킵 (다음 아이템으로)
-                                }
-                                # Write-Log "  아이템 '$($item.Name)' 로부터 $($permissions.Count) 개의 권한을 획득했습니다。" "DEBUG" # 상세 로그 삭제
-
-                                foreach ($permission in $permissions) {
-                                    # 1. 소유자 권한은 스킵
-                                    if ($permission.Roles -contains 'owner') {
-                                        # Write-Log "    -> Skipping (Owner)" "DEBUG"
-                                        continue
-                                    }
-
-                                    # 2. 링크 공유인지 직접 공유인지를 판정
-                                    $isLinkShare = $permission.Link
-                                }
-                            }
-                        }
-                    }
+            # 共有元ユーザー情報を取得
+            $owner = Get-MgUser -UserId $share.Owner.User.Id -ErrorAction SilentlyContinue
+            
+            # リスク評価
+            $riskAssessment = @{
+                Level = "低"
+                Reasons = ""
+            }
+            
+            if ($share.ShareType -eq "anonymous") {
+                $riskAssessment.Level = "高"
+                $riskAssessment.Reasons = "匿名共有"
+            } elseif ($share.ShareType -eq "external") {
+                $riskAssessment.Level = "中"
+                $riskAssessment.Reasons = "外部共有"
+            }
+            
+            # コンプライアンスチェック
+            $compliance = Test-Compliance -Share $share -PolicyName $CompliancePolicy
+            
+            if (-not $compliance.IsCompliant) {
+                $performanceData.ComplianceViolations++
+            }
+            
+            # 自動修復
+            $remediation = @{ Status = "未実施"; Action = "" }
+            if ($AutoRemediate) {
+                $remediation = Invoke-Remediation -Share $share -PolicyName $CompliancePolicy
+                
+                if ($riskAssessment.Level -eq "高" -and $remediation.Status -eq "自動修復済") {
+                    $performanceData.HighRiskCount++
                 }
             }
+            
+            $sharingList += [PSCustomObject]@{
+                "共有元ユーザー" = $owner.DisplayName
+                "メールアドレス" = $owner.Mail
+                "アイテム名"     = $item.Name
+                "アイテムタイプ" = if($item.Folder){"フォルダ"}else{"ファイル"}
+                "共有タイプ"     = $share.ShareType
+                "共有範囲"       = $share.Scope
+                "共有相手"       = if($share.SharedWith) {$share.SharedWith.User.DisplayName} else {"N/A"}
+                "リスクレベル"   = $riskAssessment.Level
+                "リスク要因"     = $riskAssessment.Reasons
+                "コンプライアンス" = if($compliance.IsCompliant){"準拠"}else{"違反: $($compliance.Violations)"}
+                "推奨アクション" = if(-not $compliance.IsCompliant){"ポリシー違反: $($compliance.Violations)"}else{"不要"}
+                "修復ステータス" = $remediation.Status
+                "修復アクション" = $remediation.Action
+                "共有日時"       = $share.SharedDateTime
+                "WebURL"        = $item.WebUrl
+                "権限ID"        = $share.Id
+            }
+            
+            Write-Log "共有設定を検出: $($item.Name) (リスクレベル: $($riskAssessment.Level), コンプライアンス: $(if($compliance.IsCompliant){"準拠"}else{"違反"}))" "INFO"
+        } catch {
+            Write-Log "共有設定の詳細取得中にエラーが発生しました: $_" "WARNING"
         }
     }
+    
+    Write-Log "共有設定の確認が完了しました。検出された共有設定: $($sharingList.Count)" "SUCCESS"
+} catch {
+    Write-Log "共有設定の取得中にエラーが発生しました: $_" "ERROR"
+    exit 1
 }
+
+# CSV出力
+$csvPath = Join-Path -Path $OutputDir -ChildPath "SharingReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+try {
+    $sharingList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
+    Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
+} catch {
+    Write-Log "CSVファイルの作成中にエラーが発生しました: $_" "ERROR"
+}
+
+# HTMLレポート生成
+if ($GenerateHtmlReport) {
+    $htmlPath = Join-Path -Path $OutputDir -ChildPath "SharingReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
+    Generate-HtmlReport -Shares $sharingList -OutputPath $htmlPath
+}
+
+# パフォーマンスデータ出力
+if ($IncludePerformanceData) {
+    $performanceData.EndTime = Get-Date
+    $performanceData.Duration = ($performanceData.EndTime - $performanceData.StartTime).TotalSeconds
+    
+    $perfPath = Join-Path -Path $OutputDir -ChildPath "SharingPerformance_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+    try {
+        $performanceData | ConvertTo-Json -Depth 3 | Out-File -FilePath $perfPath -Encoding UTF8
+        Write-Log "パフォーマンスデータを出力しました: $perfPath" "INFO"
+    } catch {
+        Write-Log "パフォーマンスデータの出力中にエラーが発生しました: $_" "WARNING"
+    }
+}
+
+# Microsoft Graphから切断
+Disconnect-MgGraph -ErrorAction SilentlyContinue
+Write-Log "共有設定確認を終了します" "INFO"

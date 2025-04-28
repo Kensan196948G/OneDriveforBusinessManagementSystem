@@ -2,19 +2,11 @@
 # GetUserInfo.ps1 - ユーザー情報取得スクリプト（管理者判定強化＋高機能HTML版）
 
 param (
-    [string]$BaseDir = "$(Get-Location)",
-    [string]$DateFolder = (Get-Date -Format "yyyyMMdd")
+    [string]$OutputDir = "$(Get-Location)",
+    [string]$ConfigPath = "$PSScriptRoot\..\config.json"
 )
 
 $executionTime = Get-Date
-
-$outputRootDir = Join-Path -Path $BaseDir -ChildPath "OneDriveManagement.$DateFolder"
-$logDir = Join-Path -Path $outputRootDir -ChildPath "Log"
-$reportDir = Join-Path -Path $outputRootDir -ChildPath "Report"
-
-if (-not (Test-Path -Path $outputRootDir)) { New-Item -ItemType Directory -Path $outputRootDir -Force | Out-Null }
-if (-not (Test-Path -Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
-if (-not (Test-Path -Path $reportDir)) { New-Item -ItemType Directory -Path $reportDir -Force | Out-Null }
 
 # Main.ps1からログ関数をインポート
 . "$PSScriptRoot\..\Main.ps1"
@@ -35,8 +27,7 @@ Write-Log "出力ルートディレクトリ: $outputRootDir" "INFO"
 Write-Log "レポートディレクトリ: $reportDir" "INFO"
 
 try {
-    $configPath = Join-Path -Path $PSScriptRoot -ChildPath "..\config.json"
-    $config = Get-Content -Path $configPath | ConvertFrom-Json
+    $config = Get-Content -Path $ConfigPath | ConvertFrom-Json
 
     $tokenUrl = "https://login.microsoftonline.com/$($config.TenantId)/oauth2/v2.0/token"
     $tokenBody = @{
@@ -132,9 +123,9 @@ $csvFile = "UserInfo.$timestamp.csv"
 $htmlFile = "UserInfo.$timestamp.html"
 $jsFile = "UserInfo.$timestamp.js"
 
-$csvPath = Join-Path -Path $reportDir -ChildPath $csvFile
-$htmlPath = Join-Path -Path $reportDir -ChildPath $htmlFile
-$jsPath = Join-Path -Path $reportDir -ChildPath $jsFile
+$csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
+$htmlPath = Join-Path -Path $OutputDir -ChildPath $htmlFile
+$jsPath = Join-Path -Path $OutputDir -ChildPath $jsFile
 
 try {
     if ($PSVersionTable.PSVersion.Major -ge 6) {
@@ -500,7 +491,7 @@ window.onload = function() {
 <div class="header"><div class="header-icon">👥</div><h1>ユーザー情報レポート</h1></div>
 <div class="info-section">
 <p><span class="info-label">実行日時:</span> $($executionTime.ToString("yyyy/MM/dd HH:mm:ss"))</p>
-<p><span class="info-label">出力フォルダ:</span> $reportDir</p>
+<p><span class="info-label">出力フォルダ:</span> $OutputDir</p>
 </div>
 <div class="toolbar">
 <input type="text" id="searchInput" placeholder="検索...">

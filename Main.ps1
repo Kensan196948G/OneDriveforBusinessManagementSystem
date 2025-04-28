@@ -12,7 +12,8 @@ $executionTime = Get-Date
 $dateFolderName = "OneDriveManagement." + $executionTime.ToString("yyyyMMdd")
 $dateFolderPath = Join-Path -Path $OutputDir -ChildPath $dateFolderName
 $reportFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Report"
-$logFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Log"
+$logFolderName = "Log" + $executionTime.ToString("yyyyMMdd")
+$logFolderPath = Join-Path -Path $dateFolderPath -ChildPath $logFolderName
 
 # 出力ディレクトリが存在しない場合は作成
 if ($null -eq $dateFolderPath -or -not (Test-Path -Path $dateFolderPath)) {
