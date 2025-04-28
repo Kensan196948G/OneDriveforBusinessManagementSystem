@@ -20,18 +20,34 @@ const riskDescriptions = {
 // config.jsonから認証情報を取得
 async function fetchConfig() {
     try {
-        const response = await fetch('./config.json');
+        // 相対パスで直接インポート
+        const configPath = './config.json';
+        const response = await fetch(configPath, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        
         if (!response.ok) {
-            throw new Error(`config.json読み込み失敗 (HTTP ${response.status})`);
+            throw new Error(`設定ファイル読み込み失敗: ${response.status}`);
         }
-        return await response.json();
+        
+        const config = await response.json();
+        
+        // 必須フィールドの検証
+        if (!config.tenantId || !config.clientId || !config.clientSecret) {
+            throw new Error('設定ファイルに必要な認証情報が不足しています');
+        }
+        
+        return config;
     } catch (error) {
         console.error('認証情報取得エラー:', error);
         showError(
-            'データ取得エラー',
-            'データが取得できませんでした。以下の方法をお試しください:<br>' +
-            '1. PowerShellスクリプトを再実行してください<br>' +
-            '2. 問題が解決しない場合は管理者に連絡してください'
+            '設定エラー',
+            `設定ファイルの読み込みに失敗しました:<br>
+            <strong>${error.message}</strong><br><br>
+            設定ファイルのパスと内容を確認してください`
         );
         throw error;
     }
@@ -337,18 +353,4 @@ window.setupSimplePagination = function(totalItems, itemsPerPage = 10) {
     updatePagination();
 }
 
-module.exports = {
-    riskStyles,
-    riskDescriptions,
-    fetchConfig,
-    getAuthToken,
-    callApi,
-    showLoading,
-    showError,
-    renderTable,
-    setupPagination,
-    exportToCsv,
-    initFilters,
-    initTooltips,
-    setupSimplePagination
-};
+// ブラウザで使用するためmodule.exportsは不要

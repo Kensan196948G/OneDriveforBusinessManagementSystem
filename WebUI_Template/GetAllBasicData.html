@@ -171,6 +171,13 @@ body {
 </style>
 </head>
 <body>
+<!-- ローディングオーバーレイ -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <div class="mt-2">基本データを取得中です...お待ちください</div>
+    </div>
+</div>
 <div class="container">
     <h1 class="text-center mb-4">
       <i class="fas fa-database me-3 text-primary"></i>
@@ -181,7 +188,7 @@ body {
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
-            <div>基本データを取得中...お待ちください</div>
+            <div>基本データを取得中です...お待ちください</div>
         </div>
     </div>
     
@@ -290,27 +297,29 @@ body {
         </table>
     </div>
     
-    <!-- エラー表示領域 -->
-    <div id="errorContainer" class="alert alert-danger mb-3">
-        <div class="d-flex align-items-center mb-3">
-            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+    <!-- データ取得エラーコンテナ -->
+    <div id="errorContainer" class="alert alert-danger mt-3 mb-5 mx-auto" style="border-left: 5px solid #dc3545; max-width: 100%; width: 100%;">
+        <div class="d-flex align-items-start px-3 py-2">
+            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
             <div>
-                <h4 class="alert-heading mb-1">データ取得エラー</h4>
-                <p class="mb-0" id="errorMessage">データの読み込みを開始します。しばらくお待ちください。</p>
-            </div>
-        </div>
-        <hr>
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <p class="mb-0"><i class="fas fa-headset me-2"></i>ITサポートデスク: <a href="tel:0120-XXX-XXX">0120-XXX-XXX</a></p>
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-danger" onclick="handleReload()">
-                    <i class="fas fa-redo-alt me-2"></i>再読み込み
-                </button>
-                <button class="btn btn-outline-danger" onclick="retryDataFetch()">
-                    <i class="fas fa-sync-alt me-2"></i>再試行
-                </button>
+                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
+                <p class="mb-3 fs-5">基本データが取得できませんでした。以下の方法をお試しください:</p>
+                <ol class="mb-4 fs-5">
+                    <li class="mb-2">GetAllBasicData.ps1スクリプトを再実行してください<br />
+                        <code class="bg-light p-1 d-inline-block mt-1">.\GetAllBasicData.ps1</code>
+                    </li>
+                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br />
+                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
+                    </li>
+                </ol>
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
+                        <i class="fas fa-sync-alt me-2"></i>再読み込み
+                    </button>
+                    <button class="btn btn-outline-danger px-4 py-2" onclick="handleRetry()">
+                        <i class="fas fa-redo me-2"></i>再試行
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -320,6 +329,88 @@ body {
 <!-- レスポンシブテーブル対応用ライブラリ -->
 <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
+
+<script>
+// ローディング表示制御
+let loadingTimeout;
+let isLoading = false;
+
+function showLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        isLoading = true;
+        loadingOverlay.style.display = 'flex';
+        // 最大3秒で強制的に非表示
+        loadingTimeout = setTimeout(() => {
+            if (isLoading) {
+                hideLoading();
+            }
+        }, 3000);
+    }
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay && isLoading) {
+        isLoading = false;
+        clearTimeout(loadingTimeout);
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+// 初期表示設定
+document.addEventListener('DOMContentLoaded', function() {
+    // エラーコンテナ表示を維持
+    const errorContainer = document.getElementById('errorContainer');
+    if (errorContainer) errorContainer.style.display = 'block';
+    
+    // ローディング表示を開始
+    showLoading();
+    
+    // データ取得開始 (3秒後に強制的にローディングのみ非表示)
+    setTimeout(() => {
+        hideLoading();
+        // エラー表示は維持
+        
+        // ここに実際のデータ取得処理を後で実装
+        // fetchData().then(...).catch(...);
+    }, 3000);
+});
+
+// エラー表示関数
+function showError() {
+    const errorContainer = document.getElementById('errorContainer');
+    if (errorContainer) errorContainer.style.display = 'block';
+}
+
+// ローディング表示関数
+function showLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+}
+
+// ローディング非表示関数
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+}
+
+// 再読み込み処理
+function handleReload() {
+    location.reload();
+}
+
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// エラー表示
+function showError() {
+    document.getElementById('errorContainer').style.display = 'block';
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+</script>
 <script>
 // ローディング制御関数
 function showLoadingOverlay() {
@@ -340,7 +431,13 @@ function hideLoadingOverlay(startTime) {
 // データ取得関数
 async function fetchData() {
     const loadingStartTime = showLoadingOverlay();
-    document.getElementById('errorContainer').style.display = 'block'; // 初期表示
+    try {
+        // データ取得処理
+        hideLoadingOverlay(loadingStartTime);
+    } catch (error) {
+        hideLoadingOverlay(loadingStartTime);
+        showError();
+    }
     
     try {
         const response = await fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,mail,accountEnabled,lastLoginDateTime,assignedLicenses', {

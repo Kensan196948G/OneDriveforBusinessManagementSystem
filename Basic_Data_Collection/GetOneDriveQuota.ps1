@@ -8,28 +8,8 @@ param (
 
 # ログ設定
 $executionTime = Get-Date
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$logFilePath = Join-Path -Path $LogDir -ChildPath "GetOneDriveQuota.$timestamp.log"
-$errorLogPath = Join-Path -Path $LogDir -ChildPath "GetOneDriveQuota.Error.$timestamp.log"
-
-function Write-Log {
-    param (
-        [string]$Message,
-        [string]$Level = "INFO"
-    )
-    
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    
-    switch ($Level) {
-        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-        default { Write-Host $logMessage }
-    }
-    
-    Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
-}
+# Main.ps1からログ関数をインポート
+. "$PSScriptRoot\..\Main.ps1"
 
 # Microsoft Graph接続
 try {

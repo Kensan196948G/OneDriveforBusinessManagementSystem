@@ -15,7 +15,7 @@ $reportFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Report"
 $logFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Log"
 
 # 出力ディレクトリが存在しない場合は作成
-if (-not (Test-Path -Path $dateFolderPath)) {
+if ($null -eq $dateFolderPath -or -not (Test-Path -Path $dateFolderPath)) {
     New-Item -Path $dateFolderPath -ItemType Directory | Out-Null
     Write-Output "出力用フォルダを作成しました: $dateFolderPath"
 }
@@ -41,28 +41,43 @@ $errorLogPath = Join-Path -Path $logFolderPath -ChildPath "ErrorLog.$timestamp.l
 function Write-ExecutionLog {
     param (
         [string]$Message,
-        [string]$Level = "INFO"
+        [string]$Level = "INFO",
+        [string]$ScriptName = $MyInvocation.ScriptName
     )
     
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logMessage = "[$timestamp] [$Level] $Message"
+    
+    # スクリプト名からベース名を取得
+    $scriptBaseName = [System.IO.Path]::GetFileNameWithoutExtension($ScriptName)
+    
+    # ログファイルパスを動的に生成
+    $logTimestamp = Get-Date -Format "yyyyMMddHHmmss"
+    $dynamicLogPath = Join-Path -Path $logFolderPath -ChildPath "$scriptBaseName.$logTimestamp.log"
     
     # コンソールに出力
     switch ($Level) {
         "ERROR" { Write-Host $logMessage -ForegroundColor Red }
         "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
         "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
+        "DEBUG" { Write-Host $logMessage -ForegroundColor Cyan }
         default { Write-Host $logMessage }
     }
     
     # ログファイルに出力
-    Add-Content -Path $executionLogPath -Value $logMessage -Encoding UTF8
+    Add-Content -Path $dynamicLogPath -Value $logMessage -Encoding UTF8
+    
+    # グローバルな実行ログにも出力
+    if ($executionLogPath -ne $dynamicLogPath) {
+        Add-Content -Path $executionLogPath -Value $logMessage -Encoding UTF8
+    }
 }
 
 function Write-ErrorLog {
     param (
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
-        [string]$Message
+        [string]$Message,
+        [string]$ScriptName = $MyInvocation.ScriptName
     )
     
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -76,6 +91,13 @@ $($ErrorRecord.ScriptStackTrace)
 
 "@
     
+    # スクリプト名からベース名を取得
+    $scriptBaseName = [System.IO.Path]::GetFileNameWithoutExtension($ScriptName)
+    
+    # エラーログファイルパスを動的に生成
+    $logTimestamp = Get-Date -Format "yyyyMMddHHmmss"
+    $dynamicErrorLogPath = Join-Path -Path $logFolderPath -ChildPath "$scriptBaseName.Error.$logTimestamp.log"
+    
     # コンソールに出力
     Write-Host $errorMessage -ForegroundColor Red
     
@@ -83,9 +105,12 @@ $($ErrorRecord.ScriptStackTrace)
     Add-Content -Path $executionLogPath -Value $errorMessage -Encoding UTF8
     
     # エラーログに詳細を出力
-    Add-Content -Path $errorLogPath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
+    Add-Content -Path $dynamicErrorLogPath -Value $errorMessage -Encoding UTF8
+    Add-Content -Path $dynamicErrorLogPath -Value $errorDetails -Encoding UTF8
 }
+
+# 共通ログ関数をエクスポート
+Export-ModuleMember -Function Write-ExecutionLog, Write-ErrorLog
 
 # Microsoft Graphモジュールのインストール確認と実施
 function Install-RequiredModules {

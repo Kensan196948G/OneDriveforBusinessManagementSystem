@@ -7,46 +7,8 @@ param (
 )
 
 $executionTime = Get-Date
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$logFilePath = Join-Path -Path $LogDir -ChildPath "GetAllBasicData.$timestamp.log"
-$errorLogPath = Join-Path -Path $LogDir -ChildPath "GetAllBasicData.Error.$timestamp.log"
-
-function Write-Log {
-    param (
-        [string]$Message,
-        [string]$Level = "INFO"
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    switch ($Level) {
-        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-        default { Write-Host $logMessage }
-    }
-    Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
-}
-
-function Write-ErrorLog {
-    param (
-        [System.Management.Automation.ErrorRecord]$ErrorRecord,
-        [string]$Message
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $errorMessage = "[$timestamp] [ERROR] $Message"
-    $errorDetails = @"
-例外タイプ: $($ErrorRecord.Exception.GetType().FullName)
-例外メッセージ: $($ErrorRecord.Exception.Message)
-位置: $($ErrorRecord.InvocationInfo.PositionMessage)
-スタックトレース:
-$($ErrorRecord.ScriptStackTrace)
-
-"@
-    Write-Host $errorMessage -ForegroundColor Red
-    Add-Content -Path $logFilePath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
-}
+# Main.ps1からログ関数をインポート
+. "$PSScriptRoot\..\Main.ps1"
 
 Write-Log "すべての基本データ収集を開始します" "INFO"
 Write-Log "出力ディレクトリ: $OutputDir" "INFO"
@@ -59,8 +21,6 @@ try {
         exit
     }
     $isAdmin = $true
-    $executorName = "アプリケーション認証"
-    $userType = "アプリケーション"
     Write-Log "Microsoft Graphアプリケーション権限で実行中" "INFO"
     Write-Log "実行モード: 管理者モード（アプリケーション権限）" "INFO"
 } catch {

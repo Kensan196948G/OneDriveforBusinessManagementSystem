@@ -16,46 +16,8 @@ if (-not (Test-Path -Path $outputRootDir)) { New-Item -ItemType Directory -Path 
 if (-not (Test-Path -Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 if (-not (Test-Path -Path $reportDir)) { New-Item -ItemType Directory -Path $reportDir -Force | Out-Null }
 
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$logFilePath = Join-Path -Path $logDir -ChildPath "GetUserInfo.$timestamp.log"
-$errorLogPath = Join-Path -Path $logDir -ChildPath "GetUserInfo.Error.$timestamp.log"
-
-function Write-Log {
-    param (
-        [string]$Message,
-        [string]$Level = "INFO"
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "[$timestamp] [$Level] $Message"
-    switch ($Level) {
-        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
-        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
-        default { Write-Host $logMessage }
-    }
-    Add-Content -Path $logFilePath -Value $logMessage -Encoding UTF8
-}
-
-function Write-ErrorLog {
-    param (
-        [System.Management.Automation.ErrorRecord]$ErrorRecord,
-        [string]$Message
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $errorMessage = "[$timestamp] [ERROR] $Message"
-    $errorDetails = @"
-例外タイプ: $($ErrorRecord.Exception.GetType().FullName)
-例外メッセージ: $($ErrorRecord.Exception.Message)
-位置: $($ErrorRecord.InvocationInfo.PositionMessage)
-スタックトレース:
-$($ErrorRecord.ScriptStackTrace)
-
-"@
-    Write-Host $errorMessage -ForegroundColor Red
-    Add-Content -Path $logFilePath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorMessage -Encoding UTF8
-    Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
-}
+# Main.ps1からログ関数をインポート
+. "$PSScriptRoot\..\Main.ps1"
 
 # 管理者ロールID辞書
 $adminRoleIds = @{

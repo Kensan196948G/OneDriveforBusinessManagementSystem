@@ -67,7 +67,6 @@ $($ErrorRecord.ScriptStackTrace)
     Add-Content -Path $errorLogPath -Value $errorDetails -Encoding UTF8
 }
 
-# 共有設定確認開始
 Write-Log "共有設定確認を開始します" "INFO"
 Write-Log "出力ディレクトリ: $OutputDir" "INFO"
 Write-Log "ログディレクトリ: $LogDir" "INFO"
@@ -140,7 +139,6 @@ try {
         $UserUPN = $TargetUser
         Write-Log "対象ユーザー/サービスプリンシパル: $UserUPN" "INFO"
     }
-} # if (-not $isAdmin)の閉じ括弧
 
 # 出力用の共有設定リスト
 $sharingList = @()
@@ -193,6 +191,7 @@ try {
                         "権限ID"           = "N/A"
                     }
                     continue # 次のユーザーへ
+                }
                 }
 
                 # 有効なユーザーのOneDriveを取得
@@ -294,3 +293,12 @@ try {
 
                                     # 2. 링크 공유인지 직접 공유인지를 판정
                                     $isLinkShare = $permission.Link
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

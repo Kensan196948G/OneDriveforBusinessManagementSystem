@@ -243,28 +243,72 @@ body {
     </div>
 </div>
 
-<!-- エラーメッセージを最下部に移動 -->
-<div class="container mt-4">
-    <div id="errorContainer" class="error-message alert alert-danger" style="display: none;">
-        <h4><i class="fas fa-exclamation-triangle me-2"></i>外部共有データ取得エラー</h4>
-        <p>外部共有データの取得に失敗しました。以下の手順で確認してください:</p>
-        <ol>
-            <li>PowerShellスクリプト <code>ExternalShareCheck.ps1</code> が正しく実行できるか確認</li>
-            <li>必要な権限があるか確認</li>
-            <li>ネットワーク接続を確認</li>
+<!-- データ取得エラーメッセージ -->
+<div id="errorContainer" class="alert alert-danger mt-3 mb-3 mx-auto" style="display: none; border-left: 5px solid #dc3545; max-width: 1300px; width: 100%; padding: 1.5rem;">
+<div class="d-flex align-items-start px-2 py-1">
+    <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
+    <div>
+        <h3 class="fw-bold mb-3 text-danger fs-4">データ取得エラー</h3>
+        <p class="mb-3 fs-5">外部共有データが取得できませんでした。以下の方法をお試しください:</p>
+        <ol class="mb-4 fs-5">
+            <li class="mb-2">ExternalShareCheck.ps1スクリプトを再実行してください<br>.\ExternalShareCheck.ps1</li>
+            <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br>連絡先: ITサポートデスク (ext. 1234)</li>
         </ol>
-        <div class="text-end">
-            <button class="btn btn-danger me-2" onclick="loadData()">
-                <i class="fas fa-sync-alt me-1"></i>再試行
+        <div class="d-flex gap-3 mt-3">
+            <button class="btn btn-danger px-4 py-2" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-2"></i>再読み込み
             </button>
-            <button class="btn btn-warning" onclick="loadData()">
-                <i class="fas fa-sync-alt me-1"></i>再読み込み
+            <button class="btn btn-outline-danger px-4 py-2" onclick="showLoading(); setTimeout(loadData, 1000);">
+                <i class="fas fa-redo me-2"></i>再試行
             </button>
         </div>
     </div>
 </div>
+        </div>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// 初期表示設定
+document.addEventListener('DOMContentLoaded', function() {
+    // エラーコンテナ非表示
+    const errorContainer = document.getElementById('errorContainer');
+    if (errorContainer) errorContainer.style.display = 'none';
+    
+    // ローディング表示
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+        setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 1500);
+    }
+
+    // データ取得処理をシミュレート
+    setTimeout(() => {
+        if (Math.random() > 0.5) {
+            showError();
+        }
+    }, 2000);
+});
+
+// ローディング制御
+function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    document.getElementById('errorContainer').style.display = 'none';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// エラー表示
+function showError() {
+    document.getElementById('errorContainer').style.display = 'block';
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+</script>
 <script>
 // 表示件数設定
 let itemsPerPage = 10;
@@ -278,6 +322,7 @@ function changeItemsPerPage(value) {
 
 // データ取得
 function loadData() {
+    // ローディング表示とエラー非表示
     document.getElementById('loadingOverlay').style.display = 'flex';
     document.getElementById('errorContainer').style.display = 'none';
     
@@ -285,6 +330,8 @@ function loadData() {
     setTimeout(() => {
         try {
             // Graph APIから外部共有情報を取得
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'none';
             fetch('https://graph.microsoft.com/v1.0/drives/' + driveId + '/items/' + itemId + '/permissions', {
                 method: 'GET',
                 headers: {
@@ -308,9 +355,13 @@ function loadData() {
             .catch(error => {
                 console.error('Error:', error);
                 // エラーメッセージ表示
-                showErrorMessage('外部共有情報の取得に失敗しました');
-                // ローディングオーバーレイを非表示
-                hideLoadingOverlay();
+                // エラー表示とローディング非表示
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // エラーメッセージ更新
+                document.getElementById('errorMessage').querySelector('p').textContent =
+                    '外部共有情報の取得に失敗しました: ' + (error.message || '不明なエラー');
             });
             
             initFilters();
