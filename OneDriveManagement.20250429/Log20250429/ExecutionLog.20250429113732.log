@@ -1,0 +1,27 @@
+[2025-04-29 11:37:32] [INFO] OneDrive for Business 運用ツール - ITSM準拠 を開始しました
+[2025-04-29 11:37:32] [INFO] 出力フォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250429
+[2025-04-29 11:37:32] [INFO] ログフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250429\Log20250429
+[2025-04-29 11:37:32] [INFO] レポートフォルダ: C:\kitting\OneDriveforBusinessManagementSystem\OneDriveManagement.20250429\Report
+[2025-04-29 11:37:32] [INFO] Microsoft.Graph モジュールは既にインストールされています
+[2025-04-29 11:37:32] [INFO] config.jsonから認証情報を読み込みます...
+[2025-04-29 11:37:32] [INFO] Microsoft Graph用アクセストークンを取得します...
+[2025-04-29 11:37:32] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-29 11:37:35] [INFO] 基本データ収集メニューを表示します
+[2025-04-29 11:37:38] [INFO] 基本データ収集スクリプトを実行します: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+[2025-04-29 11:37:38] [INFO] config.jsonから認証情報を読み込みます...
+[2025-04-29 11:37:38] [INFO] Microsoft Graph用アクセストークンを取得します...
+[2025-04-29 11:37:38] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-29 11:37:38] [INFO] スクリプト実行開始: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1 (Basic_Data_Collection)
+[2025-04-29 11:37:38] [ERROR] Microsoft Graphの接続中にエラーが発生しました
+[2025-04-29 11:37:38] [SUCCESS] スクリプト実行完了: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+[2025-04-29 11:40:24] [SUCCESS] 基本データ収集が完了しました
+[2025-04-29 11:40:27] [INFO] 基本データ収集メニューを表示します
+[2025-04-29 11:40:29] [INFO] 基本データ収集スクリプトを実行します: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+[2025-04-29 11:40:29] [INFO] config.jsonから認証情報を読み込みます...
+[2025-04-29 11:40:29] [INFO] Microsoft Graph用アクセストークンを取得します...
+[2025-04-29 11:40:29] [SUCCESS] Microsoft Graphにクライアントシークレット認証で接続しました
+[2025-04-29 11:40:29] [INFO] スクリプト実行開始: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1 (Basic_Data_Collection)
+[2025-04-29 11:40:30] [ERROR] Microsoft Graphの接続中にエラーが発生しました
+[2025-04-29 11:40:30] [SUCCESS] スクリプト実行完了: C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1
+[2025-04-29 11:41:37] [SUCCESS] 基本データ収集が完了しました
+[2025-04-29 11:41:39] [INFO] プログラムを終了します。

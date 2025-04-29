@@ -6,37 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<!-- データ表示最適化用CSS追加 -->
-<link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css" rel="stylesheet">
+<script src="common.js"></script>
 <style>
-/* ローディングオーバーレイ */
-.loading-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.9);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 20px;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.loading-spinner i {
-    font-size: 2rem;
-    color: #007bff;
-    margin-bottom: 10px;
-}
-
 body {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,18 +31,11 @@ body {
 }
 
 /* カラムスタイルを統合 */
-.column-user, .column-login, .column-type, .column-quota, .column-lastactive, .column-state { 
+.column-user, .column-login, .column-type, .column-quota, .column-lastactive, .column-state {
   color: white;
 }
-.column-user { background-color: var(--user-color); }
-.column-email { background: linear-gradient(135deg, var(--email-color), #ffb74d); color: #333; }
-.column-login { background-color: var(--login-color); }
-.column-type { background-color: var(--type-color); }
-.column-status { background: linear-gradient(135deg, var(--status-color), #ff8a65); color: white; }
-.column-onedrive { background: linear-gradient(135deg, var(--onedrive-color), #7cb342); color: white; }
-.column-quota { background-color: var(--quota-color); }
-.column-lastactive { background-color: var(--lastactive-color); }
-.column-state { background-color: var(--state-color); }
+.column-email { color: #333; }
+.column-status, .column-onedrive { color: white; }
 
 /* カラム幅の最適化設定 */
 .column-user { width: 12%; }
@@ -171,71 +135,52 @@ body {
 </style>
 </head>
 <body>
-<!-- ローディングオーバーレイ -->
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-spinner">
-        <i class="fas fa-spinner fa-spin"></i>
-        <div class="mt-2">基本データを取得中です...お待ちください</div>
-    </div>
-</div>
 <div class="container">
     <h1 class="text-center mb-4">
       <i class="fas fa-database me-3 text-primary"></i>
       基本データ収集レポート
       <i class="fas fa-table ms-3 text-primary"></i>
     </h1>
-
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <div>基本データを取得中です...お待ちください</div>
-        </div>
-    </div>
     
     <div class="filter-container">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="globalSearch" placeholder="全体検索..." onkeyup="filterTable()">
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
-                    <select class="form-select" id="entriesPerPage" onchange="updatePageSize()">
-                        <option value="10">10件表示</option>
-                        <option value="20">20件表示</option>
-                        <option value="50">50件表示</option>
-                        <option value="100">100件表示</option>
-                        <option value="0">全件表示</option>
+                <select class="form-select" id="statusFilter">
+                    <option value="">すべての状態</option>
+                    <option value="active">有効のみ</option>
+                    <option value="inactive">無効のみ</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <span class="me-2">表示件数:</span>
+                    <select class="form-select form-select-sm w-auto" id="entriesPerPage">
+                        <option value="10">10件</option>
+                        <option value="25">25件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="0">全件数</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-5 text-end">
-                <button class="btn btn-outline-primary me-2" onclick="exportToCsv()">
-                    <i class="fas fa-file-csv me-1"></i>CSVエクスポート
+            <div class="col-md-3 text-end">
+                <button class="btn btn-primary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
-                <button class="btn btn-outline-secondary me-2" onclick="window.print()">
+                <button class="btn btn-secondary" onclick="window.print()">
                     <i class="fas fa-print me-1"></i>印刷
-                </button>
-                <button class="btn btn-outline-success" onclick="refreshData()">
-                    <i class="fas fa-sync-alt me-1"></i>更新
                 </button>
             </div>
         </div>
-        <!-- ページネーション情報 -->
-        <div class="row mb-2">
-            <div class="col-md-12 d-flex align-items-center gap-3">
-                <span id="tableInfo" class="text-muted fs-5">0件中 1～0件を表示</span>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
-                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
-                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
-                    </button>
-                </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <span id="resultCount" class="text-muted"></span>
             </div>
         </div>
     </div>
@@ -297,485 +242,111 @@ body {
         </table>
     </div>
     
-    <!-- データ取得エラーコンテナ -->
-    <div id="errorContainer" class="alert alert-danger mt-3 mb-5 mx-auto" style="border-left: 5px solid #dc3545; max-width: 100%; width: 100%;">
-        <div class="d-flex align-items-start px-3 py-2">
-            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
-            <div>
-                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
-                <p class="mb-3 fs-5">基本データが取得できませんでした。以下の方法をお試しください:</p>
-                <ol class="mb-4 fs-5">
-                    <li class="mb-2">GetAllBasicData.ps1スクリプトを再実行してください<br />
-                        <code class="bg-light p-1 d-inline-block mt-1">.\GetAllBasicData.ps1</code>
-                    </li>
-                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br />
-                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
-                    </li>
-                </ol>
-                <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
-                        <i class="fas fa-sync-alt me-2"></i>再読み込み
-                    </button>
-                    <button class="btn btn-outline-danger px-4 py-2" onclick="handleRetry()">
-                        <i class="fas fa-redo me-2"></i>再試行
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- レスポンシブテーブル対応用ライブラリ -->
-<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
-
 <script>
-// ローディング表示制御
-let loadingTimeout;
-let isLoading = false;
-
-function showLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        isLoading = true;
-        loadingOverlay.style.display = 'flex';
-        // 最大3秒で強制的に非表示
-        loadingTimeout = setTimeout(() => {
-            if (isLoading) {
-                hideLoading();
-            }
-        }, 3000);
-    }
-}
-
-function hideLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay && isLoading) {
-        isLoading = false;
-        clearTimeout(loadingTimeout);
-        loadingOverlay.style.display = 'none';
-    }
-}
-
-// 初期表示設定
-document.addEventListener('DOMContentLoaded', function() {
-    // エラーコンテナ表示を維持
-    const errorContainer = document.getElementById('errorContainer');
-    if (errorContainer) errorContainer.style.display = 'block';
-    
-    // ローディング表示を開始
-    showLoading();
-    
-    // データ取得開始 (3秒後に強制的にローディングのみ非表示)
-    setTimeout(() => {
-        hideLoading();
-        // エラー表示は維持
-        
-        // ここに実際のデータ取得処理を後で実装
-        // fetchData().then(...).catch(...);
-    }, 3000);
-});
-
-// エラー表示関数
-function showError() {
-    const errorContainer = document.getElementById('errorContainer');
-    if (errorContainer) errorContainer.style.display = 'block';
-}
-
-// ローディング表示関数
-function showLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'flex';
-}
-
-// ローディング非表示関数
-function hideLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
-}
-
-// 再読み込み処理
-function handleReload() {
-    location.reload();
-}
-
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-// エラー表示
-function showError() {
-    document.getElementById('errorContainer').style.display = 'block';
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-</script>
-<script>
-// ローディング制御関数
-function showLoadingOverlay() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-    return Date.now(); // 表示開始時刻を返す
-}
-
-function hideLoadingOverlay(startTime) {
-    const minDisplayTime = 1500; // 最低表示時間(ms)
-    const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, minDisplayTime - elapsed);
-    
-    setTimeout(() => {
-        document.getElementById('loadingOverlay').style.display = 'none';
-    }, remaining);
-}
-
-// データ取得関数
-async function fetchData() {
-    const loadingStartTime = showLoadingOverlay();
-    try {
-        // データ取得処理
-        hideLoadingOverlay(loadingStartTime);
-    } catch (error) {
-        hideLoadingOverlay(loadingStartTime);
-        showError();
-    }
-    
-    try {
-        const response = await fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,mail,accountEnabled,lastLoginDateTime,assignedLicenses', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + accessToken,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        const users = data.value;
-        
-        users.forEach(user => {
-            addBasicDataToTable(user);
-        });
-        
-        initFilters();
-        renderTable();
-        document.getElementById('errorContainer').style.display = 'none';
-        hideLoadingOverlay(loadingStartTime);
-    } catch (error) {
-        console.error('データ取得エラー:', error);
-        document.getElementById('errorMessage').textContent = '基本データの取得に失敗しました: ' + error.message;
-        document.getElementById('errorContainer').style.display = 'block';
-        hideLoadingOverlay(loadingStartTime);
-    }
-}
-
-// ページ再読み込み処理
-function handleReload() {
-    const loadingStartTime = showLoadingOverlay();
-    window.reportData = [];
-    document.getElementById('errorContainer').style.display = 'block';
-    setTimeout(() => {
-        fetchData();
-    }, 100); // 少し遅延させてローディング表示を確実にする
-}
-
-// 初期データ取得
-window.reportData = [];
-document.getElementById('errorContainer').style.display = 'block';
-document.getElementById('errorMessage').textContent = 'データの読み込みを開始します。しばらくお待ちください。';
-fetchData();
-
-const displayColumns = [
-    'ユーザー名',
-    'メールアドレス',
-    'ログインユーザー名',
-    'ユーザー種別',
-    'アカウント状態',
-    'OneDrive対応',
-    'クォータ(GB)',
-    '最終アクセス日',
-    '状態'
-];
-
-// 現在のページ番号とページサイズ
-let currentPage = 1;
-let pageSize = 10;
-
-// フィルターメニュー初期化
-function initFilters() {
-    const columns = displayColumns;
-    
-    columns.forEach((col, index) => {
-        const select = document.querySelectorAll('.filter-row select')[index];
-        const uniqueValues = [...new Set(window.reportData.map(item => item[col]))];
-        
-        // デフォルトオプション
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = `すべての${col}`;
-        select.appendChild(defaultOption);
-        
-        // ユニークな値を追加
-        uniqueValues.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
-        });
-    });
-}
-
-// ページネーション更新
-function updatePagination(totalPages) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    
-    // 前のページボタン
-    const prevLi = document.createElement('li');
-    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"><i class="fas fa-chevron-left"></i></a>`;
-    pagination.appendChild(prevLi);
-    
-    // ページ番号
-    for (let i = 1; i <= totalPages; i++) {
-        const li = document.createElement('li');
-        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-        li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>`;
-        pagination.appendChild(li);
-    }
-    
-    // 次のページボタン
-    const nextLi = document.createElement('li');
-    nextLi.className = `page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}`;
-    nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"><i class="fas fa-chevron-right"></i></a>`;
-    pagination.appendChild(nextLi);
-}
-
-// ページ変更
-function changePage(page) {
-    if (page < 1) return;
-    
-    const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value) || 10;
-    const filteredData = getFilteredData();
-    const totalPages = Math.ceil(filteredData.length / entriesPerPage);
-    
-    if (page > totalPages) return;
-    
-    currentPage = page;
-    renderTable(filteredData);
-    
-    // ページの先頭にスクロール
-    window.scrollTo(0, 0);
-}
-
-// フィルタリングされたデータを取得
-function getFilteredData() {
-    const filters = [];
-    document.querySelectorAll('.filter-row select').forEach((select, index) => {
-        filters[index] = select.value;
-    });
-    
-    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
-    
-    return window.reportData.filter(item => {
-        // グローバル検索
-        if (globalSearch) {
-            const found = Object.values(item).some(val => 
-                String(val).toLowerCase().includes(globalSearch)
-            );
-            if (!found) return false;
-        }
-        
-        // カラムフィルター
-        return displayColumns.every((col, colIndex) => {
-            if (!filters[colIndex]) return true;
-            return String(item[col]) === filters[colIndex];
-        });
-    });
-}
-
-// フィルター適用
-function filterTable() {
-    currentPage = 1; // フィルター適用時は1ページ目に戻る
-    const filteredData = getFilteredData();
-    renderTable(filteredData);
-    
-    // フィルタリング情報の更新
-    document.getElementById('filterInfo').textContent = 
-        `${filteredData.length}件が条件に一致しました（全${window.reportData.length}件中）`;
-}
-
-// テーブルデータ表示
-function renderTable(data) {
-    const tbody = document.querySelector('#tableBody');
-    tbody.innerHTML = '';
-    
-    const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value) || 10;
-    const startIndex = (currentPage - 1) * entriesPerPage;
-    const endIndex = startIndex + entriesPerPage;
-    const pageData = data.slice(startIndex, Math.min(endIndex, data.length));
-    
-    pageData.forEach(item => {
-        const row = document.createElement('tr');
-        const statusClass = {
-            '危険': 'status-danger',
-            '警告': 'status-warning',
-            '正常': 'status-normal'
-        }[item['状態']] || '';
-        
-        row.className = statusClass;
-        
-        let rowHtml = '';
-        displayColumns.forEach(col => {
-            if (col === 'クォータ(GB)') {
-                const usagePercent = Math.min(95, Math.floor(Math.random() * 100)); // ダミーのパーセント値
-                rowHtml += `
-                    <td>
-                        <div class="progress" style="height:15px;">
-                            <div class="progress-bar ${statusClass.replace('status-', 'bg-')}" 
-                                role="progressbar" style="width:${usagePercent}%" 
-                                aria-valuenow="${usagePercent}" aria-valuemin="0" aria-valuemax="100">
-                                ${item[col]}
-                            </div>
-                        </div>
-                    </td>`;
+// ページ固有設定
+window.PAGE_CONFIG = {
+    title: "基本データ収集レポート",
+    dataFile: "./data/basic_data.json",
+    columns: [
+        { id: "displayName", name: "ユーザー名", icon: "fa-user-circle" },
+        { id: "mail", name: "メールアドレス", icon: "fa-envelope" },
+        { id: "userPrincipalName", name: "ログインユーザー名", icon: "fa-sign-in-alt" },
+        { id: "userType", name: "ユーザー種別", icon: "fa-user-tag" },
+        { id: "accountEnabled", name: "アカウント状態", icon: "fa-power-off" },
+        { id: "hasOneDrive", name: "OneDrive対応", icon: "fa-cloud" },
+        { id: "quotaGB", name: "クォータ(GB)", icon: "fa-hdd" },
+        { id: "lastLogin", name: "最終アクセス日", icon: "fa-calendar" },
+        { id: "status", name: "状態", icon: "fa-shield-alt" }
+    ],
+    filters: [
+        { id: "globalSearch", type: "text", placeholder: "ユーザー名またはメールアドレスで検索..." },
+        { id: "statusFilter", type: "select", options: ["すべての状態", "有効のみ", "無効のみ"] }
+    ],
+    customRenderer: function(data) {
+        return data.map(item => {
+            let status;
+            if (!item.accountEnabled) {
+                status = "無効";
+            } else if (!item.lastLoginDateTime ||
+                      new Date(item.lastLoginDateTime) < new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) {
+                status = "非アクティブ";
             } else {
-                rowHtml += `<td>${item[col]}</td>`;
+                status = "正常";
             }
-        });
-        
-        row.innerHTML = rowHtml;
-        tbody.appendChild(row);
-    });
-    
-    // ページネーション情報の表示
-    const totalPages = Math.ceil(data.length / entriesPerPage);
-    updatePagination(totalPages);
-    
-    // 表示件数の情報を更新
-    document.getElementById('tableInfo').textContent = 
-        `${data.length}件中 ${startIndex + 1}～${Math.min(endIndex, data.length)}件を表示`;
-}
 
-// ページサイズ更新
-function updatePageSize() {
-    currentPage = 1; // ページサイズ変更時に最初のページに戻る
-    filterTable();
-}
-
-// CSVエクスポート
-function exportToCsv() {
-    const headers = displayColumns.join(',') + '\n';
-    const csvContent = headers + window.reportData.map(item => 
-        displayColumns.map(col => `"${item[col]}"`).join(',')
-    ).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'BasicDataReport.csv');
-    link.click();
-}
-
-// エラー表示処理
-function showError(message) {
-    const errorContainer = document.getElementById('errorContainer');
-    const errorMessage = document.getElementById('errorMessage');
-    errorMessage.textContent = message || 'データの取得中にエラーが発生しました。';
-    errorContainer.style.display = 'block';
-}
-
-// エラー非表示処理
-function hideError() {
-    document.getElementById('errorContainer').style.display = 'none';
-}
-
-// データ再取得処理
-function retryDataFetch() {
-    const loadingStartTime = showLoadingOverlay();
-    fetchData();
-}
-
-// データ更新処理
-function refreshData() {
-    const loadingStartTime = showLoadingOverlay();
-    const refreshButton = document.querySelector('button.btn-outline-success');
-    const originalContent = refreshButton.innerHTML;
-    refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>更新中...';
-    refreshButton.disabled = true;
-    
-    // 実際のアプリケーションでは、ここでAJAXリクエストなどでデータを取得
-    // このデモでは、タイムアウトでシミュレーション
-    setTimeout(() => {
-        // ダミーデータの一部を変更して更新をシミュレート
-        window.reportData.forEach(item => {
-            if (Math.random() > 0.7) {
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                item['最終アクセス日'] = `${year}/${month}/${day}`;
-                
-                const states = ['正常', '警告', '危険'];
-                item['状態'] = states[Math.floor(Math.random() * states.length)];
-            }
-        });
-        
-        filterTable();
-        refreshButton.innerHTML = originalContent;
-        refreshButton.disabled = false;
-        hideLoadingOverlay(loadingStartTime);
-        
-        // 更新完了メッセージ
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            <i class="fas fa-check-circle me-2"></i>データが正常に更新されました（${new Date().toLocaleTimeString()}）
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="閉じる"></button>
-        `;
-        document.querySelector('.filter-container').after(alertDiv);
-        
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alertDiv);
-            bsAlert.close();
-        }, 5000);
-    }, 1500);
-}
-
-// ウィンドウサイズに応じたレイアウト調整
-function adjustLayout() {
-    // レスポンシブな調整を行う
-    const windowWidth = window.innerWidth;
-    
-    // 画面幅に応じてフォントサイズなどを調整
-    if (windowWidth < 768) {
-        document.querySelectorAll('.header-text').forEach(el => {
-            el.style.fontSize = '0.7rem';
-        });
-    } else {
-        document.querySelectorAll('.header-text').forEach(el => {
-            el.style.fontSize = '0.8rem';
+            return {
+                displayName: item.displayName || "N/A",
+                mail: item.mail || "N/A",
+                userPrincipalName: item.userPrincipalName || "N/A",
+                userType: item.userType === "Member" ? "メンバー" : "ゲスト",
+                accountEnabled: item.accountEnabled ? "有効" : "無効",
+                hasOneDrive: item.hasOneDrive ? "有" : "無",
+                quotaGB: item.quotaGB ? `${item.quotaGB} GB` : "N/A",
+                lastLogin: item.lastLoginDateTime ? new Date(item.lastLoginDateTime).toLocaleString() : "未ログイン",
+                status: status
+            };
         });
     }
-}
-
-// 初期化
-window.onload = function() {
-    initFilters();
-    filterTable(); // 初期表示（フィルタリングも含む）
-    
-    // イベントリスナー設定
-    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-    document.getElementById('entriesPerPage').addEventListener('change', updatePageSize);
-    document.querySelectorAll('.filter-row select').forEach(select => {
-        select.addEventListener('change', filterTable);
-    });
-    
-    // ウィンドウリサイズ対応
-    window.addEventListener('resize', adjustLayout);
 };
+
+// 初期化処理（共通JSを使用）
+window.onload = async function() {
+    try {
+        // レポート日時を設定
+        document.getElementById('reportDate').textContent = new Date().toLocaleString();
+        
+        // データ取得
+        const rawData = await fetchData('script', '', PAGE_CONFIG.dataFile);
+        window.tableData = PAGE_CONFIG.customRenderer(rawData);
+        
+        // テーブルヘッダーを初期化
+        initTableHeader(PAGE_CONFIG.columns);
+        
+        // フィルターを初期化
+        initFilters(window.tableData, PAGE_CONFIG.columns);
+        
+        // ページネーションを設定
+        const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value || '10');
+        setupPagination(
+            window.tableData,
+            entriesPerPage === 0 ? window.tableData.length : entriesPerPage,
+            (data) => renderTable(data, 'tableBody', PAGE_CONFIG.columns),
+            (pageInfo) => {
+                if (entriesPerPage === 0) {
+                    document.getElementById('resultCount').textContent =
+                        `全${pageInfo.total}件を表示`;
+                    document.getElementById('pagination').classList.add('d-none');
+                } else {
+                    document.getElementById('resultCount').textContent =
+                        `${pageInfo.total}件中 ${pageInfo.start}～${pageInfo.end}件を表示`;
+                    document.getElementById('pagination').classList.remove('d-none');
+                }
+            }
+        );
+        
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
+        
+        document.getElementById('entriesPerPage').addEventListener('change', () => {
+            setupPagination(window.tableData);
+        });
+        
+    } catch (error) {
+        console.error('ページ初期化エラー:', error);
+    }
+};
+
 </script>
 </body>
 </html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDrive for Business 管理ツール</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #224abe);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.2);
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            opacity: 0.3;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+        
+        .card-body {
+            position: relative;
+        }
+        
+        .bg-primary { background-color: var(--primary-color) !important; }
+        .bg-success { background-color: var(--success-color) !important; }
+        .bg-info { background-color: var(--info-color) !important; }
+        .bg-warning { background-color: var(--warning-color) !important; }
+        .bg-danger { background-color: var(--danger-color) !important; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container text-center">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-cloud me-2"></i>
+                OneDrive for Business 管理ツール
+            </h1>
+            <p class="lead">組織内のOneDrive利用状況を管理・監視するための統合ツール</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    ユーザー数
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="userCount">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    OneDrive有効ユーザー
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="onedriveUserCount">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-cloud fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    外部共有数
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="externalShareCount">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-share-alt fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    同期エラー数
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="syncErrorCount">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-4"><i class="fas fa-tasks me-2"></i>レポート一覧</h2>
+        
+        <div class="row">
+            <!-- 基本データ収集 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-database card-icon text-primary"></i>
+                        <h5 class="card-title text-primary">基本データ収集</h5>
+                        <p class="card-text">組織内のユーザー基本情報とOneDrive状態を一覧表示します。</p>
+                        <div class="d-grid gap-2">
+                            <a href="GetAllBasicData.html" class="btn btn-outline-primary">
+                                <i class="fas fa-table me-1"></i>基本データレポート
+                            </a>
+                            <a href="GetUserInfo.html" class="btn btn-outline-secondary">
+                                <i class="fas fa-user me-1"></i>ユーザー情報レポート
+                            </a>
+                            <a href="GetAllUserDriveRoots.html" class="btn btn-outline-secondary">
+                                <i class="fas fa-folder-open me-1"></i>ドライブルートレポート
+                            </a>
+                            <a href="GetOneDriveQuota.html" class="btn btn-outline-secondary">
+                                <i class="fas fa-hdd me-1"></i>クォータ使用量レポート
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 変更管理 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-exchange-alt card-icon text-success"></i>
+                        <h5 class="card-title text-success">変更管理</h5>
+                        <p class="card-text">共有設定変更やアクセス権変更を監視・管理します。</p>
+                        <div class="d-grid gap-2">
+                            <a href="SharingCheck.html" class="btn btn-outline-success">
+                                <i class="fas fa-share-alt me-1"></i>共有設定チェック
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- インシデント管理 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle card-icon text-danger"></i>
+                        <h5 class="card-title text-danger">インシデント管理</h5>
+                        <p class="card-text">同期エラーやアクセス問題を検出・対応します。</p>
+                        <div class="d-grid gap-2">
+                            <a href="SyncErrorCheck.html" class="btn btn-outline-danger">
+                                <i class="fas fa-sync-alt me-1"></i>同期エラーチェック
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- セキュリティ管理 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt card-icon text-warning"></i>
+                        <h5 class="card-title text-warning">セキュリティ管理</h5>
+                        <p class="card-text">外部共有やセキュリティリスクを監視します。</p>
+                        <div class="d-grid gap-2">
+                            <a href="ExternalShareCheck.html" class="btn btn-outline-warning">
+                                <i class="fas fa-external-link-alt me-1"></i>外部共有チェック
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- レポート生成 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-file-alt card-icon text-info"></i>
+                        <h5 class="card-title text-info">レポート生成</h5>
+                        <p class="card-text">各種レポートを生成・エクスポートします。</p>
+                        <div class="d-grid gap-2">
+                            <a href="GenerateReport.html" class="btn btn-outline-info">
+                                <i class="fas fa-file-export me-1"></i>レポート生成
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- システム管理 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-cog card-icon text-secondary"></i>
+                        <h5 class="card-title text-secondary">システム管理</h5>
+                        <p class="card-text">ツールの設定と管理を行います。</p>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-outline-secondary disabled">
+                                <i class="fas fa-tools me-1"></i>設定 (準備中)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                <i class="fas fa-copyright"></i> 2025 OneDrive for Business 管理ツール
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ダッシュボード統計データの取得
+        document.addEventListener('DOMContentLoaded', function() {
+            // ここに実際のデータ取得処理を実装
+            // デモ用に仮の値を設定
+            document.getElementById('userCount').textContent = '1,245';
+            document.getElementById('onedriveUserCount').textContent = '932';
+            document.getElementById('externalShareCount').textContent = '187';
+            document.getElementById('syncErrorCount').textContent = '23';
+        });
+    </script>
+</body>
+</html>

@@ -6,30 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css" rel="stylesheet">
+<script src="common.js"></script>
 <style>
-/* 既存のCSSスタイルを継承 */
-.loading-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.9);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 20px;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
 /* カラムカラーをドライブルート用に調整 */
 :root {
   --user-color: #4fc3f7;
@@ -39,11 +17,9 @@
   --status-color: #ff5252;
 }
 
-.column-user { background-color: var(--user-color); color: white; }
-.column-drive { background: linear-gradient(135deg, var(--drive-color), #ffb74d); color: #333; }
-.column-created { background-color: var(--created-color); color: white; }
-.column-modified { background-color: var(--modified-color); color: white; }
-.column-status { background-color: var(--status-color); color: white; }
+.column-user { color: white; }
+.column-drive { color: #333; }
+.column-created, .column-modified, .column-status { color: white; }
 
 /* カラム幅設定 */
 .column-user { width: 15%; }
@@ -66,14 +42,6 @@ body {
 </style>
 </head>
 <body>
-<!-- ローディングオーバーレイ -->
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-spinner">
-        <i class="fas fa-spinner fa-spin"></i>
-        <div class="mt-2">ドライブルート情報を取得中です...お待ちください</div>
-    </div>
-</div>
-
 <div class="container">
     <h1 class="text-center mb-4">
       <i class="fas fa-folder-open me-3 text-primary"></i>
@@ -83,34 +51,43 @@ body {
 
     <div class="filter-container">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="globalSearch" placeholder="全体検索..." onkeyup="filterTable()">
+                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはドライブURLで検索...">
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
-                    <select class="form-select" id="entriesPerPage" onchange="updatePageSize()">
-                        <option value="10">10件表示</option>
-                        <option value="20">20件表示</option>
-                        <option value="50">50件表示</option>
-                        <option value="100">100件表示</option>
-                        <option value="0">全件表示</option>
+                <select class="form-select" id="statusFilter">
+                    <option value="">すべての状態</option>
+                    <option value="active">有効のみ</option>
+                    <option value="inactive">無効のみ</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <span class="me-2">表示件数:</span>
+                    <select class="form-select form-select-sm w-auto" id="entriesPerPage">
+                        <option value="10">10件</option>
+                        <option value="25">25件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="0">全件数</option>
                     </select>
                 </div>
             </div>
-            <div class="col-md-5 text-end">
-                <button class="btn btn-outline-primary me-2" onclick="exportToCsv()">
-                    <i class="fas fa-file-csv me-1"></i>CSVエクスポート
+            <div class="col-md-3 text-end">
+                <button class="btn btn-primary me-2" onclick="exportToCsv()">
+                    <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
-                <button class="btn btn-outline-secondary me-2" onclick="window.print()">
+                <button class="btn btn-secondary" onclick="window.print()">
                     <i class="fas fa-print me-1"></i>印刷
                 </button>
-                <button class="btn btn-outline-success" onclick="refreshData()">
-                    <i class="fas fa-sync-alt me-1"></i>更新
-                </button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <span id="resultCount" class="text-muted"></span>
             </div>
         </div>
     </div>
@@ -140,26 +117,18 @@ body {
                         <span class="badge bg-white text-dark header-text">状態</span>
                     </th>
                 </tr>
+                <tr class="filter-row">
+                    <th><select class="form-select form-select-sm" onchange="filterTable()"></select></th>
+                    <th><select class="form-select form-select-sm" onchange="filterTable()"></select></th>
+                    <th><select class="form-select form-select-sm" onchange="filterTable()"></select></th>
+                    <th><select class="form-select form-select-sm" onchange="filterTable()"></select></th>
+                    <th><select class="form-select form-select-sm" onchange="filterTable()"></select></th>
+                </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
     
-    <!-- データ取得エラーコンテナ -->
-    <div id="errorContainer" class="alert alert-danger mt-3 mb-5 mx-auto" style="display: none;">
-        <div class="d-flex align-items-start px-3 py-2">
-            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
-            <div>
-                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
-                <p id="errorMessage" class="mb-3 fs-5"></p>
-                <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
-                        <i class="fas fa-sync-alt me-2"></i>再読み込み
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -168,46 +137,76 @@ body {
 <script src="common.js"></script>
 
 <script>
-// ローディング表示制御
-function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-}
+// ページ固有設定
+window.PAGE_CONFIG = {
+    title: "ユーザードライブルートレポート",
+    dataFile: "./data/driveroots.json",
+    columns: [
+        { id: "user", name: "ユーザー名", icon: "fa-user-circle" },
+        { id: "driveUrl", name: "ドライブURL", icon: "fa-link" },
+        { id: "created", name: "作成日時", icon: "fa-calendar-plus" },
+        { id: "modified", name: "最終更新", icon: "fa-calendar-check" },
+        { id: "status", name: "状態", icon: "fa-power-off" }
+    ],
+    filters: [
+        { id: "globalSearch", type: "text", placeholder: "ユーザー名またはドライブURLで検索..." },
+        { id: "statusFilter", type: "select", options: ["すべての状態", "有効のみ", "無効のみ"] }
+    ]
+};
 
-function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-// エラー表示
-function showError(message) {
-    document.getElementById('errorMessage').textContent = message;
-    document.getElementById('errorContainer').style.display = 'block';
-}
-
-// 初期表示設定
-document.addEventListener('DOMContentLoaded', function() {
-    showLoading();
-    setTimeout(() => {
-        hideLoading();
-        showError('ドライブルート情報の取得に失敗しました。GetAllUserDriveRoots.ps1を実行してください。');
-    }, 2000);
-});
-
-// データ取得関数
-async function fetchData() {
-    showLoading();
+// 初期化処理（共通JSを使用）
+window.onload = async function() {
     try {
-        // ここに実際のデータ取得処理を実装
-        hideLoading();
+        // レポート日時を設定
+        document.getElementById('reportDate').textContent = new Date().toLocaleString();
+        
+        // データ取得
+        window.tableData = await fetchData('script', '', PAGE_CONFIG.dataFile);
+        
+        // テーブルヘッダーを初期化
+        initTableHeader(PAGE_CONFIG.columns);
+        
+        // フィルターを初期化
+        initFilters(window.tableData, PAGE_CONFIG.columns);
+        
+        // ページネーションを設定
+        const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value || '10');
+        setupPagination(
+            window.tableData,
+            entriesPerPage === 0 ? window.tableData.length : entriesPerPage,
+            (data) => renderTable(data, 'tableBody', PAGE_CONFIG.columns),
+            (pageInfo) => {
+                if (entriesPerPage === 0) {
+                    document.getElementById('resultCount').textContent =
+                        `全${pageInfo.total}件を表示`;
+                    document.getElementById('pagination').classList.add('d-none');
+                } else {
+                    document.getElementById('resultCount').textContent =
+                        `${pageInfo.total}件中 ${pageInfo.start}～${pageInfo.end}件を表示`;
+                    document.getElementById('pagination').classList.remove('d-none');
+                }
+            }
+        );
+        
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
+        
+        document.getElementById('entriesPerPage').addEventListener('change', () => {
+            setupPagination(window.tableData);
+        });
+        
     } catch (error) {
-        hideLoading();
-        showError('ドライブルート情報の取得中にエラーが発生しました: ' + error.message);
+        console.error('ページ初期化エラー:', error);
     }
-}
-
-// ページ再読み込み処理
-function handleReload() {
-    location.reload();
-}
+};
 </script>
 </body>
 </html>

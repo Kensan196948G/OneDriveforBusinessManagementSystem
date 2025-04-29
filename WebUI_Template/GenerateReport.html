@@ -39,6 +39,14 @@ body {
     height: 300px;
     position: relative;
 }
+.error-message {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
 </style>
 </head>
 <body>
@@ -47,67 +55,16 @@ body {
         <i class="fas fa-cloud me-2"></i>OneDrive管理 総合レポート
     </h1>
     
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="dashboard-card card text-white bg-primary">
-                <div class="card-body text-center">
-                    <h5><i class="fas fa-users me-2"></i>総ユーザー数</h5>
-                    <div class="alert-count">1,245</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card card text-white bg-warning">
-                <div class="card-body text-center">
-                    <h5><i class="fas fa-exclamation-triangle me-2"></i>同期エラー</h5>
-                    <div class="alert-count">23</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card card text-white bg-danger">
-                <div class="card-body text-center">
-                    <h5><i class="fas fa-external-link-alt me-2"></i>外部共有</h5>
-                    <div class="alert-count">15</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dashboard-card card text-white bg-success">
-                <div class="card-body text-center">
-                    <h5><i class="fas fa-check-circle me-2"></i>正常ユーザー</h5>
-                    <div class="alert-count">1,207</div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="row mb-4" id="summaryCards"></div>
 
-    <div class="row">
+    <div class="row" id="chartRow">
         <div class="col-md-6">
             <div class="dashboard-card card">
                 <div class="card-header">
                     <i class="fas fa-chart-pie me-2"></i>ストレージ使用状況
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="padding: 10px;">
-                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
-                            <!-- 円グラフ (75%使用中) -->
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#0d6efd" stroke-width="8" 
-                                    stroke-dasharray="212 70" transform="rotate(-90 50 50)"/>
-                            <!-- 円グラフ (25%空き) -->
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="#6c757d" stroke-width="8" 
-                                    stroke-dasharray="70 212" stroke-dashoffset="-212" transform="rotate(-90 50 50)"/>
-                            <!-- 中央テキスト -->
-                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" 
-                                  font-size="8" fill="#333">75% 使用中</text>
-                        </svg>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted d-flex align-items-center flex-wrap">
-                            <span class="me-2"><i class="fas fa-circle text-primary me-1"></i>使用中 (75%)</span>
-                            <span><i class="fas fa-circle text-secondary me-1"></i>空き (25%)</span>
-                        </small>
-                    </div>
+                    <div class="chart-container" id="storageChart"></div>
                 </div>
             </div>
         </div>
@@ -117,32 +74,7 @@ body {
                     <i class="fas fa-chart-bar me-2"></i>エラーの種類別分布
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="padding: 10px;">
-                        <svg viewBox="0 0 100 70" style="width: 100%; height: 100%;">
-                            <!-- 棒グラフ -->
-                            <rect x="15" y="30" width="12" height="40" fill="#dc3545"/> <!-- 同期エラー 45% -->
-                            <rect x="35" y="40" width="12" height="30" fill="#ffc107"/> <!-- 認証エラー 30% -->
-                            <rect x="55" y="50" width="12" height="20" fill="#0dcaf0"/> <!-- ネットワークエラー 15% -->
-                            <rect x="75" y="60" width="12" height="10" fill="#6c757d"/> <!-- その他 10% -->
-                            
-                            <!-- 軸線 -->
-                            <line x1="5" y1="70" x2="95" y2="70" stroke="black" stroke-width="0.5"/>
-                            
-                            <!-- ラベル -->
-                            <text x="21" y="75" text-anchor="middle" font-size="6" fill="#333">同期</text>
-                            <text x="41" y="75" text-anchor="middle" font-size="6" fill="#333">認証</text>
-                            <text x="61" y="75" text-anchor="middle" font-size="6" fill="#333">NW</text>
-                            <text x="81" y="75" text-anchor="middle" font-size="6" fill="#333">その他</text>
-                        </svg>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted d-flex align-items-center flex-wrap">
-                            <span class="me-2"><i class="fas fa-circle text-danger me-1"></i>同期エラー (45%)</span>
-                            <span class="me-2"><i class="fas fa-circle text-warning me-1"></i>認証エラー (30%)</span>
-                            <span class="me-2"><i class="fas fa-circle text-info me-1"></i>ネットワークエラー (15%)</span>
-                            <span><i class="fas fa-circle text-secondary me-1"></i>その他 (10%)</span>
-                        </small>
-                    </div>
+                    <div class="chart-container" id="errorChart"></div>
                 </div>
             </div>
         </div>
@@ -154,42 +86,14 @@ body {
                 <div class="card-header">
                     <i class="fas fa-list me-2"></i>直近のアラート
                 </div>
-                <div class="card-body p-0">
-                    <div class="summary-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="badge bg-danger me-2">高</span>
-                                <strong>山田 太郎</strong> - 機密ファイルが外部共有されています
-                            </div>
-                            <div>2025/04/15 10:23</div>
-                        </div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="badge bg-warning me-2">中</span>
-                                <strong>佐藤 花子</strong> - 同期エラーが発生しています
-                            </div>
-                            <div>2025/04/14 15:42</div>
-                        </div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="badge bg-warning me-2">中</span>
-                                <strong>鈴木 一郎</strong> - ストレージクォータが90%を超えています
-                            </div>
-                            <div>2025/04/13 09:15</div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card-body p-0" id="recentAlerts"></div>
             </div>
         </div>
     </div>
 
     <div class="row mt-4">
         <div class="col-md-12 text-center">
-            <button class="btn btn-primary me-2" onclick="exportToPdf()">
+            <button class="btn btn-primary me-2" onclick="exportReport()">
                 <i class="fas fa-file-pdf me-1"></i>PDFレポート出力
             </button>
             <button class="btn btn-secondary" onclick="window.print()">
@@ -201,92 +105,177 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="./common.js"></script>
+
 <script>
-// ダッシュボードデータ初期化
-async function initDashboard() {
+// ページ固有設定
+const PAGE_CONFIG = {
+    title: "OneDrive管理 総合レポート",
+    icon: "fa-cloud",
+    dataSource: "api",
+    endpoint: "/api/report",
+    exportType: "pdf",
+    exportFileName: "OneDriveReport_{date}.pdf",
+    charts: {
+        storage: {
+            type: "pie",
+            colors: ["#0d6efd", "#6c757d"],
+            labels: ["使用中", "空き"]
+        },
+        errors: {
+            type: "bar",
+            colors: ["#dc3545", "#ffc107", "#0dcaf0", "#6c757d"],
+            labels: ["同期エラー", "認証エラー", "ネットワークエラー", "その他"]
+        }
+    },
+    summaryCards: [
+        { 
+            title: "総ユーザー数", 
+            icon: "fa-users",
+            color: "primary",
+            dataKey: "totalUsers"
+        },
+        { 
+            title: "同期エラー", 
+            icon: "fa-exclamation-triangle",
+            color: "warning",
+            dataKey: "syncErrors"
+        },
+        { 
+            title: "外部共有", 
+            icon: "fa-external-link-alt",
+            color: "danger",
+            dataKey: "externalShares"
+        },
+        { 
+            title: "正常ユーザー", 
+            icon: "fa-check-circle",
+            color: "success",
+            dataKey: "healthyUsers"
+        }
+    ]
+};
+
+// カスタムレンダラー
+function renderDashboard(data) {
     try {
-        showLoading(true);
+        // サマリーカードのレンダリング
+        renderSummaryCards(data);
         
-        // PSスクリプトが生成したレポートデータを取得
-        const reportData = await callApi('/api/report');
+        // グラフのレンダリング
+        renderCharts(data);
         
-        // データ構造を詳細に確認
-        if (!reportData || typeof reportData !== 'object') {
-            throw new Error('無効なレポートデータ形式: オブジェクトではありません');
-        }
-
-        // 必須フィールドを検証
-        const requiredFields = ['totalUsers', 'syncErrors', 'externalShares', 'healthyUsers', 'storageUsage'];
-        const missingFields = requiredFields.filter(field => !(field in reportData));
-        if (missingFields.length > 0) {
-            throw new Error(`必須フィールドが不足しています: ${missingFields.join(', ')}`);
-        }
-
-        // 数値フィールドの検証
-        const numericFields = ['totalUsers', 'syncErrors', 'externalShares', 'healthyUsers', 'storageUsage'];
-        const invalidFields = numericFields.filter(field =>
-            typeof reportData[field] !== 'number' || isNaN(reportData[field])
-        );
-        if (invalidFields.length > 0) {
-            throw new Error(`無効な数値フィールド: ${invalidFields.join(', ')}`);
-        }
-
-        // ダッシュボードにデータを反映
-        updateDashboard(reportData);
+        // 直近アラートのレンダリング
+        renderRecentAlerts(data.recentAlerts);
     } catch (error) {
-        console.error('ダッシュボード初期化エラー:', error);
-        showError('データ取得エラー', `レポートデータの取得に失敗しました:<br>${error.message}`);
+        console.error("ダッシュボードレンダリングエラー:", error);
         throw error;
-    } finally {
-        showLoading(false);
     }
 }
 
-// ダッシュボード更新
-function updateDashboard(data) {
-    try {
-        // サマリーカード更新
-        document.querySelector('.bg-primary .alert-count').textContent = data.totalUsers;
-        document.querySelector('.bg-warning .alert-count').textContent = data.syncErrors;
-        document.querySelector('.bg-danger .alert-count').textContent = data.externalShares;
-        document.querySelector('.bg-success .alert-count').textContent = data.healthyUsers;
+// サマリーカードのレンダリング
+function renderSummaryCards(data) {
+    const container = document.getElementById('summaryCards');
+    if (!container) return;
 
-        // ストレージ使用率更新
-        const usagePercentage = Math.min(100, Math.max(0, data.storageUsage)); // 0-100%にクランプ
-        document.querySelector('.chart-container svg text').textContent = `${usagePercentage}% 使用中`;
-        document.querySelector('.chart-container svg circle:nth-child(1)')
-            .setAttribute('stroke-dasharray', `${usagePercentage * 2.83} ${(100 - usagePercentage) * 2.83}`);
-
-        // 直近のアラート更新
-        const alertsContainer = document.querySelector('.card-body.p-0');
-        if (alertsContainer && Array.isArray(data.recentAlerts)) {
-            alertsContainer.innerHTML = data.recentAlerts.map(alert => {
-                if (!alert || typeof alert !== 'object') return '';
-                
-                // アラートデータのバリデーション
-                const severity = alert.severity || '低';
-                const user = alert.user || '不明なユーザー';
-                const message = alert.message || '詳細情報なし';
-                const date = alert.date || '日時不明';
-                
-                return `
-                    <div class="summary-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="badge ${getAlertBadgeClass(severity)} me-2">${severity}</span>
-                                <strong>${user}</strong> - ${message}
-                            </div>
-                            <div>${date}</div>
-                        </div>
+    container.innerHTML = PAGE_CONFIG.summaryCards.map(card => {
+        const value = data[card.dataKey] || 0;
+        return `
+            <div class="col-md-3">
+                <div class="dashboard-card card text-white bg-${card.color}">
+                    <div class="card-body text-center">
+                        <h5><i class="fas ${card.icon} me-2"></i>${card.title}</h5>
+                        <div class="alert-count">${value}</div>
                     </div>
-                `;
-            }).join('');
-        }
-    } catch (error) {
-        console.error('ダッシュボード更新エラー:', error);
-        showError('表示エラー', `ダッシュボードの更新に失敗しました:<br>${error.message}`);
-        throw error;
-    }
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// グラフのレンダリング
+function renderCharts(data) {
+    // ストレージ使用率グラフ
+    renderStorageChart(data.storageUsage);
+    
+    // エラー分布グラフ
+    renderErrorChart(data.errorDistribution);
+}
+
+// ストレージ使用率グラフ
+function renderStorageChart(usagePercentage) {
+    const container = document.getElementById('storageChart');
+    if (!container) return;
+
+    const percentage = Math.min(100, Math.max(0, usagePercentage || 0));
+    container.innerHTML = `
+        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="${PAGE_CONFIG.charts.storage.colors[0]}" 
+                    stroke-width="8" stroke-dasharray="${percentage * 2.83} ${(100 - percentage) * 2.83}" 
+                    transform="rotate(-90 50 50)"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="${PAGE_CONFIG.charts.storage.colors[1]}" 
+                    stroke-width="8" stroke-dasharray="${(100 - percentage) * 2.83} ${percentage * 2.83}" 
+                    stroke-dashoffset="-${percentage * 2.83}" transform="rotate(-90 50 50)"/>
+            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" 
+                  font-size="8" fill="#333">${percentage}% 使用中</text>
+        </svg>
+        <div class="card-footer">
+            <small class="text-muted d-flex align-items-center flex-wrap">
+                <span class="me-2"><i class="fas fa-circle text-primary me-1"></i>${PAGE_CONFIG.charts.storage.labels[0]} (${percentage}%)</span>
+                <span><i class="fas fa-circle text-secondary me-1"></i>${PAGE_CONFIG.charts.storage.labels[1]} (${100 - percentage}%)</span>
+            </small>
+        </div>
+    `;
+}
+
+// エラー分布グラフ
+function renderErrorChart(errorData = []) {
+    const container = document.getElementById('errorChart');
+    if (!container) return;
+
+    // デフォルトデータ (エラーがない場合)
+    const defaultData = [45, 30, 15, 10];
+    const values = errorData.length === PAGE_CONFIG.charts.errors.labels.length ? 
+        errorData : defaultData;
+
+    container.innerHTML = `
+        <svg viewBox="0 0 100 70" style="width: 100%; height: 100%;">
+            ${values.map((value, i) => `
+                <rect x="${15 + i * 20}" y="${70 - value * 0.7}" 
+                      width="12" height="${value * 0.7}" 
+                      fill="${PAGE_CONFIG.charts.errors.colors[i]}"/>
+            `).join('')}
+            <line x1="5" y1="70" x2="95" y2="70" stroke="black" stroke-width="0.5"/>
+            ${PAGE_CONFIG.charts.errors.labels.map((label, i) => `
+                <text x="${21 + i * 20}" y="75" text-anchor="middle" font-size="6" fill="#333">${label}</text>
+            `).join('')}
+        </svg>
+        <div class="card-footer">
+            <small class="text-muted d-flex align-items-center flex-wrap">
+                ${values.map((value, i) => `
+                    <span class="me-2"><i class="fas fa-circle" style="color: ${PAGE_CONFIG.charts.errors.colors[i]} me-1"></i>
+                    ${PAGE_CONFIG.charts.errors.labels[i]} (${value}%)</span>
+                `).join('')}
+            </small>
+        </div>
+    `;
+}
+
+// 直近アラートのレンダリング
+function renderRecentAlerts(alerts = []) {
+    const container = document.getElementById('recentAlerts');
+    if (!container) return;
+
+    container.innerHTML = alerts.map(alert => `
+        <div class="summary-item">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge ${getAlertBadgeClass(alert.severity)} me-2">${alert.severity || '低'}</span>
+                    <strong>${alert.user || '不明なユーザー'}</strong> - ${alert.message || '詳細情報なし'}
+                </div>
+                <div>${alert.date || '日時不明'}</div>
+            </div>
+        </div>
+    `).join('');
 }
 
 // アラートの重要度に応じたバッジクラスを取得
@@ -298,39 +287,35 @@ function getAlertBadgeClass(severity) {
     }[severity] || 'bg-secondary';
 }
 
-// PDFエクスポート
-async function exportToPdf() {
+// レポートエクスポート
+async function exportReport() {
     try {
         showLoading(true);
-        const pdfData = await callApi('/api/export-pdf');
-        
-        // レスポンスのバリデーション
-        if (!pdfData || !(pdfData instanceof Blob)) {
-            throw new Error('無効なPDFデータが返されました');
-        }
-
-        // PDFダウンロード処理
-        const url = URL.createObjectURL(pdfData);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `OneDriveReport_${new Date().toISOString().slice(0,10)}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // メモリ解放
-        setTimeout(() => URL.revokeObjectURL(url), 100);
+        await exportData(PAGE_CONFIG.exportType, PAGE_CONFIG.exportFileName, PAGE_CONFIG.endpoint);
     } catch (error) {
-        console.error('PDFエクスポートエラー:', error);
-        showError('PDF出力エラー', `PDFレポートの生成に失敗しました:<br>${error.message}`);
-        throw error;
+        showError('エクスポートエラー', `レポートのエクスポートに失敗しました:<br>${error.message}`);
     } finally {
         showLoading(false);
     }
 }
 
-// 初期表示
-document.addEventListener('DOMContentLoaded', initDashboard);
+// 初期化処理
+window.onload = async function() {
+    try {
+        // レポート日時を設定
+        document.getElementById('reportDate').textContent = new Date().toLocaleString();
+        
+        // データ取得
+        const data = await fetchData(PAGE_CONFIG.dataSource, PAGE_CONFIG.endpoint);
+        
+        // ダッシュボードレンダリング
+        renderDashboard(data);
+        
+    } catch (error) {
+        console.error('ダッシュボード初期化エラー:', error);
+        showError('ダッシュボード初期化エラー', error.message);
+    }
+};
 </script>
 </body>
 </html>

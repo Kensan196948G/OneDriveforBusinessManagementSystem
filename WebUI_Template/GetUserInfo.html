@@ -8,12 +8,14 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <script src="common.js"></script>
 <style>
-/* 既存のスタイルはそのまま保持 */
 body {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-/* ... (既存のスタイルを全て含める) ... */
+/* リスクレベル別スタイル */
+.status-high { background-color: rgba(220, 53, 69, 0.1); }
+.status-medium { background-color: rgba(255, 193, 7, 0.1); }
+.status-low { background-color: rgba(40, 167, 69, 0.1); }
 </style>
 </head>
 <body>
@@ -26,26 +28,43 @@ body {
     
     <div class="filter-container">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select class="form-select" id="statusFilter">
                     <option value="">すべてのステータス</option>
                     <option value="active">有効のみ</option>
                     <option value="inactive">無効のみ</option>
                 </select>
             </div>
-            <div class="col-md-4 text-end">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <span class="me-2">表示件数:</span>
+                    <select class="form-select form-select-sm w-auto" id="entriesPerPage">
+                        <option value="10">10件</option>
+                        <option value="25">25件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="0">全件数</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 text-end">
                 <button class="btn btn-primary me-2" onclick="exportToCsv()">
                     <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
                 <button class="btn btn-secondary" onclick="window.print()">
                     <i class="fas fa-print me-1"></i>印刷
                 </button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <span id="resultCount" class="text-muted"></span>
             </div>
         </div>
     </div>
@@ -99,150 +118,76 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// データ取得方法を切り替えるフラグ
-const USE_API = false; // true: API経由, false: PSスクリプト出力を直接使用
+// ページ固有設定
+window.PAGE_CONFIG = {
+    title: "ユーザー情報レポート",
+    dataFile: "./data/userinfo.json",
+    columns: [
+        { id: "user", name: "ユーザー名", icon: "fa-user-circle" },
+        { id: "email", name: "メールアドレス", icon: "fa-envelope" },
+        { id: "login", name: "ログインユーザー名", icon: "fa-sign-in-alt" },
+        { id: "type", name: "ユーザー種別", icon: "fa-user-tag" },
+        { id: "status", name: "アカウント状態", icon: "fa-power-off" },
+        { id: "lastsync", name: "最終同期日時", icon: "fa-sync-alt" }
+    ],
+    filters: [
+        { id: "globalSearch", type: "text", placeholder: "ユーザー名またはメールアドレスで検索..." },
+        { id: "statusFilter", type: "select", options: ["すべてのステータス", "有効のみ", "無効のみ"] }
+    ]
+};
 
-// データ取得処理
-async function fetchUserData() {
-    showLoading(true);
-    
+// 初期化処理（共通JSを使用）
+window.onload = async function() {
     try {
-        let userData;
+        // レポート日時を設定
+        document.getElementById('reportDate').textContent = new Date().toLocaleString();
         
-        if (USE_API) {
-            // API経由でデータ取得
-            userData = await callApi('/api/userinfo');
-        } else {
-            // PSスクリプトの出力を直接取得
-            const response = await fetch('./data/userinfo.json');
-            if (!response.ok) throw new Error('データ取得に失敗しました');
-            userData = await response.json();
-        }
+        // データ取得
+        window.tableData = await fetchData('script', '', PAGE_CONFIG.dataFile);
         
-        // データをテーブルに表示
-        renderUserData(userData);
-        initFilters(userData);
-    } catch (error) {
-        showError('データ取得エラー', error.message);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// データをテーブルに表示
-function renderUserData(data) {
-    const tbody = document.getElementById('userTableBody');
-    tbody.innerHTML = '';
-    
-    data.forEach(user => {
-        const row = document.createElement('tr');
-        const statusClass = user.アカウント状態 === '有効' ? 'status-active' : 
-                           user.アカウント状態 === '無効' ? 'status-inactive' : 
-                           'status-disabled';
-        row.className = statusClass;
+        // テーブルヘッダーを初期化
+        initTableHeader(PAGE_CONFIG.columns);
         
-        row.innerHTML = `
-            <td>${escapeHtml(user.ユーザー名)}</td>
-            <td>${escapeHtml(user.メールアドレス)}</td>
-            <td>${escapeHtml(user.ログインユーザー名)}</td>
-            <td>${escapeHtml(user.ユーザー種別)}</td>
-            <td>${escapeHtml(user.アカウント状態)}</td>
-            <td>${escapeHtml(user.最終同期日時)}</td>
-        `;
+        // フィルターを初期化
+        initFilters(window.tableData, PAGE_CONFIG.columns);
         
-        tbody.appendChild(row);
-    });
-    
-    window.userData = data; // グローバルに保持
-}
-
-// HTMLエスケープ関数
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.toString()
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
-        .replace(/'/g, '&#039;');
-}
-
-// フィルターメニュー初期化
-function initFilters(data) {
-    const columns = ['ユーザー名', 'メールアドレス', 'ログインユーザー名', 'ユーザー種別', 'アカウント状態', '最終同期日時'];
-    
-    columns.forEach((col, index) => {
-        const select = document.querySelectorAll('.filter-row select')[index];
-        if (!select) return;
+        // ページネーションを設定
+        const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value || '10');
+        setupPagination(
+            window.tableData,
+            entriesPerPage === 0 ? window.tableData.length : entriesPerPage,
+            (data) => renderTable(data, 'userTableBody', PAGE_CONFIG.columns),
+            (pageInfo) => {
+                if (entriesPerPage === 0) {
+                    document.getElementById('resultCount').textContent =
+                        `全${pageInfo.total}件を表示`;
+                    document.getElementById('pagination').classList.add('d-none');
+                } else {
+                    document.getElementById('resultCount').textContent =
+                        `${pageInfo.total}件中 ${pageInfo.start}～${pageInfo.end}件を表示`;
+                    document.getElementById('pagination').classList.remove('d-none');
+                }
+            }
+        );
         
-        select.innerHTML = '';
-        
-        // デフォルトオプション
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = `すべての${col}`;
-        select.appendChild(defaultOption);
-        
-        // ユニークな値を追加
-        const uniqueValues = [...new Set(data.map(item => item[col]))];
-        uniqueValues.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
         });
-    });
-}
-
-// テーブルフィルタリング
-function filterTable() {
-    const filters = [];
-    document.querySelectorAll('.filter-row select').forEach((select, index) => {
-        filters[index] = select.value;
-    });
-    
-    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    
-    const filteredData = window.userData.filter(user => {
-        // グローバル検索
-        if (globalSearch) {
-            const found = Object.values(user).some(val => 
-                String(val).toLowerCase().includes(globalSearch)
-            );
-            if (!found) return false;
-        }
         
-        // ステータスフィルター
-        if (statusFilter && user.アカウント状態 !== statusFilter) {
-            return false;
-        }
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
         
-        // カラムフィルター
-        return ['ユーザー名', 'メールアドレス', 'ログインユーザー名', 'ユーザー種別', 'アカウント状態', '最終同期日時']
-            .every((col, colIndex) => {
-                if (!filters[colIndex]) return true;
-                return String(user[col]) === filters[colIndex];
-            });
-    });
-    
-    renderUserData(filteredData);
-}
-
-// CSVエクスポート
-function exportToCsv() {
-    const columns = ['ユーザー名', 'メールアドレス', 'ログインユーザー名', 'ユーザー種別', 'アカウント状態', '最終同期日時'];
-    const data = window.userData || [];
-    
-    exportToCsv(data, 'UserInfo_Export.csv', columns);
-}
-
-// 初期化処理
-window.onload = function() {
-    fetchUserData();
-    
-    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-    document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('entriesPerPage').addEventListener('change', () => {
+            setupPagination(window.tableData);
+        });
+        
+    } catch (error) {
+        console.error('ページ初期化エラー:', error);
+    }
 };
 </script>
 </body>

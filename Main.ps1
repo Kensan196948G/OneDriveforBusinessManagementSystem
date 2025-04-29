@@ -9,16 +9,32 @@ param (
 $executionTime = Get-Date
 
 # 日付ベースのフォルダ名とログフォルダを作成
-$dateFolderName = "OneDriveManagement." + $executionTime.ToString("yyyyMMdd")
-$dateFolderPath = Join-Path -Path $OutputDir -ChildPath $dateFolderName
-$reportFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Report"
-$logFolderName = "Log" + $executionTime.ToString("yyyyMMdd")
-$logFolderPath = Join-Path -Path $dateFolderPath -ChildPath $logFolderName
+try {
+    $dateFolderName = "OneDriveManagement." + $executionTime.ToString("yyyyMMdd")
+    $dateFolderPath = Join-Path -Path $OutputDir -ChildPath $dateFolderName
+    $reportFolderPath = Join-Path -Path $dateFolderPath -ChildPath "Report"
+    $logFolderName = "Log" + $executionTime.ToString("yyyyMMdd")
+    $logFolderPath = Join-Path -Path $dateFolderPath -ChildPath $logFolderName
 
-# 出力ディレクトリが存在しない場合は作成
-if ($null -eq $dateFolderPath -or -not (Test-Path -Path $dateFolderPath)) {
-    New-Item -Path $dateFolderPath -ItemType Directory | Out-Null
-    Write-Output "出力用フォルダを作成しました: $dateFolderPath"
+    # 絶対パスを確認
+    Write-Host "出力ディレクトリ: $(Resolve-Path $OutputDir)" -ForegroundColor Cyan
+    Write-Host "日付フォルダパス: $dateFolderPath" -ForegroundColor Cyan
+
+    # 出力ディレクトリが存在しない場合は作成
+    if (-not (Test-Path -Path $dateFolderPath -ErrorAction Stop)) {
+        New-Item -Path $dateFolderPath -ItemType Directory -Force | Out-Null
+        Write-Host "出力用フォルダを作成しました: $(Resolve-Path $dateFolderPath)" -ForegroundColor Green
+    }
+
+    # ログフォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $logFolderPath -ErrorAction Stop)) {
+        New-Item -Path $logFolderPath -ItemType Directory -Force | Out-Null
+        Write-Host "ログフォルダを作成しました: $(Resolve-Path $logFolderPath)" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "ディレクトリ作成エラー: $_" -ForegroundColor Red
+    Write-Host "スタックトレース: $($_.ScriptStackTrace)" -ForegroundColor Yellow
+    exit 1
 }
 
 # ログフォルダが存在しない場合は作成
@@ -110,8 +126,7 @@ $($ErrorRecord.ScriptStackTrace)
     Add-Content -Path $dynamicErrorLogPath -Value $errorDetails -Encoding UTF8
 }
 
-# 共通ログ関数をエクスポート
-Export-ModuleMember -Function Write-ExecutionLog, Write-ErrorLog
+# 共通ログ関数定義 (Export-ModuleMemberは削除)
 
 # Microsoft Graphモジュールのインストール確認と実施
 function Install-RequiredModules {
@@ -407,27 +422,36 @@ try {
         
         switch ($choice.ToUpper()) {
             "0" {
+                Write-ExecutionLog "基本データ収集メニューを表示します" "INFO"
                 $scriptPath = Show-BasicDataMenu
                 if ($scriptPath) {
+                    Write-ExecutionLog "基本データ収集スクリプトを実行します: $scriptPath" "INFO"
                     # OneDriveクォータ取得前に毎回トークン再取得
                     $connected = Connect-ToMicrosoftGraph
                     if (-not $connected) {
                         Write-ExecutionLog "Microsoft Graphへの再接続に失敗したため、スクリプトをスキップします。" "ERROR"
+                        Write-Host "エラー: Graph再接続に失敗しました。Enterキーでメニューに戻ります" -ForegroundColor Red
+                        $null = Read-Host
                     } else {
                         Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Basic_Data_Collection" -LogFolder $logFolderPath
+                        Write-ExecutionLog "基本データ収集が完了しました" "SUCCESS"
                     }
                 }
             }
             "1" {
+                Write-ExecutionLog "インシデント管理メニューを表示します" "INFO"
                 $scriptPath = Show-IncidentManagementMenu
                 if ($scriptPath) {
+                    Write-ExecutionLog "インシデント管理スクリプトを実行します: $scriptPath" "INFO"
                     Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Incident_Management" -LogFolder $logFolderPath
+                    Write-ExecutionLog "インシデント管理処理が完了しました" "SUCCESS"
                 }
             }
             "2" {
+                Write-ExecutionLog "変更管理メニューを表示します" "INFO"
                 $scriptPath = Show-ChangeManagementMenu
                 if ($scriptPath) {
-                    Write-ExecutionLog "変更管理スクリプトを実行します: $scriptPath" "DEBUG"
+                    Write-ExecutionLog "変更管理スクリプトを実行します: $scriptPath" "INFO"
                     
                     # サービスプリンシパル情報を取得
                     try {
@@ -471,29 +495,46 @@ try {
                 }
             }
             "3" {
+                Write-ExecutionLog "セキュリティ管理メニューを表示します" "INFO"
                 $scriptPath = Show-SecurityManagementMenu
                 if ($scriptPath) {
+                    Write-ExecutionLog "セキュリティ管理スクリプトを実行します: $scriptPath" "INFO"
                     Invoke-SelectedScript -ScriptPath $scriptPath -BaseFolder $dateFolderPath -CategoryName "Security_Management" -LogFolder $logFolderPath
+                    Write-ExecutionLog "セキュリティ管理処理が完了しました" "SUCCESS"
                 }
             }
             "4" {
-                # 総合レポート生成
+                Write-ExecutionLog "総合レポート生成を開始します" "INFO"
                 $reportScriptPath = "$scriptRoot\GenerateReport.ps1"
                 if (Test-Path -Path $reportScriptPath) {
+                    Write-ExecutionLog "レポート生成スクリプトを実行します: $reportScriptPath" "INFO"
                     Invoke-SelectedScript -ScriptPath $reportScriptPath -BaseFolder $dateFolderPath -CategoryName "Report" -LogFolder $logFolderPath
+                    Write-ExecutionLog "総合レポート生成が完了しました" "SUCCESS"
+                } else {
+                    Write-ExecutionLog "レポート生成スクリプトが見つかりません: $reportScriptPath" "ERROR"
+                    Write-Host "エラー: レポート生成スクリプトが見つかりません" -ForegroundColor Red
+                    $null = Read-Host
                 }
             }
             "5" {
+                Write-ExecutionLog "Microsoft Graph再接続を開始します" "INFO"
                 Disconnect-MgGraph | Out-Null
                 $connected = Connect-ToMicrosoftGraph
                 if (-not $connected) {
                     Write-ExecutionLog "Microsoft Graphへの再接続に失敗したため、プログラムを終了します。" "ERROR"
-                    exit
+                    Write-Host "エラー: Graph再接続に失敗しました。プログラムを終了します" -ForegroundColor Red
+                    exit 1
+                } else {
+                    Write-ExecutionLog "Microsoft Graphへの再接続に成功しました" "SUCCESS"
+                    Write-Host "再接続に成功しました。Enterキーでメニューに戻ります" -ForegroundColor Green
+                    $null = Read-Host
                 }
             }
             "Q" {
                 $exit = $true
                 Write-ExecutionLog "プログラムを終了します。" "INFO"
+                Write-Host "プログラムを終了します。Enterキーを押してください..." -ForegroundColor Cyan
+                $null = Read-Host
             }
             default {
                 Write-Host "無効な選択です。もう一度お試しください。" -ForegroundColor Yellow

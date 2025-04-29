@@ -1,0 +1,15 @@
+﻿[2025/04/29 08:40:42][ERROR] ユーザー情報の取得中にエラーが発生しました
+Exception Type: Microsoft.Graph.PowerShell.AuthenticationException
+StackTrace: at Get-MgUser<Process>, C:\Users\kensa\OneDrive\ドキュメント\WindowsPowerShell\Modules\Microsoft.Graph.Users\2.26.1\exports\ProxyCmdletDefinitions.ps1: line 23080
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetUserInfo.ps1: line 103
+[2025/04/29 08:46:41][ERROR] Microsoft Graphの接続中にエラーが発生しました
+Exception Type: System.Management.Automation.ParameterBindingException
+StackTrace: at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1: line 64
+[2025/04/29 08:48:36][ERROR] ユーザー情報の取得中にエラーが発生しました
+Exception Type: Microsoft.Graph.PowerShell.AuthenticationException
+StackTrace: at Get-MgUser<Process>, C:\Users\kensa\OneDrive\ドキュメント\WindowsPowerShell\Modules\Microsoft.Graph.Users\2.26.1\exports\ProxyCmdletDefinitions.ps1: line 23080
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetUserInfo.ps1: line 103
+[2025/04/29 08:56:59][ERROR] ユーザー情報の取得中にエラーが発生しました
+Exception Type: Microsoft.Graph.PowerShell.AuthenticationException
+StackTrace: at Get-MgUser<Process>, C:\Users\kensa\OneDrive\ドキュメント\WindowsPowerShell\Modules\Microsoft.Graph.Users\2.26.1\exports\ProxyCmdletDefinitions.ps1: line 23080
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetUserInfo.ps1: line 133

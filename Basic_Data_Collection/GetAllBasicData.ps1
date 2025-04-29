@@ -8,8 +8,55 @@ param (
 
 $executionTime = Get-Date
 
-# Main.ps1からログ関数をインポート
-. "$PSScriptRoot\..\Main.ps1"
+# SafeExitModuleをインポート (ルートディレクトリ直下にあるためパス修正)
+$modulePath = "$PSScriptRoot\..\SafeExitModule.psm1"
+if (-not (Test-Path $modulePath)) {
+    Write-Error "SafeExitModuleが見つかりません: $modulePath"
+    exit 1
+}
+Import-Module $modulePath -Force
+
+# 出力ディレクトリを明示的に設定（ユーザー指定を優先）
+$BaseDir = $PSScriptRoot
+# 正しいパス構造に修正
+# 出力ディレクトリ構造を修正（重複フォルダ作成防止）
+$outputRootDir = $OutputDir
+if ($outputRootDir -like "*Basic_Data_Collection*") {
+    $dataCollectionDir = $outputRootDir
+} else {
+    $dataCollectionDir = Join-Path -Path $outputRootDir -ChildPath "Basic_Data_Collection.$($executionTime.ToString('yyyyMMdd'))"
+}
+$reportDir = Join-Path -Path $dataCollectionDir -ChildPath "GetAllBasicData"
+
+# ディレクトリ作成（自動生成フォルダを含む）
+try {
+    # Basic_Data_Collection.日付フォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $dataCollectionDir)) {
+        New-Item -Path $dataCollectionDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "Basic_Data_Collectionフォルダを作成しました: $dataCollectionDir" "INFO"
+    }
+
+    # GetOneDriveQuotaフォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $reportDir)) {
+        New-Item -Path $reportDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "GetOneDriveQuotaフォルダを作成しました: $reportDir" "INFO"
+    }
+    
+    # GetAllBasicDataサブフォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $reportDir)) {
+        New-Item -Path $reportDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "レポート出力ディレクトリを作成しました: $reportDir" "INFO"
+    }
+} catch {
+    Write-Log "ディレクトリ作成エラー: $_" "ERROR"
+    throw
+}
+
+Write-Log "すべての基本データ収集を開始します" "INFO"
+Write-Log "ベースディレクトリ: $BaseDir" "INFO"
+Write-Log "出力ルートディレクトリ: $outputRootDir" "INFO"
+Write-Log "レポートディレクトリ: $reportDir" "INFO"
+Write-Host "出力先ディレクトリ: $outputRootDir" -ForegroundColor Cyan
 
 # config.jsonから認証情報を読み込む
 try {
@@ -196,8 +243,8 @@ function Generate-HtmlReport {
         # 出力ディレクトリはMain.ps1で作成済み
         
         
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $outputPath = Join-Path $OutputDir "GetAllBasicData_$timestamp.html"
+        $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+        $outputPath = Join-Path $reportDir "AllBasicData.$timestamp.html"
         $htmlContent | Out-File -FilePath $outputPath -Encoding UTF8
         
         return $outputPath
@@ -209,7 +256,7 @@ function Generate-HtmlReport {
 
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $csvFile = "AllBasicData.$timestamp.csv"
-$csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
+$csvPath = Join-Path -Path $reportDir -ChildPath $csvFile
 
 try {
     if ($PSVersionTable.PSVersion.Major -ge 6) {

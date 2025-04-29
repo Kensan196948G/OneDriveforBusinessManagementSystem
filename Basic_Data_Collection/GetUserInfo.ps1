@@ -6,10 +6,15 @@ param (
     [string]$ConfigPath = "$PSScriptRoot\..\config.json"
 )
 
-$executionTime = Get-Date
+# SafeExitModuleをインポート (ルートディレクトリ直下にあるためパス修正)
+$modulePath = "$PSScriptRoot\..\SafeExitModule.psm1"
+if (-not (Test-Path $modulePath)) {
+    Write-Error "SafeExitModuleが見つかりません: $modulePath"
+    exit 1
+}
+Import-Module $modulePath -Force
 
-# Main.ps1からログ関数をインポート
-. "$PSScriptRoot\..\Main.ps1"
+$executionTime = Get-Date
 
 # 管理者ロールID辞書
 $adminRoleIds = @{
@@ -21,124 +26,271 @@ $adminRoleIds = @{
     "SecurityAdministrator" = "194ae4cb-b126-40b2-bd5b-6091b380977d"
 }
 
+# 出力ディレクトリを明示的に設定（ユーザー指定を優先）
+$BaseDir = $PSScriptRoot
+# 正しいパス構造に修正
+# 出力ディレクトリ構造を修正（重複フォルダ作成防止）
+$outputRootDir = $OutputDir
+if ($outputRootDir -like "*Basic_Data_Collection*") {
+    $dataCollectionDir = $outputRootDir
+} else {
+    $dataCollectionDir = Join-Path -Path $outputRootDir -ChildPath "Basic_Data_Collection.$($executionTime.ToString('yyyyMMdd'))"
+}
+$reportDir = Join-Path -Path $dataCollectionDir -ChildPath "GetUserInfo"
+
+# ディレクトリ作成（自動生成フォルダを含む）
+try {
+    # Basic_Data_Collection.日付フォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $dataCollectionDir)) {
+        New-Item -Path $dataCollectionDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "Basic_Data_Collectionフォルダを作成しました: $dataCollectionDir" "INFO"
+    }
+
+    # GetUserInfoフォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $reportDir)) {
+        New-Item -Path $reportDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "GetUserInfoフォルダを作成しました: $reportDir" "INFO"
+    }
+    
+    # GetUserInfoサブフォルダが存在しない場合は作成
+    if (-not (Test-Path -Path $reportDir)) {
+        New-Item -Path $reportDir -ItemType Directory -ErrorAction Stop | Out-Null
+        Write-Log "レポート出力ディレクトリを作成しました: $reportDir" "INFO"
+    }
+} catch {
+    Write-Log "ディレクトリ作成エラー: $_" "ERROR"
+    throw
+}
+
 Write-Log "ユーザー情報取得を開始します" "INFO"
 Write-Log "ベースディレクトリ: $BaseDir" "INFO"
 Write-Log "出力ルートディレクトリ: $outputRootDir" "INFO"
 Write-Log "レポートディレクトリ: $reportDir" "INFO"
+Write-Host "出力先ディレクトリ: $outputRootDir" -ForegroundColor Cyan
 
-try {
-    $config = Get-Content -Path $ConfigPath | ConvertFrom-Json
+# Graph API接続（リトライ付き）
+$maxRetries = 3
+$retryCount = 0
+$connected = $false
 
-    $tokenUrl = "https://login.microsoftonline.com/$($config.TenantId)/oauth2/v2.0/token"
-    $tokenBody = @{
-        client_id     = $config.ClientId
-        client_secret = $config.ClientSecret
-        scope         = "https://graph.microsoft.com/.default"
-        grant_type    = "client_credentials"
+do {
+    try {
+        $config = Get-Content -Path $ConfigPath | ConvertFrom-Json
+        $tokenUrl = "https://login.microsoftonline.com/$($config.TenantId)/oauth2/v2.0/token"
+        $tokenBody = @{
+            client_id     = $config.ClientId
+            client_secret = $config.ClientSecret
+            scope         = "https://graph.microsoft.com/.default"
+            grant_type    = "client_credentials"
+        }
+
+        $tokenResponse = Invoke-RestMethod -Uri $tokenUrl -Method Post -Body $tokenBody
+        $script:AccessToken = $tokenResponse.access_token
+        $connected = $true
+        Write-Log "Microsoft Graphにクライアントシークレット認証で接続しました" -Level "SUCCESS"
+    } catch {
+        $retryCount++
+        if ($retryCount -ge $maxRetries) {
+            Write-Log "Microsoft Graph認証に失敗しました（リトライ上限）: $_" -Level "ERROR"
+            Write-Log "スタックトレース: $($_.ScriptStackTrace)" -Level "DEBUG"
+            exit 1
+        }
+        Write-Log "Microsoft Graph認証に失敗しました（リトライ $retryCount/$maxRetries）: $_" -Level "WARNING"
+        Start-Sleep -Seconds (5 * $retryCount)  # 指数バックオフ
     }
-
-    $tokenResponse = Invoke-RestMethod -Uri $tokenUrl -Method Post -Body $tokenBody
-    $script:AccessToken = $tokenResponse.access_token
-
-    Write-Log "Microsoft Graphにクライアントシークレット認証で接続しました" "SUCCESS"
-} catch {
-    Write-ErrorLog $_ "Microsoft Graph認証に失敗しました"
-    exit
-}
+} while (-not $connected -and $retryCount -lt $maxRetries)
 
 $userList = @()
 
+# ユーザー情報取得（ページネーション対応）
 try {
+    # メイン処理開始 - ユーザー情報取得
     Write-Log "Microsoft Graph REST APIで全ユーザー情報を取得します..." "INFO"
     $headers = @{ Authorization = "Bearer $script:AccessToken" }
     $url = "https://graph.microsoft.com/v1.0/users`?$top=999&`$select=displayName,mail,onPremisesSamAccountName,accountEnabled,onPremisesLastSyncDateTime,userType,userPrincipalName,id"
     $users = @()
+    $retryCount = 0
+    $maxApiRetries = 3
 
     do {
-        $response = Invoke-RestMethod -Headers $headers -Uri $url -Method Get
-        $users += $response.value
-        $url = $response.'@odata.nextLink'
+        try {
+            $response = Invoke-RestMethod -Headers $headers -Uri $url -Method Get -ErrorAction Stop
+            $users += $response.value
+            $url = $response.'@odata.nextLink'
+            $retryCount = 0  # 成功したらリトライカウントをリセット
+        } catch {
+            $retryCount++
+            if ($retryCount -ge $maxApiRetries) {
+                Write-Log "ユーザー情報取得に失敗しました（リトライ上限）: $_" -Level "ERROR"
+                throw
+            }
+            Write-Log "ユーザー情報取得に失敗しました（リトライ $retryCount/$maxApiRetries）: $_" -Level "WARNING"
+            Start-Sleep -Seconds (2 * $retryCount)
+        }
     } while ($url)
+
+    if ($users.Count -eq 0) {
+        Write-Log "取得したユーザー情報が0件です" -Level "ERROR"
+        exit 1
+    }
 
     $totalUsers = $users.Count
     $processed = 0
     
+    # 取得したユーザーデータを処理
     foreach ($user in $users) {
-        $processed++
-        $progressParams = @{
-            Activity = "ユーザー情報を処理中"
-            Status = "$processed/$totalUsers 完了"
-            PercentComplete = ($processed / $totalUsers * 100)
-            CurrentOperation = "処理中: $($user.userPrincipalName)"
-        }
-        Write-Progress @progressParams
-        
-        $userTypeValue = "Member"
-        if ($user.userPrincipalName -match "#EXT#" -or $user.userType -eq "Guest") {
-            $userTypeValue = "Guest"
-        } elseif ([string]::IsNullOrEmpty($user.id)) {
-            $userTypeValue = "未設定"
-        } else {
-            try {
-                $memberOfUrl = "https://graph.microsoft.com/v1.0/users/$($user.id)/memberOf"
-                $memberOfResponse = Invoke-RestMethod -Headers $headers -Uri $memberOfUrl -Method Get
-                $memberOf = $memberOfResponse.value
-                $isAdmin = $false
-                foreach ($role in $memberOf) {
-                    if ($role.'@odata.type' -eq "#microsoft.graph.directoryRole") {
-                        $roleTemplateUrl = "https://graph.microsoft.com/v1.0/directoryRoles/$($role.id)"
-                        $roleDetail = Invoke-RestMethod -Headers $headers -Uri $roleTemplateUrl -Method Get
-                        if ($adminRoleIds.Values -contains $roleDetail.roleTemplateId) {
-                            $isAdmin = $true
-                            break
+        try {
+            Write-Log "ユーザー処理中: $($user.userPrincipalName)" "DEBUG"
+            $processed++
+            $progressPercent = [math]::Round(($processed / $totalUsers * 100), 2)
+            $progressParams = @{
+                Activity = "ユーザー情報を処理中"
+                Status = "$processed/$totalUsers 完了 ($progressPercent%)"
+                PercentComplete = $progressPercent
+                CurrentOperation = "処理中: $($user.userPrincipalName)"
+            }
+            Write-Progress @progressParams
+            
+            if ($processed % 10 -eq 0 -or $processed -eq $totalUsers) {
+                Write-Host "[$processed/$totalUsers] $($user.userPrincipalName)" -ForegroundColor DarkGray
+            }
+
+            $userTypeValue = "Member"
+            if ($user.userPrincipalName -match "#EXT#" -or $user.userType -eq "Guest") {
+                $userTypeValue = "Guest"
+            } elseif ([string]::IsNullOrEmpty($user.id)) {
+                $userTypeValue = "未設定"
+            } else {
+                try {
+                    $memberOfUrl = "https://graph.microsoft.com/v1.0/users/$($user.id)/memberOf"
+                    $memberOfResponse = Invoke-RestMethod -Headers $headers -Uri $memberOfUrl -Method Get
+                    $memberOf = $memberOfResponse.value
+                    $isAdmin = $false
+                    foreach ($role in $memberOf) {
+                        if ($role.'@odata.type' -eq "#microsoft.graph.directoryRole") {
+                            $roleTemplateUrl = "https://graph.microsoft.com/v1.0/directoryRoles/$($role.id)"
+                            $roleDetail = Invoke-RestMethod -Headers $headers -Uri $roleTemplateUrl -Method Get
+                            if ($adminRoleIds.Values -contains $roleDetail.roleTemplateId) {
+                                $isAdmin = $true
+                                break
+                            }
                         }
                     }
+                    if ($isAdmin) { $userTypeValue = "Administrator" }
+                } catch {
+                    Write-Log "ユーザー種別確認エラー: $($user.userPrincipalName) - $_" "WARNING"
+                    $userTypeValue = "確認エラー"
                 }
-                if ($isAdmin) { $userTypeValue = "Administrator" }
-            } catch {
-                Write-Log "ユーザー種別確認エラー: $($user.userPrincipalName) - $_" "WARNING"
-                $userTypeValue = "確認エラー"
             }
-        }
 
-        $userList += [PSCustomObject]@{
-            "ユーザー名"       = $user.displayName
-            "メールアドレス"   = $user.mail
-            "ログインユーザー名" = if($user.onPremisesSamAccountName){$user.onPremisesSamAccountName}else{"同期なし"}
-            "ユーザー種別"     = $userTypeValue
-            "アカウント状態"   = if($user.accountEnabled){"有効"}else{"無効"}
-            "最終同期日時"     = if($user.onPremisesLastSyncDateTime){$user.onPremisesLastSyncDateTime}else{"同期情報なし"}
+            $userList += [PSCustomObject]@{
+                "ユーザー名"       = $user.displayName
+                "メールアドレス"   = $user.mail
+                "ログインユーザー名" = if($user.onPremisesSamAccountName){$user.onPremisesSamAccountName}else{"同期なし"}
+                "ユーザー種別"     = $userTypeValue
+                "アカウント状態"   = if($user.accountEnabled){"有効"}else{"無効"}
+                "最終同期日時"     = if($user.onPremisesLastSyncDateTime){$user.onPremisesLastSyncDateTime}else{"同期情報なし"}
+            }
+        } catch {
+            Write-Log "ユーザー処理中にエラーが発生しました: $($user.userPrincipalName) - $_" "WARNING"
+            continue
         }
     }
 
     Write-Progress -Activity "ユーザー情報処理" -Completed
     Write-Log "ユーザー情報の取得が完了しました。取得件数: $($userList.Count)" "SUCCESS"
     Write-Host "`nユーザー情報処理が完了しました: $($userList.Count)件のレコードを取得" -ForegroundColor Green
-} catch {
-    Write-ErrorLog $_ "ユーザー情報の取得中にエラーが発生しました"
-}
 
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$csvFile = "UserInfo.$timestamp.csv"
-$htmlFile = "UserInfo.$timestamp.html"
-$jsFile = "UserInfo.$timestamp.js"
+    $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+    $csvFile = "UserInfo.$timestamp.csv"
+    $htmlFile = "UserInfo.$timestamp.html"
+    $jsFile = "UserInfo.$timestamp.js"
 
-$csvPath = Join-Path -Path $OutputDir -ChildPath $csvFile
-$htmlPath = Join-Path -Path $OutputDir -ChildPath $htmlFile
-$jsPath = Join-Path -Path $OutputDir -ChildPath $jsFile
+    $csvPath = Join-Path -Path $reportDir -ChildPath $csvFile
+    $htmlPath = Join-Path -Path $reportDir -ChildPath $htmlFile
+    $jsPath = Join-Path -Path $reportDir -ChildPath $jsFile
 
-try {
-    if ($PSVersionTable.PSVersion.Major -ge 6) {
-        $userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8BOM
-    } else {
-        $userList | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
-        $content = [System.IO.File]::ReadAllText($csvPath)
-        [System.IO.File]::WriteAllText($csvPath, $content, [System.Text.Encoding]::UTF8)
-    }
-    Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
-} catch {
-    Write-ErrorLog $_ "CSVファイルの作成中にエラーが発生しました"
-}
+    Write-Log "CSV出力先: $csvPath" "DEBUG"
+    Write-Log "HTML出力先: $htmlPath" "DEBUG"
+    Write-Log "JS出力先: $jsPath" "DEBUG"
+    Write-Host "CSV出力先: $csvPath" -ForegroundColor Cyan
+    Write-Host "HTML出力先: $htmlPath" -ForegroundColor Cyan
+    # ファイル出力処理
+    try {
+        # CSVファイル出力（BOM付きUTF8を確実に適用）
+        try {
+            # メモリストリームを使用して確実にBOMを付与
+            $utf8WithBom = [System.Text.Encoding]::UTF8
+            $memoryStream = New-Object System.IO.MemoryStream
+            $streamWriter = New-Object System.IO.StreamWriter($memoryStream, $utf8WithBom)
+            
+            # CSVヘッダー書き込み（ダブルクォート囲み）
+            $headers = $userList[0].PSObject.Properties |
+                       Select-Object -ExpandProperty Name |
+                       ForEach-Object { '"{0}"' -f $_ }
+            $streamWriter.WriteLine(($headers -join ","))
+            
+            # データ行書き込み（値のエスケープ処理）
+            foreach ($user in $userList) {
+                $line = $user.PSObject.Properties |
+                        Select-Object -ExpandProperty Value |
+                        ForEach-Object {
+                            $val = $_ -replace '"', '""'  # ダブルクォートをエスケープ
+                            '"{0}"' -f $val  # 値をダブルクォートで囲む
+                        }
+                $streamWriter.WriteLine(($line -join ","))
+            }
+            
+            $streamWriter.Flush()
+            $memoryStream.Position = 0
+            
+            # ファイルに書き込み
+            $fileStream = [System.IO.File]::Create($csvPath)
+            $memoryStream.WriteTo($fileStream)
+            
+            $streamWriter.Close()
+            $memoryStream.Close()
+            $fileStream.Close()
+            
+            Write-Log "CSVファイルを作成しました: $csvPath" "SUCCESS"
+        } catch {
+            Write-Log "CSVファイル出力エラー: $_" "ERROR"
+            if ($streamWriter) { $streamWriter.Dispose() }
+            if ($memoryStream) { $memoryStream.Dispose() }
+            if ($fileStream) { $fileStream.Dispose() }
+            throw
+        }
+        
+        try {
+            # HTMLファイル生成（ユーザーデータをJSONで埋め込み）
+            $jsonData = $userList | ConvertTo-Json -Depth 5 -Compress
+            $htmlTemplate = @"
+<!DOCTYPE html>
+<html>
+<head>
+<title>ユーザー情報レポート</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script>
+const userData = $jsonData;
+</script>
+<script src="common.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>ユーザー情報レポート</h1>
+    <div id="userTableContainer"></div>
+</div>
+</body>
+</html>
+"@
+            $htmlTemplate | Out-File -FilePath $htmlPath -Encoding UTF8 -Force
+            Write-Log "HTMLファイルを作成しました: $htmlPath" "SUCCESS"
+        } catch {
+            Write-Log "HTMLファイル生成エラー: $_" "ERROR"
+            throw
+        }
 
 # HTMLテンプレート生成と保存
 $htmlContent = @"
@@ -529,9 +681,15 @@ foreach ($user in $userList) {
 <td>$($user.'最終同期日時')</td>
 </tr>
 "@
+    } # メインtryブロック終了
+} catch {
+    Write-Log "メイン処理でエラーが発生しました: $_" -Level "ERROR"
+    Write-Log "スタックトレース: $($_.ScriptStackTrace)" -Level "DEBUG"
+    exit 1
 }
 
-$htmlContent += @"
+try {
+    $htmlContent += @"
 </tbody>
 </table>
 </div>
@@ -539,5 +697,13 @@ $htmlContent += @"
 </html>
 "@
 
-$htmlContent | Out-File -FilePath $htmlPath -Encoding UTF8
-Write-Log "HTMLファイルを作成しました: $htmlPath" "SUCCESS"
+    $htmlContent | Out-File -FilePath $htmlPath -Encoding UTF8
+    Write-Log "HTMLファイルを作成しました: $htmlPath" "SUCCESS"
+} catch {
+    Write-Log "HTMLファイル生成エラー: $_" "ERROR"
+    throw
+}
+        } catch {
+            Write-Log "HTMLファイル生成エラー: $_" "ERROR"
+            throw
+        }

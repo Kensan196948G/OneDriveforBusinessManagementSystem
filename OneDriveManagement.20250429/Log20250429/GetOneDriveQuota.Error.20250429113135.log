@@ -1,0 +1,12 @@
+[2025-04-29 11:31:35] [ERROR] Microsoft Graphの接続中にエラーが発生しました
+例外タイプ: System.Management.Automation.ParameterBindingException
+例外メッセージ: Cannot bind parameter 'ClientSecretCredential'. Cannot convert the value of type "System.String" to type "System.Management.Automation.PSCredential".
+位置: At C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1:112 char:21
++     Connect-MgGraph @params -ErrorAction Stop
++                     ~~~~~~~
+スタックトレース:
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Basic_Data_Collection\GetOneDriveQuota.ps1: line 112
+at Invoke-SelectedScript, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 388
+at <ScriptBlock>, C:\kitting\OneDriveforBusinessManagementSystem\Main.ps1: line 436
+at <ScriptBlock>, <No file>: line 1
+

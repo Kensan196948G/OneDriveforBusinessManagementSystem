@@ -288,7 +288,7 @@ function initFilters(data, columns) {
 }
 
 // ページネーション設定（改良版）
-function setupPagination(data, itemsPerPage = 10, renderCallback) {
+function setupPagination(data, itemsPerPage = 10, renderCallback, updateCountCallback = null) {
     let currentPage = 1;
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const pagination = document.getElementById('pagination');
@@ -337,12 +337,53 @@ function setupPagination(data, itemsPerPage = 10, renderCallback) {
         currentPage = page;
         const start = (page - 1) * itemsPerPage;
         const end = start + itemsPerPage;
-        renderCallback(data.slice(start, end));
+        const pageData = data.slice(start, end);
+        renderCallback(pageData);
+        
+        // 表示件数更新コールバック
+        if (updateCountCallback) {
+            updateCountCallback({
+                total: data.length,
+                start: start + 1,
+                end: Math.min(end, data.length),
+                currentPage: page,
+                totalPages: totalPages
+            });
+        }
+        
         updatePagination();
     }
     
     updatePagination();
     changePage(1);
+}
+
+// 使用率バー表示関数（クォータレポート用）
+function renderUsageBar(percentage, statusClass = '') {
+    const barColor = statusClass.includes('warning') ? 'bg-warning' :
+                    statusClass.includes('danger') ? 'bg-danger' : 'bg-success';
+    
+    return `
+        <div class="d-flex align-items-center">
+            <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                <div class="progress-bar ${barColor}"
+                     role="progressbar"
+                     style="width: ${percentage}%"
+                     aria-valuenow="${percentage}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+            <span>${percentage}%</span>
+        </div>
+    `;
+}
+
+// ステータスクラス取得（クォータレポート用）
+function getStatusClass(status) {
+    if (status.includes('警告')) return 'status-warning';
+    if (status.includes('危険')) return 'status-danger';
+    return 'status-normal';
 }
 
 // ブラウザで使用するためmodule.exportsは不要

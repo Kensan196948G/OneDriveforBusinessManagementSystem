@@ -205,12 +205,6 @@ function showError(message) {
 - CSVエクスポート時はパスワード保護
 - 印刷時は機密情報を省略可能
 
-## 7. システム情報
-- **最終更新日**: 2025年4月28日
-- **現在の動作状況**:
-  - WebUIサーバー: ポート8005で稼働中 (python -m http.server 8005)
-  - テスト環境: http://localhost:8005
-
-## 8. 参考資料
+## 7. 参考資料
 - [OneDrive運用ツール_運用手順.md](Doc/OneDrive運用ツール_運用手順.md)
 - [OneDrive運用ツール_仕様と利用手順.md](Doc/OneDrive運用ツール_仕様と利用手順.md)

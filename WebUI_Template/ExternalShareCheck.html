@@ -26,13 +26,13 @@ body {
     
     <div class="filter-container">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input type="text" class="form-control" id="globalSearch" placeholder="検索...">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select class="form-select" id="statusFilter">
                     <option value="">すべてのステータス</option>
                     <option value="即時対応が必要">即時対応が必要</option>
@@ -40,13 +40,30 @@ body {
                     <option value="問題なし">問題なし</option>
                 </select>
             </div>
-            <div class="col-md-4 text-end">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <span class="me-2">表示件数:</span>
+                    <select class="form-select form-select-sm w-auto" id="entriesPerPage">
+                        <option value="10">10件</option>
+                        <option value="25">25件</option>
+                        <option value="50">50件</option>
+                        <option value="100">100件</option>
+                        <option value="0">全件数</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 text-end">
                 <button class="btn btn-primary me-2" onclick="exportToCsv()">
                     <i class="fas fa-file-export me-1"></i>CSVエクスポート
                 </button>
                 <button class="btn btn-secondary" onclick="window.print()">
                     <i class="fas fa-print me-1"></i>印刷
                 </button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <span id="resultCount" class="text-muted"></span>
             </div>
         </div>
     </div>
@@ -92,149 +109,85 @@ body {
 </div>
 
 <script>
-// データ取得方法を切り替えるフラグ
-const USE_API = false; // true: API経由, false: PSスクリプト出力を直接使用
-
-// データ取得処理
-async function fetchExternalShareData() {
-    showLoading(true);
-    
-    try {
-        let shareData;
-        
-        if (USE_API) {
-            // API経由でデータ取得
-            shareData = await callApi('/api/external-shares');
-        } else {
-            // PSスクリプトの出力を直接取得
-            const response = await fetch('./data/external-shares.json');
-            if (!response.ok) throw new Error('データ取得に失敗しました');
-            shareData = await response.json();
+// ページ固有設定
+window.PAGE_CONFIG = {
+    title: "外部共有レポート",
+    dataFile: "./data/external-shares.json",
+    columns: [
+        { id: "owner", name: "所有者", icon: "fa-user-shield" },
+        { id: "item", name: "共有アイテム", icon: "fa-file-contract" },
+        { id: "external", name: "外部共有先", icon: "fa-globe-americas" },
+        { id: "date", name: "共有日", icon: "fa-calendar-check" },
+        { id: "action", name: "推奨アクション", icon: "fa-tasks" }
+    ],
+    filters: [
+        { id: "globalSearch", type: "text", placeholder: "検索..." },
+        { id: "statusFilter", type: "select", options: ["すべてのステータス", "即時対応が必要", "確認推奨", "問題なし"] }
+    ],
+    // 危険度表示用のカスタムレンダラー
+    customRenderer: (item, column) => {
+        if (column.id === "action") {
+            const statusClass = item['推奨アクション'] === '即時対応が必要' ? 'status-alert' :
+                             item['推奨アクション'] === '確認推奨' ? 'status-warning' :
+                             'status-normal';
+            return `<span class="${statusClass}">${escapeHtml(item['推奨アクション'])}</span>`;
         }
-        
-        // データをテーブルに表示
-        renderShareData(shareData);
-        initFilters(shareData);
-    } catch (error) {
-        showError('データ取得エラー', error.message);
-    } finally {
-        showLoading(false);
+        return escapeHtml(item[column.name]);
     }
-}
+};
 
-// データをテーブルに表示
-function renderShareData(data) {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    
-    data.forEach(item => {
-        const row = document.createElement('tr');
-        const statusClass = item['推奨アクション'] === '即時対応が必要' ? 'status-alert' : 
-                           item['推奨アクション'] === '確認推奨' ? 'status-warning' : 
-                           'status-normal';
-        row.className = statusClass;
+// 初期化処理（共通JSを使用）
+window.onload = async function() {
+    try {
+        // レポート日時を設定
+        document.getElementById('reportDate').textContent = new Date().toLocaleString();
         
-        row.innerHTML = `
-            <td>${escapeHtml(item['所有者'])}</td>
-            <td>${escapeHtml(item['共有アイテム'])}</td>
-            <td>${escapeHtml(item['外部共有先'])}</td>
-            <td>${escapeHtml(item['共有日'])}</td>
-            <td>${escapeHtml(item['推奨アクション'])}</td>
-        `;
+        // データ取得
+        window.tableData = await fetchData('script', '', PAGE_CONFIG.dataFile);
         
-        tbody.appendChild(row);
-    });
-    
-    window.shareData = data; // グローバルに保持
-}
-
-// HTMLエスケープ関数
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.toString()
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
-        .replace(/'/g, '&#039;');
-}
-
-// フィルターメニュー初期化
-function initFilters(data) {
-    const columns = ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション'];
-    
-    columns.forEach((col, index) => {
-        const select = document.querySelectorAll('.filter-row select')[index];
-        if (!select) return;
+        // テーブルヘッダーを初期化
+        initTableHeader(PAGE_CONFIG.columns);
         
-        select.innerHTML = '';
+        // フィルターを初期化
+        initFilters(window.tableData, PAGE_CONFIG.columns);
         
-        // デフォルトオプション
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = `すべての${col}`;
-        select.appendChild(defaultOption);
+        // ページネーションを設定
+        const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value || '10');
+        setupPagination(
+            window.tableData,
+            entriesPerPage === 0 ? window.tableData.length : entriesPerPage,
+            (data) => renderTable(data, 'tableBody', PAGE_CONFIG.columns, PAGE_CONFIG.customRenderer),
+            (pageInfo) => {
+                if (entriesPerPage === 0) {
+                    document.getElementById('resultCount').textContent =
+                        `全${pageInfo.total}件を表示`;
+                    document.getElementById('pagination').classList.add('d-none');
+                } else {
+                    document.getElementById('resultCount').textContent =
+                        `${pageInfo.total}件中 ${pageInfo.start}～${pageInfo.end}件を表示`;
+                    document.getElementById('pagination').classList.remove('d-none');
+                }
+            }
+        );
         
-        // ユニークな値を追加
-        const uniqueValues = [...new Set(data.map(item => item[col]))];
-        uniqueValues.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
         });
-    });
-}
-
-// テーブルフィルタリング
-function filterTable() {
-    const filters = [];
-    document.querySelectorAll('.filter-row select').forEach((select, index) => {
-        filters[index] = select.value;
-    });
-    
-    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    
-    const filteredData = window.shareData.filter(item => {
-        // グローバル検索
-        if (globalSearch) {
-            const found = Object.values(item).some(val => 
-                String(val).toLowerCase().includes(globalSearch)
-            );
-            if (!found) return false;
-        }
         
-        // ステータスフィルター
-        if (statusFilter && item['推奨アクション'] !== statusFilter) {
-            return false;
-        }
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            setupPagination(filtered);
+        });
         
-        // カラムフィルター
-        return ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション']
-            .every((col, colIndex) => {
-                if (!filters[colIndex]) return true;
-                return String(item[col]) === filters[colIndex];
-            });
-    });
-    
-    renderShareData(filteredData);
-}
-
-// CSVエクスポート
-function exportToCsv() {
-    const columns = ['所有者', '共有アイテム', '外部共有先', '共有日', '推奨アクション'];
-    const data = window.shareData || [];
-    
-    exportToCsv(data, 'ExternalShare_Export.csv', columns);
-}
-
-// 初期化処理
-window.onload = function() {
-    fetchExternalShareData();
-    
-    document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-    document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('entriesPerPage').addEventListener('change', () => {
+            setupPagination(window.tableData);
+        });
+        
+    } catch (error) {
+        console.error('ページ初期化エラー:', error);
+    }
 };
 </script>
 </body>

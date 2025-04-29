@@ -6,38 +6,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="common.js"></script>
 <style>
-/* ローディングオーバーレイ */
-.loading-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.9);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 20px;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.loading-spinner i {
-    font-size: 2rem;
-    color: #007bff;
-    margin-bottom: 10px;
-}
-
 body {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ヘッダーフレックスボックスレイアウト */
+.filter-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .filter-container {
+        flex-wrap: wrap;
+    }
+}
+
+/* 各要素の最小幅設定 */
+#globalSearch {
+    min-width: 200px;
+}
+
+#statusFilter {
+    min-width: 150px;
+}
+
+#entriesPerPage {
+    min-width: 120px;
+}
+
+.action-btn {
+    min-width: 180px;
 }
 .table thead th {
     position: sticky;
@@ -45,65 +51,20 @@ body {
     background-color: #f8f9fa;
     z-index: 10;
 }
-:root {
-  --user-color: #64b5f6;
-  --email-color: #ffd54f;
-  --total-color: #4dd0e1;
-  --used-color: #ff8a65;
-  --remaining-color: #81c784;
-  --usage-color: #ba68c8;
-  --status-color: #ffb74d;
-}
-
-.column-user { 
-  background: linear-gradient(135deg, var(--user-color), #42a5f5);
-  color: white;
-}
-.column-email { 
-  background: linear-gradient(135deg, var(--email-color), #ffca28);
-  color: #333;
-}
-.column-total { 
-  background: linear-gradient(135deg, var(--total-color), #26c6da);
-  color: white;
-}
-.column-used { 
-  background: linear-gradient(135deg, var(--used-color), #ff7043);
-  color: white;
-}
-.column-remaining { 
-  background: linear-gradient(135deg, var(--remaining-color), #43a047);
-  color: white;
-}
-.column-usage { 
-  background: linear-gradient(135deg, var(--usage-color), #9c27b0);
-  color: white;
-}
-.column-status { 
-  background: linear-gradient(135deg, var(--status-color), #ff8a65);
-  color: white;
-}
-
-.status-warning { 
+.status-warning {
   background: linear-gradient(135deg, #ffd740, #ffa000);
   color: #333;
   font-weight: bold;
 }
-.status-danger { 
+.status-danger {
   background: linear-gradient(135deg, #ff5252, #c62828);
   color: white;
   font-weight: bold;
 }
-.status-normal { 
+.status-normal {
   background: linear-gradient(135deg, #69f0ae, #00c853);
   color: white;
   font-weight: bold;
-}
-
-.table-hover tbody tr:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
 }
 .filter-row select {
     width: 100%;
@@ -119,6 +80,44 @@ body {
     border-radius: 5px;
     margin-bottom: 15px;
 }
+
+/* 各要素の幅設定 */
+.filter-container > .input-group {
+    flex-grow: 1;
+    min-width: 25%;
+    max-width: 25%;
+}
+
+.filter-container > #statusFilter {
+    width: 20%;
+    min-width: 150px;
+    max-width: 20%;
+}
+
+.filter-container > .d-flex.align-items-center {
+    width: 15%;
+    min-width: 120px;
+    max-width: 15%;
+}
+
+.filter-container > .d-flex.gap-3 {
+    width: 35%;
+    min-width: 180px;
+    max-width: 35%;
+    flex-shrink: 0;
+    margin-left: auto;
+    justify-content: flex-end;
+    gap: 1rem !important;
+}
+
+@media (max-width: 768px) {
+    .filter-container > .d-flex.gap-3 {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        justify-content: center;
+    }
+}
 .progress {
     height: 20px;
     border-radius: 10px;
@@ -130,112 +129,84 @@ body {
 </head>
 <body>
 <div class="container">
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <div>ストレージクォータデータを取得中...お待ちください</div>
-        </div>
-    </div>
-
-<h1 class="text-center mb-4">
-  <i class="fas fa-database me-3 text-primary"></i>
-  ストレージクォータレポート
-  <i class="fas fa-hdd ms-3 text-primary"></i>
-</h1>
-
+    <h1 class="text-center mb-4">
+      <i class="fas fa-database me-3 text-primary"></i>
+      ストレージクォータレポート
+      <i class="fas fa-hdd ms-3 text-primary"></i>
+    </h1>
     
     <div class="filter-container">
-        <!-- 上部行: 検索、フィルター、ページネーション、アクションボタン -->
-        <div class="row mb-3">
-            <div class="col-md-12 d-flex align-items-center gap-3">
-                <!-- 検索欄 -->
-                <div class="input-group" style="width: 300px">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
-                </div>
-                
-                <!-- ステータスフィルター -->
-                <select class="form-select" id="statusFilter" style="width: 200px">
-                    <option value="">すべてのステータス</option>
-                    <option value="warning">警告のみ</option>
-                    <option value="danger">危険のみ</option>
-                </select>
-                
-                <!-- ページネーション選択欄 -->
-                <div class="input-group" style="width: 120px">
-                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
-                    <select class="form-select" id="entriesPerPage">
-                        <option value="10">10件表示</option>
-                        <option value="25">25件表示</option>
-                        <option value="50">50件表示</option>
-                        <option value="100">100件表示</option>
-                    </select>
-                </div>
-                
-                <!-- アクションボタン -->
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary py-2 px-3" onclick="exportToCsv()" style="font-size: 0.9rem;">
-                        <i class="fas fa-file-export me-1"></i>CSVエクスポート
-                    </button>
-                    <button class="btn btn-secondary py-2 px-3" onclick="window.print()" style="font-size: 0.9rem;">
-                        <i class="fas fa-print me-1"></i>印刷
-                    </button>
-                    <button id="refreshBtn" class="btn btn-warning py-2 px-3" onclick="handleRefresh()" style="font-size: 0.9rem;">
-                        <span id="refreshIcon"><i class="fas fa-sync-alt me-1"></i></span>
-                        <span id="refreshText">更新</span>
-                    </button>
-                </div>
-            </div>
+        <!-- 検索欄 -->
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="globalSearch" placeholder="ユーザー名またはメールアドレスで検索...">
         </div>
-        
-        <!-- 下部行: 件数表示とページネーション -->
-        <div class="row mb-2">
-            <div class="col-md-12 d-flex align-items-center gap-3">
-                <span id="resultCount" class="text-muted fs-5">0件中 1～0件を表示</span>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage - 1)">
-                        <i class="fas fa-chevron-left fa-lg" style="width: 16px; display: inline-block;"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary px-2" onclick="changePage(currentPage + 1)">
-                        <i class="fas fa-chevron-right fa-lg" style="width: 16px; display: inline-block;"></i>
-                    </button>
-                </div>
-            </div>
+
+        <!-- ステータスフィルタ -->
+        <select class="form-select" id="statusFilter">
+            <option value="">すべてのステータス</option>
+            <option value="warning">警告のみ</option>
+            <option value="danger">危険のみ</option>
+            <option value="normal">正常のみ</option>
+        </select>
+
+        <!-- 表示件数プルダウン -->
+        <div class="d-flex align-items-center">
+            <span class="me-2">表示件数:</span>
+            <select class="form-select form-select-sm" id="entriesPerPage">
+                <option value="10">10件</option>
+                <option value="25">25件</option>
+                <option value="50">50件</option>
+                <option value="100">100件</option>
+                <option value="0">全件数</option>
+            </select>
         </div>
+
+        <!-- ボタン領域 -->
+        <div class="d-flex gap-3">
+            <button class="btn btn-primary action-btn" onclick="exportToCsv()">
+                <i class="fas fa-file-export me-1"></i>CSVエクスポート
+            </button>
+            <button class="btn btn-secondary action-btn" onclick="window.print()">
+                <i class="fas fa-print me-1"></i>印刷
+            </button>
         </div>
+
+        <!-- 結果カウント表示 -->
+        <span id="resultCount" class="text-muted"></span>
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover" id="quotaTable" style="width: 100%; max-width: 1300px; margin: 0 auto">
+        <table class="table table-hover" id="dataTable">
             <thead>
                 <tr>
-                    <th class="column-user" style="width: 15%">
-                      <i class="fas fa-user-circle me-2"></i>
-                      <span class="badge bg-white text-dark">ユーザー名</span>
+                    <th style="width: 15%">
+                        <i class="fas fa-user-circle me-2"></i>
+                        <span class="badge bg-white text-dark">ユーザー名</span>
                     </th>
-                    <th class="column-email" style="width: 20%">
-                      <i class="fas fa-envelope me-2"></i>
-                      <span class="badge bg-white text-dark">メールアドレス</span>
+                    <th style="width: 20%">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span class="badge bg-white text-dark">メールアドレス</span>
                     </th>
-                    <th class="column-total" style="width: 12%">
-                      <i class="fas fa-database me-2"></i>
-                      <span class="badge bg-white text-dark">総容量(GB)</span>
+                    <th style="width: 12%">
+                        <i class="fas fa-database me-2"></i>
+                        <span class="badge bg-white text-dark">総容量(GB)</span>
                     </th>
-                    <th class="column-used" style="width: 12%">
-                      <i class="fas fa-hdd me-2"></i>
-                      <span class="badge bg-white text-dark">使用容量(GB)</span>
+                    <th style="width: 12%">
+                        <i class="fas fa-hdd me-2"></i>
+                        <span class="badge bg-white text-dark">使用容量(GB)</span>
                     </th>
-                    <th class="column-remaining" style="width: 12%">
-                      <i class="fas fa-sd-card me-2"></i>
-                      <span class="badge bg-white text-dark">残り容量(GB)</span>
+                    <th style="width: 12%">
+                        <i class="fas fa-sd-card me-2"></i>
+                        <span class="badge bg-white text-dark">残り容量(GB)</span>
                     </th>
-                    <th class="column-usage" style="width: 12%">
-                      <i class="fas fa-percentage me-2"></i>
-                      <span class="badge bg-white text-dark">使用率(%)</span>
+                    <th style="width: 12%">
+                        <i class="fas fa-percentage me-2"></i>
+                        <span class="badge bg-white text-dark">使用率(%)</span>
                     </th>
-                    <th class="column-status" style="width: 12%">
-                      <i class="fas fa-exclamation-circle me-2"></i>
-                      <span class="badge bg-white text-dark">状態</span>
+                    <th style="width: 12%">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span class="badge bg-white text-dark">状態</span>
                     </th>
                 </tr>
                 <tr class="filter-row">
@@ -248,337 +219,60 @@ body {
                     <th><select class="form-select" onchange="filterTable()"></select></th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- データ行はJavaScriptで動的に生成されます -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
-</div>
-
-<!-- データ取得エラーコンテナ (GetUserInfo.htmlと統一) -->
-    <div id="errorContainer" class="alert alert-danger mt-3 mb-5 mx-auto" style="border-left: 5px solid #dc3545; max-width: 1300px; width: 100%;">
-        <div class="d-flex align-items-start px-3 py-2">
-            <i class="fas fa-exclamation-triangle fa-3x me-4 mt-1" style="min-width: 48px;"></i>
-            <div>
-                <h3 class="alert-heading mb-3 text-danger">データ取得エラー</h3>
-                <ol class="mb-4 fs-5">
-                    <li class="mb-2">GetOneDriveQuota.ps1スクリプトを再実行してください<br />
-                        <code class="bg-light p-1 d-inline-block mt-1">.\GetOneDriveQuota.ps1</code>
-                    </li>
-                    <li class="mb-2">問題が解決しない場合は管理者に連絡してください<br />
-                        <span class="text-muted">連絡先: ITサポートデスク (ext. 1234)</span>
-                    </li>
-                </ol>
-                <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-danger px-4 py-2" onclick="handleReload()">
-                        <i class="fas fa-sync-alt me-2"></i>再読み込み
-                    </button>
-                    <button class="btn btn-outline-danger px-4 py-2" onclick="handleRetry()">
-                        <i class="fas fa-redo me-2"></i>再試行
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 詳細ページネーションコントロール -->
-<div class="row mt-3">
-    <div class="col-md-12">
-        <nav aria-label="Page navigation" class="float-end">
-            <ul class="pagination" id="pagination"></ul>
-        </nav>
-    </div>
+    
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="./common.js"></script>
+
 <script>
-// データ取得関数
-async function fetchQuotaData() {
-    try {
-        showLoading(true);
-        
-        // PSスクリプトが生成したJSONデータを取得
-        const data = await callApi('/api/quota');
-        
-        // データ構造を確認
-        if (!Array.isArray(data)) {
-            throw new Error('無効なデータ形式: 配列が返されませんでした');
-        }
-        
-        // 必須フィールドを検証
-        const requiredFields = ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態'];
-        const firstItem = data[0];
-        if (firstItem) {
-            const missingFields = requiredFields.filter(field => !(field in firstItem));
-            if (missingFields.length > 0) {
-                throw new Error(`必須フィールドが不足しています: ${missingFields.join(', ')}`);
-            }
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('クォータデータ取得エラー:', error);
-        showError('データ取得エラー', `クォータ情報の取得に失敗しました:<br>${error.message}`);
-        throw error;
-    } finally {
-        showLoading(false);
-    }
-}
+// ページ固有設定
+window.PAGE_CONFIG = {
+    title: "ストレージクォータレポート",
+    dataFile: "./OneDriveQuota.json",
+    columns: [
+        { id: "displayName", name: "ユーザー名", icon: "fa-user-circle" },
+        { id: "mail", name: "メールアドレス", icon: "fa-envelope" },
+        { id: "totalGB", name: "総容量(GB)", icon: "fa-database" },
+        { id: "usedGB", name: "使用容量(GB)", icon: "fa-hdd" },
+        { id: "remainingGB", name: "残り容量(GB)", icon: "fa-sd-card" },
+        { id: "usagePercent", name: "使用率(%)", icon: "fa-percentage" },
+        { id: "status", name: "状態", icon: "fa-exclamation-circle" }
+    ],
+    filters: [
+        { id: "globalSearch", type: "text", placeholder: "ユーザー名またはメールアドレスで検索..." },
+        { id: "statusFilter", type: "select", options: ["すべてのステータス", "警告のみ", "危険のみ", "正常のみ"] }
+    ]
+};
 
-// 初期化処理
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        showLoading(true);
-        window.quotaData = await fetchQuotaData();
-        renderTable(window.quotaData);
-        initFilters();
-        setupPagination(window.quotaData, entriesPerPage, renderTable);
-    } catch (error) {
-        console.error('初期化エラー:', error);
-    } finally {
-        showLoading(false);
-    }
-});
-
-// ページネーション設定
-function setupPagination() {
-    const itemsPerPage = parseInt(document.getElementById('entriesPerPage').value);
-    setupPagination(window.quotaData, itemsPerPage, (pageData) => {
-        renderTable(pageData);
-    });
-}
-
-// エントリ数変更イベント
-document.getElementById('entriesPerPage').addEventListener('change', setupPagination);
-
-// フィルターメニュー初期化
-function initFilters() {
-    const columns = ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態'];
-    
-    columns.forEach((col, index) => {
-        const select = document.querySelectorAll('.filter-row select')[index];
-        const uniqueValues = [...new Set(window.quotaData.map(item => item[col]))];
-        
-        // デフォルトオプション
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        if(col === '総容量(GB)') {
-            defaultOption.textContent = 'すべての総容量(GB)';
-        } else if(col === '使用容量(GB)') {
-            defaultOption.textContent = 'すべての使用容量(GB)';
-        } else if(col === '残り容量(GB)') {
-            defaultOption.textContent = 'すべての残り容量(GB)';
-        } else if(col === '使用率(%)') {
-            defaultOption.textContent = 'すべての使用率(%)';
-        } else if(col === '状態') {
-            defaultOption.textContent = 'すべての状態';
-        } else {
-            defaultOption.textContent = `すべての${col}`;
-        }
-        select.appendChild(defaultOption);
-        
-        // ユニークな値を追加
-        uniqueValues.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            select.appendChild(option);
-        });
-    });
-}
-
-// テーブルデータ表示
-function renderTable(data) {
-    const tbody = document.querySelector('#quotaTable tbody');
-    tbody.innerHTML = '';
-    
-    const pageData = getCurrentPageData(data);
-    
-    pageData.forEach(item => {
-        const row = document.createElement('tr');
-        const statusClass = getStatusClass(item['状態']);
-        
-        row.className = statusClass;
-        
-        row.innerHTML = `
-            <td>${item['ユーザー名']}</td>
-            <td>${item['メールアドレス']}</td>
-            <td>${item['総容量(GB)']}</td>
-            <td>${item['使用容量(GB)']}</td>
-            <td>${item['残り容量(GB)']}</td>
-            <td>
-                ${renderUsageBar(item['使用率(%)'], statusClass)}
-            </td>
-            <td>${item['状態']}</td>
-        `;
-        
-        tbody.appendChild(row);
-    });
-    
-    updatePaginationInfo(data.length);
-    
-    // ページネーション情報の表示
-    updatePagination(Math.ceil(data.length / entriesPerPage));
-    
-    // 表示件数の情報を更新
-    const infoText = `${data.length}件中 ${startIndex + 1}～${Math.min(endIndex, data.length)}件を表示`;
-    document.getElementById('resultCount').textContent = infoText;
-    document.getElementById('tableInfo').textContent = infoText;
-    
-    // ページネーションコントロールの状態更新
-    updatePaginationControls(Math.ceil(data.length / entriesPerPage));
-}
-
-// ページネーション状態更新
-function updatePaginationControls(totalPages) {
-    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
-}
-
-// ページネーション更新
-function updatePagination(totalPages) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    
-    // 前へボタン
-    const prevLi = document.createElement('li');
-    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">&laquo;</a>`;
-    pagination.appendChild(prevLi);
-    
-    // ページ番号
-    for (let i = 1; i <= totalPages; i++) {
-        const li = document.createElement('li');
-        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-        li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
-        pagination.appendChild(li);
-    }
-    
-    // 次へボタン
-    const nextLi = document.createElement('li');
-    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-    nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">&raquo;</a>`;
-    pagination.appendChild(nextLi);
-}
-
-// ページ変更
-function changePage(page) {
-    currentPage = page;
-    renderTable(filteredData.length ? filteredData : window.quotaData);
-}
-
-// フィルター適用
-function filterTable() {
-    const filters = [];
-    document.querySelectorAll('.filter-row select').forEach((select, index) => {
-        filters[index] = select.value;
-    });
-    
-    const globalSearch = document.getElementById('globalSearch').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    
-    const filteredData = window.quotaData.filter(item => {
-        // グローバル検索
-        if (globalSearch) {
-            const found = Object.values(item).some(val => 
-                String(val).toLowerCase().includes(globalSearch)
-            );
-            if (!found) return false;
-        }
-        
-        // ステータスフィルター
-        if (statusFilter && item['状態'] !== statusFilter) {
-            return false;
-        }
-        
-        // カラムフィルター
-        return ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態']
-            .every((col, colIndex) => {
-                if (!filters[colIndex]) return true;
-                return String(item[col]) === filters[colIndex];
-            });
-    });
-    
-    renderTable(filteredData);
-}
-
-// CSVエクスポート
-function exportToCsv() {
-    const headers = ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態'].join(',') + '\n';
-    const csvContent = headers + window.quotaData.map(item => 
-        ['ユーザー名', 'メールアドレス', '総容量(GB)', '使用容量(GB)', '残り容量(GB)', '使用率(%)', '状態']
-        .map(col => `"${item[col]}"`).join(',')
-    ).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'OneDriveQuotaReport.csv');
-    link.click();
-}
-
-let currentPage = 1;
-let filteredData = [];
-
-// エラーハンドリング
-function handleError(error, message) {
-    console.error('クォータデータ取得エラー:', error);
-    
-    const errorContainer = document.getElementById('errorContainer');
-    errorContainer.style.display = 'block';
-    
-    // エラーメッセージを詳細に設定
-    const errorTitle = errorContainer.querySelector('h3');
-    const errorMessage = errorContainer.querySelector('p');
-    
-    errorTitle.textContent = 'データ取得エラー';
-    errorMessage.innerHTML = `
-        クォータデータが取得できませんでした。以下の方法をお試しください:<br>
-        1. GetOneDriveQuota.ps1スクリプトを再実行してください<br>
-        2. 問題が解決しない場合は管理者に連絡してください<br><br>
-        エラー詳細: ${error.message || '不明なエラー'}
-    `;
-    
-    return null;
-}
-
-// 初期化
+// 初期化処理（共通JSを使用）
 window.onload = async function() {
-    const errorContainer = document.getElementById('errorContainer');
-    errorContainer.style.display = 'block';
-    
     try {
-        const loading = await showLoading();
-        window.quotaData = await fetchQuotaData();
+        // データ取得
+        window.tableData = await fetchData('script', '', PAGE_CONFIG.dataFile);
         
-        if (!window.quotaData || window.quotaData.length === 0) {
-            throw new Error('クォータデータが0件です');
-        }
+        // テーブルヘッダーを初期化
+        initTableHeader(PAGE_CONFIG.columns);
         
-        errorContainer.style.display = 'none';
-        initFilters();
-        renderTable(window.quotaData);
+        // フィルターを初期化
+        initFilters(window.tableData, PAGE_CONFIG.columns);
+        
+        // イベントリスナー設定
+        document.getElementById('globalSearch').addEventListener('keyup', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            renderTable(filtered, 'tableBody', PAGE_CONFIG.columns);
+        });
+        
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            const filtered = applyFilters(window.tableData, PAGE_CONFIG.columns);
+            renderTable(filtered, 'tableBody', PAGE_CONFIG.columns);
+        });
         
     } catch (error) {
-        console.error('初期化エラー:', error);
-        errorContainer.style.display = 'block';
-    } finally {
-        // イベントリスナー設定
-        document.getElementById('globalSearch').addEventListener('keyup', filterTable);
-        document.getElementById('statusFilter').addEventListener('change', filterTable);
-        document.getElementById('entriesPerPage').addEventListener('change', function() {
-            currentPage = 1;
-            renderTable(window.quotaData);
-        });
-        document.querySelectorAll('.filter-row select').forEach(select => {
-            select.addEventListener('change', filterTable);
-        });
+        console.error('ページ初期化エラー:', error);
     }
 };
 </script>
